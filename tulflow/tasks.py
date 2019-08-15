@@ -2,7 +2,8 @@
 from airflow.hooks.base_hook import BaseHook
 from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
 
-def slackpostonfail(context, message=None):
+
+def execute_slackpostonfail(context, message=None):
     """Task Method to Post Failed DAG or Task Completion on Slack."""
     conn = BaseHook.get_connection('AIRFLOW_CONN_SLACK_WEBHOOK')
     ti = context.get('task_instance')
@@ -22,7 +23,8 @@ def slackpostonfail(context, message=None):
         dag=context.get('dag')
         )
 
-    return slack_post
+    return slack_post.execute(context=context)
+
 
 def slackpostonsuccess(dag, message='Oh, happy day!'):
     """Task Method to Post Successful DAG or Task Completion on Slack."""

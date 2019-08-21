@@ -5,8 +5,11 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
+pylint = "*"
+apache-airflow = "==1.10.2"
+nose = "*"
 
 [packages]
 
 [requires]
-python_version = "3.7"
+python_version = "3.6.6"

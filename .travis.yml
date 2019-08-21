@@ -1,9 +1,11 @@
 language: python
 python:
 - '3.6.6'
+
 install:
 - pip install pipenv
 - SLUGIFY_USES_TEXT_UNIDECODE=yes pipenv install --dev
+- pipenv run airflow initdb
 script:
 - pipenv run pylint tulflow -E
 - pipenv run nosetests

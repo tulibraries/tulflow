@@ -12,6 +12,10 @@ nose = "*"
 [packages]
 setuptools = "*"
 wheel = "*"
+sickle = "*"
+pexpect = "*"
+xmltodict = "*"
+apache-airflow = "*"
 
 [requires]
 python_version = "3.6.6"

@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 pylint = "*"
-apache-airflow = "==1.10.2"
+apache-airflow = ">=1.10.3"
 nose = "*"
 
 [packages]

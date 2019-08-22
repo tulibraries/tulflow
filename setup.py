@@ -1,15 +1,15 @@
+"""tulflow Python package setup."""
 import setuptools
 
 with open("README.md", "r") as fh:
-    long_description = fh.read()
+    LONG_DESCRIPTION = fh.read()
 
 setuptools.setup(
     name="tulflow",
-    version="0.0.1",
     author="Temple University Libraries",
     author_email="tul08567@temple.edu",
     description="Package of Temple University Library Indexing & ETL functions used by Airflow.",
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/tulibraries/tulflow",
     packages=setuptools.find_packages(),
@@ -20,4 +20,6 @@ setuptools.setup(
     ],
     test_suite='nose.collector',
     tests_require=['nose'],
+    setup_requires=['pbr>=1.9', 'setuptools>=17.1'],
+    pbr=True,
 )

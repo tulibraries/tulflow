@@ -20,6 +20,6 @@ setuptools.setup(
     ],
     test_suite='nose.collector',
     tests_require=['nose'],
-    setup_requires=['pbr>=1.9', 'setuptools>=17.1'],
-    pbr=True,
+    setup_requires=['setuptools>=17.1'],
+    version="0.0.4"
 )

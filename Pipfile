@@ -10,6 +10,8 @@ apache-airflow = ">=1.10.3"
 nose = "*"
 
 [packages]
+setuptools = "*"
+wheel = "*"
 
 [requires]
 python_version = "3.6.6"

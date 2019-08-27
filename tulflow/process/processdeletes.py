@@ -6,11 +6,6 @@ import xmltodict
 import xml
 from collections import defaultdict
 
-#solr url examples...
-#http://127.0.0.1:8983/solr/blacklight-core-dev/update?stream.body=<delete><query>id:(991036925416203811 OR 991036926096903811)</query></delete>&commit=true
-#http://127.0.0.1:8983/solr/blacklight-core-dev/update?stream.body=%3Cdelete%3E%3Cquery%3Erecord_update_date:[0%20TO%20%222018-09-18%2014:35:16%22]%20AND%20id:991036281919703811%3C/query%3E%3C/delete%3E&commit=true
-
-
 def process_deletes(ds, **kwargs):
     num_deleted = -1
     deletes_fname = Variable.get("AIRFLOW_DATA_DIR") + '/oairecords_deleted.xml'

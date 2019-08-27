@@ -12,6 +12,9 @@ nose = "*"
 [packages]
 setuptools = "*"
 wheel = "*"
+sickle = "*"
+pexpect = "*"
+xmltodict = "*"
 
 [requires]
 python_version = "3.6.6"

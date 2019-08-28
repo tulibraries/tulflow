@@ -8,8 +8,10 @@ import re
 import sys
 from airflow import AirflowException
 from airflow.models import Variable
+from airflow.hooks.S3_hook import S3Hook
 from xml.etree import ElementTree
 import requests
+import hashlib
 
 ALMA_REST_ENDPOINT = 'https://api-na.hosted.exlibrisgroup.com/almaws/v1/'
 ALMA_SETS_API_PATH = 'conf/sets/'
@@ -102,6 +104,24 @@ def oai_harvest(**kwargs):
 def oai_to_s3(**kwargs):
     """Harvest & Process an OAI-PMH XML feed then write output files to a timestamped S3 bucket."""
     oai_harvest(**kwargs)
+
+def dag_write_string_to_s3(**kwargs):
+    """Push a string in memory to s3 with a defined prefix"""
+    string      =  kwargs.get('string')
+    prefix      = kwargs.get('prefix')
+    s3_conn     = kwargs.get('s3_conn')
+    bucket_name = kwargs.get('bucket_name')
+
+    hook = S3Hook(s3_conn)
+    hash =  hashlib.md5(string).hexdigest()
+    filename = "{}/{}".format(prefix,hash)
+    hook.load_string(string, filename, bucket_name=bucket_name)
+
+
+
+def dag_s3_prefix(dag_id, timestamp):
+   """Define the prefix that will be prepended to all files created by this dag run"""
+   return "{}/{}".format(dag_id, timestamp)
 
 #
 # def almaoai_harvest(url, outfilename, deletedfilename, publish_interval, last_harvest, **kwargs):

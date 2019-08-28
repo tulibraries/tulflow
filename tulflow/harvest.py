@@ -4,6 +4,7 @@ tulflow.harvest
 This module contains objects to harvest data from one given location to another.
 """
 import logging
+import re
 import sys
 from airflow import AirflowException
 from airflow.models import Variable
@@ -30,6 +31,59 @@ NEW_ROOT = """
 NEW_ROOT_CLOSING_TAG = '</collection>'
 
 
+def call_oai(oai_endpoint, harvest_params, retry_wait=-1):
+    """Function calls OAI-PMH HTTP URL, gets XML response, & handles HTTP-related errors."""
+    logging.info("Harvesting from %s", oai_endpoint)
+    logging.info("Harvesting %s", harvest_params)
+    try:
+        resp = requests.get(oai_endpoint, params=harvest_params, stream=True)
+        if resp.status_code != 200 and resp.status_code != 301:
+            resp.raise_for_status()
+        elif resp.status_code == 301:
+            logging.info("%s redirected to %s .", oai_endpoint, resp.url)
+            resp = call_oai(oai_endpoint, harvest_params)
+            data = resp.raw
+        elif '/xml' not in resp.headers.get('content-type'):
+            logging.error("ERROR: content-type=%s", (resp.headers.get('content-type')))
+            exit()
+        else:
+            data = resp.raw
+    except requests.HTTPError as error_value:
+        if error_value.response.status_code == 503:
+            retry_wait = int(resp.headers.get("Retry-After", "-1"))
+            if retry_wait < 0:
+                logging.error("OAI-PMH Service %s Unavailable (Status 503).", oai_endpoint)
+                exit()
+            else:
+                logging.info('Waiting %d seconds', retry_wait)
+                resp = call_oai(oai_endpoint, harvest_params, retry_wait)
+                data = resp.raw
+        elif error_value.response.status_code == 404:
+            logging.error("404 Not Found Error with OAI-PMH URL: %s", oai_endpoint)
+            exit()
+        else:
+            logging.error(error_value)
+            exit()
+    return(data)
+
+
+def _write_harvest(link, data, wrapper_element, parser=None):
+    record_count = 0
+    out = ElementTree.parse(data)
+    while out:
+        records = ElementTree.iterparse(out, events=('start', 'end'))
+        for event, node in records:
+            if event == "start" and node.tag == wrapper_element:
+                record_count += 1
+                if parser:
+                    node = parser(node)
+            elif event == "start" and node.tag == "{http://www.openarchives.org/OAI/2.0/}resumptionToken":
+                resumption_token = node.text
+                node.text = "captured"
+                node.set("updated", "true")
+
+    return(record_count)
+
 
 def oai_harvest(**kwargs):
     """ Harvest data from a given OAI endpoint. """
@@ -41,42 +95,9 @@ def oai_harvest(**kwargs):
         'until': kwargs.get('harvest_until_date')
     }
 
-    logging.info("Harvesting from %s", kwargs.get('oai_endpoint'))
-    logging.info("Harvesting %s", harvest_params)
-    try:
-        resp = requests.get(kwargs.get('oai_endpoint'), params=harvest_params, stream=True)
-    except Exception as err:
-        logging.error(err)
-        sys.exit(1)
+    data = call_oai(kwargs.get('oai_endpoint'), harvest_params)
+    record_count = _write_harvest(kwargs.get('oai_endpoint'), data, kwargs.get('wrapper_element'))
 
-    records = ElementTree.iterparse(resp.raw)
-
-    record_count = 0
-    for event, elem in records:
-        if elem.tag == "ListRecords" and event == "start":
-
-    while data:
-        try:
-            events = xml.dom.pulldom.parseString(data.encode('utf-8'))
-            for (event, node) in events:
-                if event == "START_ELEMENT" and node.tagName == 'record':
-                    events.expandNode(node)
-                    node.writexml(ofile)
-                    recordCount += 1
-        except TypeError as e:
-            events = xml.dom.pulldom.parseString(data)
-            for (event, node) in events:
-                if event == "START_ELEMENT" and node.tagName == 'record':
-                    events.expandNode(node)
-                    node.writexml(ofile)
-                    recordCount += 1
-        more = re.search('<resumptionToken[^>]*>(.*)</resumptionToken>', data)
-        if not more:
-            break
-        else:
-            data = getFile(link, "ListRecords&resumptionToken=%s" % more.group(1))
-            data = handleEncodingErrors(data)
-    return(recordCount)
 
 def oai_to_s3(**kwargs):
     """Harvest & Process an OAI-PMH XML feed then write output files to a timestamped S3 bucket."""

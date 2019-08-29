@@ -4,10 +4,8 @@ from unittest.mock import patch
 import hashlib
 from datetime import datetime
 from airflow.hooks.S3_hook import S3Hook
-from airflow.utils import timezone
 from tulflow.harvest import dag_s3_prefix, dag_write_string_to_s3
 
-DEFAULT_DATE = timezone.datetime(2019, 8, 16)
 
 class TestDagS3Interaction(unittest.TestCase):
     @classmethod

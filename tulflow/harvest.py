@@ -24,7 +24,7 @@ def oai_to_s3(**kwargs):
     data = harvest_oai(**kwargs)
     kwargs['prefix'] = dag_s3_prefix(dag_id, dag_start_date)
     count = process_xml(data, dag_write_string_to_s3)
-    logging.info("OAI Records Harvested & Processed: %i", count)
+    logging.info("OAI Records Harvested & Processed: %s", count)
 
 
 def harvest_oai(**kwargs):

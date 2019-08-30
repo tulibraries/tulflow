@@ -5,6 +5,7 @@ This module contains objects to harvest data from one given location to another.
 """
 import hashlib
 import logging
+import os
 from lxml import etree
 from sickle import Sickle
 from airflow.hooks.S3_hook import S3Hook
@@ -19,11 +20,11 @@ def oai_to_s3(**kwargs):
         'until': kwargs.get('harvest_until_date')
     }
     dag_id = kwargs.get('dag').dag_id
-    dag_start_date = kwargs.get('dag').start_date
+    harvest_task_start_date = os.environ['AIRFLOW_CTX_EXECUTION_DATE']
 
     data = harvest_oai(**kwargs)
-    kwargs['prefix'] = dag_s3_prefix(dag_id, dag_start_date)
-    count = process_xml(data, dag_write_string_to_s3)
+    kwargs['prefix'] = dag_s3_prefix(dag_id, harvest_task_start_date)
+    count = process_xml(data, dag_write_string_to_s3, **kwargs)
     logging.info("OAI Records Harvested & Processed: %s", count)
 
 
@@ -68,9 +69,9 @@ def dag_write_string_to_s3(**kwargs):
     prefix = kwargs.get('prefix')
     s3_conn = kwargs.get('s3_conn')
     bucket_name = kwargs.get('bucket_name')
-    logging.info("Bucket Name %s", bucket_name)
+    logging.info("Writing to S3 Bucket %s", bucket_name)
 
-    hook = S3Hook(s3_conn)
+    hook = S3Hook(s3_conn.conn_id)
     our_hash = hashlib.md5(string.encode('utf-8')).hexdigest()
     filename = "{}/{}".format(prefix, our_hash)
     hook.load_string(string, filename, bucket_name=bucket_name)

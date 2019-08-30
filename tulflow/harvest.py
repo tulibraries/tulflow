@@ -41,6 +41,9 @@ def harvest_oai(**kwargs):
 def process_xml(data, writer, **kwargs):
     """Process & Write XML data to S3."""
     parser = kwargs.get('parser')
+    records_per_file = kwargs.get('records_per_file')
+    if not records_per_file:
+        records_per_file = 1000
     count = 0
     collection = etree.Element("collection")
 
@@ -50,7 +53,7 @@ def process_xml(data, writer, **kwargs):
         if parser:
             record = parser(record)
         collection.append(record)
-        if count % 1 == 0:
+        if count % int(records_per_file) == 0:
             kwargs['string'] = etree.tostring(collection).decode('utf-8')
             writer(**kwargs)
             collection = etree.Element("collection")
@@ -65,6 +68,7 @@ def dag_write_string_to_s3(**kwargs):
     prefix = kwargs.get('prefix')
     s3_conn = kwargs.get('s3_conn')
     bucket_name = kwargs.get('bucket_name')
+    logging.info("Bucket Name %s", bucket_name)
 
     hook = S3Hook(s3_conn)
     our_hash = hashlib.md5(string.encode('utf-8')).hexdigest()

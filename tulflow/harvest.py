@@ -8,7 +8,6 @@ import logging
 from lxml import etree
 from sickle import Sickle
 from airflow.hooks.S3_hook import S3Hook
-from xml.etree import ElementTree
 
 
 def oai_to_s3(**kwargs):
@@ -19,8 +18,11 @@ def oai_to_s3(**kwargs):
         'from': kwargs.get('harvest_from_date'),
         'until': kwargs.get('harvest_until_date')
     }
+    dag_id = kwargs.get('dag').dag_id
+    dag_start_date = kwargs.get('dag').start_date
+
     data = harvest_oai(**kwargs)
-    kwargs['prefix'] = dag_s3_prefix(**kwargs)
+    kwargs['prefix'] = dag_s3_prefix(dag_id, dag_start_date)
     count = process_xml(data, dag_write_string_to_s3)
     logging.info("OAI Records Harvested & Processed: %i", count)
 
@@ -42,19 +44,18 @@ def process_xml(data, writer, **kwargs):
     count = 0
     collection = etree.Element("collection")
 
-    while data.next():
+    for record in data:
         count += 1
-        record = data.next().xml
+        record = record.xml
         if parser:
             record = parser(record)
         collection.append(record)
-        if count % 1000 == 0:
-            kwargs['string'] = etree.tostring(collection, pretty_print=True)
+        if count % 1 == 0:
+            kwargs['string'] = etree.tostring(collection).decode('utf-8')
             writer(**kwargs)
-            continue
-    else:
-        kwargs['string'] = etree.tostring(collection, pretty_print=True)
-        writer(**kwargs)
+            collection = etree.Element("collection")
+    kwargs['string'] = etree.tostring(collection).decode('utf-8')
+    writer(**kwargs)
     return count
 
 
@@ -66,9 +67,15 @@ def dag_write_string_to_s3(**kwargs):
     bucket_name = kwargs.get('bucket_name')
 
     hook = S3Hook(s3_conn)
-    our_hash = hashlib.md5(string).hexdigest()
+    our_hash = hashlib.md5(string.encode('utf-8')).hexdigest()
     filename = "{}/{}".format(prefix, our_hash)
     hook.load_string(string, filename, bucket_name=bucket_name)
+
+
+def write_log(**kwargs):
+    """Write the data to logging info."""
+    string = kwargs.get('string')
+    logging.info(string)
 
 
 def dag_s3_prefix(dag_id, timestamp):

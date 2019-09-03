@@ -26,8 +26,8 @@ class TestSlackPostSuccess(unittest.TestCase):
         """Test slackpostsuccess operator instance contains expected config values."""
         dag = DAG(dag_id='test_slacksuccess', start_date=DEFAULT_DATE)
         task = SlackWebhookOperator(dag=dag, task_id='test_slacksuccess')
-        ti = TaskInstance(task=task, execution_date=DEFAULT_DATE)
-        context = ti.get_template_context()
+        task_instance = TaskInstance(task=task, execution_date=DEFAULT_DATE)
+        task_instance.get_template_context()
         operator = slackpostonsuccess(dag)
 
         self.assertEqual("AIRFLOW_CONN_SLACK_WEBHOOK", operator.http_conn_id)
@@ -44,7 +44,7 @@ class TestSolrCloudTasks(unittest.TestCase):
     @patch.object(BaseHook, "get_connection", return_value=Connection(
         conn_id='SOLRCLOUD',
         conn_type='http',
-        host='https://hooks.slack.com/services',
+        host='http://localhost',
         password='puppies'
         )
     )
@@ -66,7 +66,7 @@ class TestSolrCloudTasks(unittest.TestCase):
     @patch.object(BaseHook, "get_connection", return_value=Connection(
         conn_id='SOLRCLOUD',
         conn_type='http',
-        host='https://hooks.slack.com/services',
+        host='http://localhost',
         password='puppies'
         )
     )

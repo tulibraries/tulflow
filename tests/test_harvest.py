@@ -1,7 +1,9 @@
 """Tests suite for tulflow harvest (Functions for harvesting OAI in Airflow Tasks)."""
 from datetime import datetime
 import hashlib
+import os
 import unittest
+from unittest import mock
 from unittest.mock import patch
 from airflow.hooks.S3_hook import S3Hook
 from airflow.models import DAG
@@ -9,9 +11,8 @@ from airflow.utils import timezone
 from lxml import etree
 from sickle.iterator import OAIItemIterator
 import httpretty
-import mock
 from tulflow.harvest import dag_s3_prefix, dag_write_string_to_s3, harvest_oai, process_xml, write_log, oai_to_s3
-
+from types import SimpleNamespace
 
 DEFAULT_DATE = timezone.datetime(2019, 8, 16)
 
@@ -103,8 +104,10 @@ class TestDagS3Interaction(unittest.TestCase):
         bucket = "my-bucket"
         our_hash = hashlib.md5(string.encode('utf-8')).hexdigest()
         key = "{}/{}".format(prefix, our_hash)
+        s3_conn = SimpleNamespace(conn_id="1")
 
-        dag_write_string_to_s3(string=string, prefix=prefix, s3_conn="s3_conn", bucket_name=bucket)
+
+        dag_write_string_to_s3(string=string, prefix=prefix, s3_conn=s3_conn, bucket_name=bucket)
         mock.assert_called_once_with(string, key, bucket_name=bucket)
 
 
@@ -172,6 +175,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         kwargs['from'] = "from"
         kwargs['until'] = "until"
         kwargs['dag'] = dag
+        os.environ['AIRFLOW_CTX_EXECUTION_DATE'] = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
         oai_to_s3(**kwargs)
         self.assertTrue(mock_harvest.called)

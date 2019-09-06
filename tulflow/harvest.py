@@ -5,7 +5,6 @@ This module contains objects to harvest data from one given location to another.
 """
 import hashlib
 import logging
-import os
 from lxml import etree
 from sickle import Sickle
 from airflow.hooks.S3_hook import S3Hook
@@ -20,10 +19,10 @@ def oai_to_s3(**kwargs):
         'until': kwargs.get('harvest_until_date')
     }
     dag_id = kwargs.get('dag').dag_id
-    harvest_task_start_date = os.environ['AIRFLOW_CTX_EXECUTION_DATE']
+    dag_start_date = kwargs.get('timestamp')
 
     data = harvest_oai(**kwargs)
-    kwargs['prefix'] = dag_s3_prefix(dag_id, harvest_task_start_date)
+    kwargs['prefix'] = dag_s3_prefix(dag_id, dag_start_date)
     count = process_xml(data, dag_write_string_to_s3, **kwargs)
     logging.info("OAI Records Harvested & Processed: %s", count)
 

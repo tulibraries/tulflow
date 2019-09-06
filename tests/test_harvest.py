@@ -175,7 +175,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         kwargs['from'] = "from"
         kwargs['until'] = "until"
         kwargs['dag'] = dag
-        os.environ['AIRFLOW_CTX_EXECUTION_DATE'] = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        kwargs['timestamp'] = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
         oai_to_s3(**kwargs)
         self.assertTrue(mock_harvest.called)

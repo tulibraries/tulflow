@@ -51,14 +51,14 @@ class TestSolrCloudTasks(unittest.TestCase):
     def test_create_sc_collection(self, mocker):
         """Test create_sc_collection operator instance contains expected config values."""
         dag = DAG(dag_id='test_create_sc_collection', start_date=DEFAULT_DATE)
-        operator = create_sc_collection(dag, 'SOLRCLOUD', 'test-collection', 'test-configset')
+        operator = create_sc_collection(dag, 'SOLRCLOUD', 'test-collection', '2', 'test-configset')
         task_instance = TaskInstance(task=operator, execution_date=DEFAULT_DATE)
 
         self.assertEqual("SOLRCLOUD", operator.http_conn_id)
         self.assertEqual("CREATE", operator.data['action'])
         self.assertEqual("test-collection", operator.data['name'])
         self.assertEqual("1", operator.data['numShards'])
-        self.assertEqual("3", operator.data['replicationFactor'])
+        self.assertEqual("2", operator.data['replicationFactor'])
         self.assertEqual("test-configset", operator.data['collection.configName'])
         self.assertEqual("create_collection", task_instance.task_id)
 

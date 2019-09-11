@@ -43,7 +43,7 @@ def slackpostonsuccess(dag, message='Oh, happy day!'):
     return slack_post
 
 
-def create_sc_collection(dag, sc_conn_id, sc_coll_name, sc_configset_name):
+def create_sc_collection(dag, sc_conn_id, sc_coll_name, sc_coll_repl, sc_configset_name):
     """Creates a new SolrCloud Collection."""
     task_instance = SimpleHttpOperator(
         task_id="create_collection",
@@ -54,7 +54,7 @@ def create_sc_collection(dag, sc_conn_id, sc_coll_name, sc_configset_name):
             "action": "CREATE",
             "name": sc_coll_name,
             "numShards": "1",
-            "replicationFactor": "3",
+            "replicationFactor": sc_coll_repl,
             "maxShardsPerNode": "1",
             "collection.configName": sc_configset_name
         },

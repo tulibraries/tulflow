@@ -1,4 +1,5 @@
 """Generic Airflow Tasks Functions, Abstracted for Reuse."""
+import re
 from airflow.hooks.base_hook import BaseHook
 from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
 from airflow.operators.http_operator import SimpleHttpOperator
@@ -84,3 +85,26 @@ def swap_sc_alias(dag, sc_conn_id, sc_coll_name, sc_configset_name):
     )
 
     return task_instance
+
+def get_solr_url(conn, core):
+    """  Generates a solr url from  passed in connection and core.
+
+    Parameters:
+        conn (airflow.models.connection): Connection object representing solr we index to.
+        core (str)  The solr collection or configuration  to use.
+
+    Returns:
+        solr_url (str): A solr URL.
+
+    """
+    solr_url = conn.host
+
+    if not re.match("^http", solr_url):
+        solr_url = 'http://' + solr_url
+
+    if conn.port:
+        solr_url += ':' + str(conn.port)
+
+    solr_url += '/solr/' + core
+
+    return solr_url

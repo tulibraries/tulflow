@@ -7,7 +7,7 @@ from airflow.operators.http_operator import SimpleHttpOperator
 from airflow.hooks.base_hook import BaseHook
 from airflow.models import Connection, DAG, TaskInstance
 from airflow.utils import timezone
-from tulflow.tasks import execute_slackpostonfail, slackpostonsuccess, create_sc_collection, swap_sc_alias
+from tulflow.tasks import execute_slackpostonfail, slackpostonsuccess, create_sc_collection, swap_sc_alias, get_solr_url
 
 DEFAULT_DATE = timezone.datetime(2019, 8, 16)
 
@@ -81,3 +81,21 @@ class TestSolrCloudTasks(unittest.TestCase):
         self.assertEqual("my-alias", operator.data['name'])
         self.assertEqual(["new-collection"], operator.data['collections'])
         self.assertEqual("solr_alias_swap", task_instance.task_id)
+
+class TestTasksGetSolrUrl(unittest.TestCase):
+    """Tests for tasks.get_solr_url function."""
+
+    def test_get_solr_url_without_http_in_host(self):
+        conn = Connection(host="example.com", port="8983")
+        core = "foo"
+        self.assertEqual(get_solr_url(conn, core), "http://example.com:8983/solr/foo")
+
+    def test_get_solr_url_with_http_in_host(self):
+        conn = Connection(host="https://example.com", port="8983")
+        core = "foo"
+        self.assertEqual(get_solr_url(conn, core), "https://example.com:8983/solr/foo")
+
+    def test_get_solr_url_without_port(self):
+        conn = Connection(host="https://example.com")
+        core = "foo"
+        self.assertEqual(get_solr_url(conn, core), "https://example.com/solr/foo")

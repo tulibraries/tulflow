@@ -8,11 +8,12 @@ import boto3
 
 NS = {"marc21": "http://www.loc.gov/MARC21/slim"}
 LOGGER = logging.getLogger('tulflow_process')
+PARSER = etree.XMLParser(remove_blank_text=True)
 
 def add_marc21xml_root_ns(data_in):
     """Given an ALMASFTP XML Collection document as bytes,
     Convert it to lxml.etree.Element & inject MARC21 as default namespace."""
-    source_xml = etree.fromstring(data_in)
+    source_xml = etree.fromstring(data_in, parser=PARSER)
     if (not source_xml.attrib.get("xmlns")) and ("{http://www.loc.gov/MARC21/slim}" not in source_xml.tag):
         source_xml.attrib["xmlns"] = "http://www.loc.gov/MARC21/slim"
     source_xml = etree.fromstring(etree.tostring(source_xml))

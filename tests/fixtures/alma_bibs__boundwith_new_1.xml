@@ -1,0 +1,192 @@
+<collection>
+  <record>
+    <leader>00960nam a2200145 i 4500</leader>
+    <controlfield tag="008">170620s        xx            000 0 eng d</controlfield>
+    <controlfield tag="005">20180618101043.0</controlfield>
+    <controlfield tag="001">9910367273103811</controlfield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">bw90000291-01tuli_inst</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">Host bibliographic record for boundwith item barcode 39074016052185</subfield>
+    </datafield>
+    <datafield tag="774" ind1="1" ind2=" ">
+      <subfield code="t">Policy coherence matters : promoting development in a global economy.</subfield>
+      <subfield code="w">991006932409703811</subfield>
+      <subfield code="9">ExL</subfield>
+    </datafield>
+  <datafield tag="774" ind1="1" ind2=" ">
+      <subfield code="t">Sustainable economic growth : natural resources and the environment in Norway / by Paul van den Noord and Ann Vourc'h.</subfield>
+      <subfield code="w">991006932709703811</subfield>
+      <subfield code="9">ExL</subfield>
+    </datafield>
+  <datafield tag="774" ind1="1" ind2=" ">
+      <subfield code="t">A global marketplace for consumers : simplifying customs clearance procedures : proceedings of an International Roundtable held at the OECD on 9 September 1997.</subfield>
+      <subfield code="w">991006932779703811</subfield>
+      <subfield code="9">ExL</subfield>
+    </datafield>
+  <datafield tag="774" ind1="1" ind2=" ">
+      <subfield code="t">Testing for a common OECD Phillips curve / by Dave Turner and Elena Seghezza.</subfield>
+      <subfield code="w">991006932279703811</subfield>
+      <subfield code="9">ExL</subfield>
+    </datafield>
+  <datafield tag="774" ind1="1" ind2=" ">
+      <subfield code="t">Reaping the full benefits of trade and investment for development.</subfield>
+      <subfield code="w">991006932319703811</subfield>
+      <subfield code="9">ExL</subfield>
+    </datafield>
+  <datafield tag="ADM" ind1=" " ind2=" ">
+      <subfield code="b">2018-08-10 13:55:43</subfield>
+      <subfield code="e">bw90000291-01tuli_inst</subfield>
+      <subfield code="d">ILS</subfield>
+      <subfield code="a">2017-06-20 13:38:20</subfield>
+      <subfield code="c">false</subfield>
+    </datafield>
+  <datafield tag="HLD" ind1="0" ind2=" ">
+      <subfield code="b">ASRS</subfield>
+      <subfield code="c">ASRS</subfield>
+      <subfield code="h"> HD72 </subfield>
+      <subfield code="i"> .O38 v.7 no.53 </subfield>
+      <subfield code="8">22457827260003811</subfield>
+      <subfield code="updated">2019-04-19 19:36:45</subfield>
+      <subfield code="created">2017-06-20 13:38:20</subfield>
+    </datafield>
+  <datafield tag="ITM" ind1=" " ind2=" ">
+      <subfield code="r">22457827260003811</subfield>
+      <subfield code="b">1</subfield>
+      <subfield code="h">0</subfield>
+      <subfield code="g">ASRS</subfield>
+      <subfield code="t">BOOK</subfield>
+      <subfield code="9">39074016052185</subfield>
+      <subfield code="e">ASRS</subfield>
+      <subfield code="8">23326254130003811</subfield>
+      <subfield code="a">0</subfield>
+      <subfield code="q">2017-06-20 13:38:20</subfield>
+      <subfield code="i">HD72 .O38 v.7 no.53</subfield>
+      <subfield code="d">ASRS</subfield>
+      <subfield code="f">ASRS</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>00498nam a2200109 i 4500</leader>
+    <controlfield tag="008">170620s        xx            000 0 eng d</controlfield>
+    <controlfield tag="005">20180618101101.0</controlfield>
+    <controlfield tag="001">9910367273003811</controlfield>
+    <datafield tag="035" ind1=" " ind2=" ">
+        <subfield code="a">bw90000165-01tuli_inst</subfield>
+      </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+        <subfield code="a">Host bibliographic record for boundwith item barcode 39074010019057 and others</subfield>
+      </datafield>
+    <datafield tag="774" ind1="1" ind2=" ">
+        <subfield code="t">Le Pour et contre (nos 1-60) / Antoine François Prévost ... [et al.] ; edited by Steve Larkin.</subfield>
+        <subfield code="w">991031640129703811</subfield>
+        <subfield code="9">ExL</subfield>
+      </datafield>
+    <datafield tag="774" ind1="1" ind2=" ">
+        <subfield code="t">Studies on Voltaire and the eighteenth century.</subfield>
+        <subfield code="w">991012069669703811</subfield>
+        <subfield code="9">ExL</subfield>
+      </datafield>
+    <datafield tag="ADM" ind1=" " ind2=" ">
+        <subfield code="b">2018-08-10 13:55:43</subfield>
+        <subfield code="e">bw90000165-01tuli_inst</subfield>
+        <subfield code="d">ILS</subfield>
+        <subfield code="a">2017-06-20 13:38:15</subfield>
+        <subfield code="c">false</subfield>
+      </datafield>
+    <datafield tag="HLD" ind1="0" ind2=" ">
+        <subfield code="b">KARDON</subfield>
+        <subfield code="c">p_remote</subfield>
+        <subfield code="h">PQ2105.A2B4</subfield>
+        <subfield code="8">22326230150003811</subfield>
+        <subfield code="updated">2017-06-20 13:38:40</subfield>
+        <subfield code="created">2017-06-20 13:38:15</subfield>
+      </datafield>
+    <datafield tag="ITM" ind1=" " ind2=" ">
+        <subfield code="r">22326230150003811</subfield>
+        <subfield code="b">1</subfield>
+        <subfield code="h">0</subfield>
+        <subfield code="g">p_remote</subfield>
+        <subfield code="t">BOOK</subfield>
+        <subfield code="9">39074010019263</subfield>
+        <subfield code="e">p_remote</subfield>
+        <subfield code="8">23326230130003811</subfield>
+        <subfield code="c">v.310</subfield>
+        <subfield code="a">0</subfield>
+        <subfield code="q">2017-06-20 13:38:15</subfield>
+        <subfield code="i">PQ2105.A2B4</subfield>
+        <subfield code="d">KARDON</subfield>
+        <subfield code="f">KARDON</subfield>
+      </datafield>
+    <datafield tag="ITM" ind1=" " ind2=" ">
+        <subfield code="r">22326230150003811</subfield>
+        <subfield code="b">1</subfield>
+        <subfield code="h">0</subfield>
+        <subfield code="g">p_remote</subfield>
+        <subfield code="t">BOOK</subfield>
+        <subfield code="9">39074010019057</subfield>
+        <subfield code="e">p_remote</subfield>
+        <subfield code="8">23326230140003811</subfield>
+        <subfield code="c">v.309</subfield>
+        <subfield code="a">0</subfield>
+        <subfield code="q">2017-06-20 13:38:15</subfield>
+        <subfield code="i">PQ2105.A2B4</subfield>
+        <subfield code="d">KARDON</subfield>
+        <subfield code="f">KARDON</subfield>
+      </datafield>
+  </record>
+  <record>
+    <leader>00453nam a2200109 i 4500</leader>
+    <controlfield tag="008">170620s        xx            000 0 eng d</controlfield>
+    <controlfield tag="005">20180618101101.0</controlfield>
+    <controlfield tag="001">9910367272903811</controlfield>
+    <datafield tag="035" ind1=" " ind2=" ">
+        <subfield code="a">bw90000246-01tuli_inst</subfield>
+      </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+        <subfield code="a">Host bibliographic record for boundwith item barcode 39074004700811</subfield>
+      </datafield>
+    <datafield tag="774" ind1="1" ind2=" ">
+        <subfield code="t">Le misanthrope / Justus van Effen ; edited by James L. Schorr.</subfield>
+        <subfield code="w">991022063789703811</subfield>
+        <subfield code="9">ExL</subfield>
+      </datafield>
+    <datafield tag="774" ind1="1" ind2=" ">
+        <subfield code="t">Studies on Voltaire and the eighteenth century.</subfield>
+        <subfield code="w">991012069669703811</subfield>
+        <subfield code="9">ExL</subfield>
+      </datafield>
+    <datafield tag="ADM" ind1=" " ind2=" ">
+        <subfield code="b">2018-08-10 13:55:43</subfield>
+        <subfield code="e">bw90000246-01tuli_inst</subfield>
+        <subfield code="d">ILS</subfield>
+        <subfield code="a">2017-06-20 13:38:22</subfield>
+        <subfield code="c">false</subfield>
+      </datafield>
+    <datafield tag="HLD" ind1="0" ind2=" ">
+        <subfield code="b">KARDON</subfield>
+        <subfield code="c">p_remote</subfield>
+        <subfield code="h">PQ2105.A2B4</subfield>
+        <subfield code="8">22326269950003811</subfield>
+        <subfield code="updated">2017-06-20 13:38:41</subfield>
+        <subfield code="created">2017-06-20 13:38:22</subfield>
+      </datafield>
+    <datafield tag="ITM" ind1=" " ind2=" ">
+        <subfield code="r">22326269950003811</subfield>
+        <subfield code="b">1</subfield>
+        <subfield code="h">0</subfield>
+        <subfield code="g">p_remote</subfield>
+        <subfield code="t">BOOK</subfield>
+        <subfield code="9">39074004700811</subfield>
+        <subfield code="e">p_remote</subfield>
+        <subfield code="8">23326269940003811</subfield>
+        <subfield code="c">v.248</subfield>
+        <subfield code="a">0</subfield>
+        <subfield code="q">2017-06-20 13:38:22</subfield>
+        <subfield code="i">PQ2105.A2B4</subfield>
+        <subfield code="d">KARDON</subfield>
+        <subfield code="f">KARDON</subfield>
+      </datafield>
+  </record>
+</collection>

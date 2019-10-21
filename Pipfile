@@ -9,6 +9,9 @@ pylint = "*"
 apache-airflow = ">=1.10.3"
 nose = "*"
 httpretty = "*"
+lxml = "*"
+boto3 = "*"
+moto = "*"
 
 [packages]
 setuptools = "*"

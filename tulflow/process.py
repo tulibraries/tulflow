@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 import boto3
 
 NS = {"marc21": "http://www.loc.gov/MARC21/slim"}
+LOGGER = logging.getLogger('tulflow_process')
 
 def add_marc21xml_root_ns(data_in):
     """Given an ALMASFTP XML Collection document as bytes,
@@ -20,14 +21,14 @@ def add_marc21xml_root_ns(data_in):
 def expand_alma_sftp_tarball(key, source_obj):
     """Given an AlmaSFTP S3 bytestream, expand and return XML file."""
     source_tar = tarfile.open(fileobj=io.BytesIO(source_obj), mode="r:gz")
-    if len(source_tar.getmembers()) is None:
-        logging.error("S3 Object is empty.")
-        logging.error(key)
+    if len(source_tar.getmembers()) == 0:
+        LOGGER.error("S3 Object is empty.")
+        LOGGER.error(key)
         return None
 
     if len(source_tar.getmembers()) > 1:
-        logging.error("S3 Object has more than 1 member, which is unexpected.")
-        logging.error(key)
+        LOGGER.error("S3 Object has more than 1 member, which is unexpected.")
+        LOGGER.error(key)
         return None
 
     for item in source_tar:
@@ -38,13 +39,13 @@ def get_record_001(record):
     record_ids = record.xpath("marc21:controlfield[@tag='001']", namespaces=NS)
 
     if record_ids == [] or record_ids[0].text is None:
-        logging.error("Record without an 001 MMS Identifier:")
-        logging.error(etree.tostring(record))
+        LOGGER.error("Record without an 001 MMS Identifier:")
+        LOGGER.error(str(etree.tostring(record)))
         return None
 
     if len(record_ids) > 1:
-        logging.error("Record with multiple 001 MMS Identifiers:")
-        logging.error(etree.tostring(record))
+        LOGGER.error("Record with multiple 001 MMS Identifiers:")
+        LOGGER.error(str(etree.tostring(record)))
         return None
 
     return record_ids[0].text
@@ -66,7 +67,7 @@ def remove_s3_object(bucket, key, access_id, access_secret):
     try:
         s3_client.delete_object(Bucket=bucket, Key=key)
     except ClientError as error:
-        logging.error(error)
+        LOGGER.error(error)
 
 def get_s3_content(bucket, key, access_id, access_secret):
     """Get the contents of S3 object located at given S3 Key."""
@@ -76,7 +77,7 @@ def get_s3_content(bucket, key, access_id, access_secret):
         body = response['Body'].read()
         return body
     except ClientError as error:
-        logging.error(error)
+        LOGGER.error(error)
         return None
 
 def generate_s3_object(body, bucket, key, access_id, access_secret):
@@ -85,4 +86,4 @@ def generate_s3_object(body, bucket, key, access_id, access_secret):
     try:
         s3_client.put_object(Bucket=bucket, Key=key, Body=body)
     except ClientError as error:
-        logging.error(error)
+        LOGGER.error(error)

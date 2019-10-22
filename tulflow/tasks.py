@@ -10,37 +10,37 @@ PP = pprint.PrettyPrinter(indent=4)
 
 def execute_slackpostonfail(context, message=None):
     """Task Method to Post Failed DAG or Task Completion on Slack."""
-    conn = BaseHook.get_connection('AIRFLOW_CONN_SLACK_WEBHOOK')
-    task_instance = context.get('task_instance')
+    conn = BaseHook.get_connection("AIRFLOW_CONN_SLACK_WEBHOOK")
+    task_instance = context.get("task_instance")
     log_url = task_instance.log_url
     task_id = task_instance.task_id
     dag_id = task_instance.dag_id
-    task_date = context.get('execution_date')
+    task_date = context.get("execution_date")
     if not message:
         message = "Task failed: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
 
     slack_post = SlackWebhookOperator(
-        task_id='slackpostonfail',
-        http_conn_id='AIRFLOW_CONN_SLACK_WEBHOOK',
+        task_id="slackpostonfail",
+        http_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK",
         webhook_token=conn.password,
         message=":poop: " + message,
-        username='airflow',
-        dag=context.get('dag')
+        username="airflow",
+        dag=context.get("dag")
         )
 
     return slack_post.execute(context=context)
 
 
-def slackpostonsuccess(dag, message='Oh, happy day!'):
+def slackpostonsuccess(dag, message="Oh, happy day!"):
     """Task Method to Post Successful DAG or Task Completion on Slack."""
-    conn = BaseHook.get_connection('AIRFLOW_CONN_SLACK_WEBHOOK')
+    conn = BaseHook.get_connection("AIRFLOW_CONN_SLACK_WEBHOOK")
 
     slack_post = SlackWebhookOperator(
         task_id="slackpostonsuccess",
-        http_conn_id='AIRFLOW_CONN_SLACK_WEBHOOK',
+        http_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK",
         webhook_token=conn.password,
-        message=':partygritty: ' + message,
-        username='airflow',
+        message=":partygritty: " + message,
+        username="airflow",
         trigger_rule="all_success",
         dag=dag)
 
@@ -51,7 +51,7 @@ def create_sc_collection(dag, sc_conn_id, sc_coll_name, sc_coll_repl, sc_configs
     """Creates a new SolrCloud Collection."""
     task_instance = SimpleHttpOperator(
         task_id="create_collection",
-        method='GET',
+        method="GET",
         http_conn_id=sc_conn_id,
         endpoint="solr/admin/collections",
         data={
@@ -74,7 +74,7 @@ def swap_sc_alias(dag, sc_conn_id, sc_coll_name, sc_configset_name):
     """Create or point an existing SolrCloud Alias to an existing SolrCloud Collection."""
     task_instance = SimpleHttpOperator(
         task_id="solr_alias_swap",
-        method='GET',
+        method="GET",
         http_conn_id=sc_conn_id,
         endpoint="solr/admin/collections",
         data={
@@ -88,6 +88,7 @@ def swap_sc_alias(dag, sc_conn_id, sc_coll_name, sc_configset_name):
     )
 
     return task_instance
+
 
 def get_solr_url(conn, core):
     """  Generates a solr url from  passed in connection and core.
@@ -103,12 +104,12 @@ def get_solr_url(conn, core):
     solr_url = conn.host
 
     if not re.match("^http", solr_url):
-        solr_url = 'http://' + solr_url
+        solr_url = "http://" + solr_url
 
     if conn.port:
-        solr_url += ':' + str(conn.port)
+        solr_url += ":" + str(conn.port)
 
-    solr_url += '/solr/' + core
+    solr_url += "/solr/" + core
 
     return solr_url
 

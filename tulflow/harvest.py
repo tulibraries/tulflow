@@ -4,10 +4,18 @@ tulflow.harvest
 This module contains objects to harvest data from one given location to another.
 """
 import hashlib
+import io
 import logging
+import pandas
 from lxml import etree
 from sickle import Sickle
-from airflow.hooks.S3_hook import S3Hook
+from tulflow import process
+
+
+NS = {
+    "marc21": "http://www.loc.gov/MARC21/slim",
+    "oai": "http://www.openarchives.org/OAI/2.0/"
+    }
 
 
 def oai_to_s3(**kwargs):
@@ -22,9 +30,8 @@ def oai_to_s3(**kwargs):
     dag_start_date = kwargs.get('timestamp')
 
     data = harvest_oai(**kwargs)
-    kwargs['prefix'] = dag_s3_prefix(dag_id, dag_start_date)
-    count = process_xml(data, dag_write_string_to_s3, **kwargs)
-    logging.info("OAI Records Harvested & Processed: %s", count)
+    outdir = dag_s3_prefix(dag_id, dag_start_date)
+    process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
 
 
 def harvest_oai(**kwargs):
@@ -34,50 +41,88 @@ def harvest_oai(**kwargs):
     logging.info("Harvesting from %s", oai_endpoint)
     logging.info("Harvesting %s", harvest_params)
     request = Sickle(oai_endpoint)
-    data = request.ListRecords(harvest_params)
+    data = request.ListRecords(**harvest_params)
     return data
 
 
-def process_xml(data, writer, **kwargs):
+def process_xml(data, writer, outdir, **kwargs):
     """Process & Write XML data to S3."""
     parser = kwargs.get('parser')
     records_per_file = kwargs.get('records_per_file')
     if not records_per_file:
         records_per_file = 1000
-    count = 0
+    count = deleted_count = 0
     collection = etree.Element("collection")
+    deleted_collection = etree.Element("collection")
+    logging.info("Processing XML")
 
     for record in data:
-        count += 1
         record = record.xml
         if parser:
-            record = parser(record)
-        collection.append(record)
-        if count % int(records_per_file) == 0:
-            kwargs['string'] = etree.tostring(collection).decode('utf-8')
-            writer(**kwargs)
-            collection = etree.Element("collection")
-    kwargs['string'] = etree.tostring(collection).decode('utf-8')
-    writer(**kwargs)
-    return count
+            record = parser(record, **kwargs)
+        if record.xpath(".//oai:header[@status='deleted']", namespaces=NS):
+            logging.info("Deleted record %i", deleted_count)
+            deleted_count += 1
+            deleted_collection.append(record)
+            if deleted_count % int(records_per_file) == 0:
+                string = etree.tostring(deleted_collection).decode('utf-8')
+                writer(string, outdir + "/deleted", **kwargs)
+                deleted_collection = etree.Element("collection")
+        else:
+            logging.info("Updated record %i", count)
+            count += 1
+            collection.append(record)
+            if count % int(records_per_file) == 0:
+                string = etree.tostring(collection).decode('utf-8')
+                writer(string, outdir + "/new-updated", **kwargs)
+                collection = etree.Element("collection")
+    writer(etree.tostring(collection).decode('utf-8'), outdir + "/new-updated", **kwargs)
+    writer(etree.tostring(deleted_collection).decode('utf-8'), outdir + "/deleted", **kwargs)
+    logging.info("OAI Records Harvested & Processed: %s", count)
+    logging.info("OAI Records Harvest & Marked for Deletion: %s", deleted_count)
 
 
-def dag_write_string_to_s3(**kwargs):
+def perform_xml_lookup(oai_record, **kwargs):
+    """Parse additions/updates & add boundwiths."""
+    access_id = kwargs.get("access_id")
+    access_secret = kwargs.get("access_secret")
+    bucket = kwargs.get("bucket_name")
+    lookup_key = kwargs.get("lookup_key")
+    csv_data = process.get_s3_content(bucket, lookup_key, access_id, access_secret)
+    lookup_csv = pandas.read_csv(io.BytesIO(csv_data), header=0)
+
+    for record in oai_record.xpath(".//marc21:record", namespaces=NS):
+        record_id = process.get_record_001(record)
+        logging.info("Reading in Record %s", record_id)
+        parent_txt = lookup_csv.loc[lookup_csv.child_id == int(record_id), 'parent_xml'].values
+        if len(set(parent_txt)) >= 1:
+            logging.info("Child XML record found %s", record_id)
+            for parent_node in parent_txt[0].split("||"):
+                try:
+                    record.append(etree.fromstring(parent_node))
+                except etree.XMLSyntaxError as error:
+                    logging.error("Problem with string syntax:")
+                    logging.error(error)
+                    logging.error(parent_node)
+    return oai_record
+
+
+def dag_write_string_to_s3(string, prefix, **kwargs):
     """Push a string in memory to s3 with a defined prefix"""
-    string = kwargs.get('string')
-    prefix = kwargs.get('prefix')
-    s3_conn = kwargs.get('s3_conn')
+    access_id = kwargs.get("access_id")
+    access_secret = kwargs.get("access_secret")
     bucket_name = kwargs.get('bucket_name')
     logging.info("Writing to S3 Bucket %s", bucket_name)
 
-    hook = S3Hook(s3_conn.conn_id)
     our_hash = hashlib.md5(string.encode('utf-8')).hexdigest()
     filename = "{}/{}".format(prefix, our_hash)
-    hook.load_string(string, filename, bucket_name=bucket_name)
+    process.generate_s3_object(string, bucket_name, filename, access_id, access_secret)
 
 
-def write_log(**kwargs):
+def write_log(string, prefix, **kwargs):
     """Write the data to logging info."""
+    prefix = kwargs.get('prefix')
+    logging.info(prefix)
     string = kwargs.get('string')
     logging.info(string)
 

@@ -1,0 +1,144 @@
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>02019cam a22003851a 4500</leader>
+  <controlfield tag="005">20050331091302.0</controlfield>
+  <controlfield tag="007">cr mn mmmmabba</controlfield>
+  <controlfield tag="008">840215s1813    nyu     s     000 0 eng d</controlfield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(PPT)b50604004-01tuli_inst</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">aas04292267</subfield>
+    <subfield code="9">ExL</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">MWA</subfield>
+    <subfield code="c">MWA</subfield>
+    <subfield code="e">dcrb</subfield>
+  </datafield>
+  <datafield tag="090" ind1=" " ind2=" ">
+    <subfield code="a">E164</subfield>
+    <subfield code="b">.E265x</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Bevan, Joseph Gurney,</subfield>
+    <subfield code="d">1753-1814.</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="2">
+    <subfield code="a">A summary of the history, doctrine, and discipline, of Friends:</subfield>
+    <subfield code="h">[electronic resource] :</subfield>
+    <subfield code="b">written at the desire of the Meeting for Sufferings, in London.</subfield>
+  </datafield>
+  <datafield tag="250" ind1=" " ind2=" ">
+    <subfield code="a">The second American edition, with a note from Anthony Benezet's account of the people called Quakers.</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="a">New-York: :</subfield>
+    <subfield code="b">Printed by Samuel Wood, no. 357, Pearl-Street.,</subfield>
+    <subfield code="c">1813.</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">23, [1] p.</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">By Joseph Gurney Bevan.</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">Last page blank.</subfield>
+  </datafield>
+  <datafield tag="510" ind1="4" ind2=" ">
+    <subfield code="a">Shaw &amp; Shoemaker</subfield>
+    <subfield code="c">28585</subfield>
+  </datafield>
+  <datafield tag="530" ind1=" " ind2=" ">
+    <subfield code="a">Microform version available in the Readex Early American Imprints series.</subfield>
+  </datafield>
+  <datafield tag="533" ind1=" " ind2=" ">
+    <subfield code="a">Electronic text and image data.</subfield>
+    <subfield code="b">[Chester, Vt. :</subfield>
+    <subfield code="c">Readex, a division of Newsbank, Inc.,</subfield>
+    <subfield code="d">2004-2007]</subfield>
+    <subfield code="e">Includes files in TIFF, GIF and PDF formats with inclusion of keyword searchable text.</subfield>
+    <subfield code="f">(Early American imprints. Second series ; no. 28585).</subfield>
+  </datafield>
+  <datafield tag="504" ind1=" " ind2=" ">
+    <subfield code="a">Includes bibliographical references.</subfield>
+  </datafield>
+  <datafield tag="590" ind1=" " ind2=" ">
+    <subfield code="a">Access is available to the Temple Community through use of a networked computer with a Temple IP address.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Society of Friends</subfield>
+    <subfield code="x">History.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Society of Friends</subfield>
+    <subfield code="x">Doctrines.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Society of Friends</subfield>
+    <subfield code="x">Discipline.</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2=" ">
+    <subfield code="a">Benezet, Anthony,</subfield>
+    <subfield code="d">1713-1784.</subfield>
+    <subfield code="t">Short account of the people called Quakers.</subfield>
+  </datafield>
+  <datafield tag="710" ind1="2" ind2=" ">
+    <subfield code="a">London Yearly Meeting (Society of Friends).</subfield>
+    <subfield code="b">Meeting for Sufferings.</subfield>
+  </datafield>
+  <datafield tag="752" ind1=" " ind2=" ">
+    <subfield code="a">United States</subfield>
+    <subfield code="b">New York</subfield>
+    <subfield code="d">New York.</subfield>
+  </datafield>
+  <datafield tag="830" ind1=" " ind2="0">
+    <subfield code="a">Early American imprints.</subfield>
+    <subfield code="n">Second series ;</subfield>
+    <subfield code="v">no. 28585.</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2="1">
+    <subfield code="z">Access full text online.</subfield>
+    <subfield code="u">http://libproxy.temple.edu/login?url=http://opac.newsbank.com/select/shaw/28585</subfield>
+    <subfield code="y">Shaw-Shoemaker Digital Edition</subfield>
+  </datafield>
+  <datafield tag="907" ind1=" " ind2=" ">
+    <subfield code="a">.b50604004</subfield>
+    <subfield code="b">w    </subfield>
+    <subfield code="c">-</subfield>
+  </datafield>
+  <datafield tag="902" ind1=" " ind2=" ">
+    <subfield code="a">111209</subfield>
+  </datafield>
+  <datafield tag="998" ind1=" " ind2=" ">
+    <subfield code="b">1</subfield>
+    <subfield code="c">111211</subfield>
+    <subfield code="d">m</subfield>
+    <subfield code="e">@</subfield>
+    <subfield code="f">-</subfield>
+    <subfield code="g">2</subfield>
+  </datafield>
+  <datafield tag="945" ind1=" " ind2=" ">
+    <subfield code="l">w    </subfield>
+    <subfield code="g">1</subfield>
+  </datafield>
+  <datafield tag="ADM" ind1=" " ind2=" ">
+    <subfield code="e">b50604004-01tuli_inst</subfield>
+    <subfield code="d">ILS</subfield>
+    <subfield code="a">2017-06-20 13:51:30</subfield>
+    <subfield code="c">false</subfield>
+  </datafield>
+  <datafield tag="PRT" ind1=" " ind2=" ">
+    <subfield code="updated">2017-11-15 21:35:19</subfield>
+    <subfield code="i">61389017170003811</subfield>
+    <subfield code="d">MAIN</subfield>
+    <subfield code="c">Early American imprints, Second Series</subfield>
+    <subfield code="created">2017-06-22 10:54:48</subfield>
+    <subfield code="j">62402557480003811</subfield>
+    <subfield code="a">53376642800003811</subfield>
+    <subfield code="b">https://sandbox01-na.alma.exlibrisgroup.com/view/uresolver/01TULI_INST/openurl?u.ignore_date_coverage=true&amp;rft.mms_id=991024062089703811</subfield>
+    <subfield code="f">Access full text online.</subfield>
+    <subfield code="9">Available</subfield>
+    <subfield code="8">53376642800003811</subfield>
+  </datafield>
+</record>

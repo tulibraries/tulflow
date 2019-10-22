@@ -4,7 +4,6 @@ import boto3
 from lxml import etree
 from moto import mock_s3
 from tulflow import process
-import logging
 
 class TestDataProcessInteractions(unittest.TestCase):
     """Test Class for data processing functions."""
@@ -145,6 +144,22 @@ class TestS3ProcessInteractions(unittest.TestCase):
         self.assertEqual(test_object_exists["Contents"][0]["Key"], key)
         test_run = process.get_s3_content(bucket, key, access_id, access_secret)
         self.assertEqual(test_run, b"test more content")
+
+    @mock_s3
+    def test_list_s3_content(self):
+        bucket = "test_bucket"
+        prefix = "test_prefix"
+        access_id = "test_access_id"
+        access_secret = "test_access_secret"
+        conn = boto3.client("s3", aws_access_key_id=access_id, aws_secret_access_key=access_secret)
+        conn.create_bucket(Bucket=bucket)
+        conn.put_object(Bucket=bucket, Key="test_prefix/item1", Body="test listing items")
+        conn.put_object(Bucket=bucket, Key="item2", Body="including more items")
+        conn.put_object(Bucket=bucket, Key="item2.magic", Body="and even more items")
+        test_run_all = process.list_s3_content(bucket, access_id, access_secret)
+        self.assertEqual(test_run_all, ["item2", "item2.magic", "test_prefix/item1"])
+        test_run_pref = process.list_s3_content(bucket, access_id, access_secret, prefix=prefix)
+        self.assertEqual(test_run_pref, ["test_prefix/item1"])
 
     @mock_s3
     def test_genereate_s3_object(self):

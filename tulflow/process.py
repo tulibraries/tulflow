@@ -6,9 +6,13 @@ from lxml import etree
 from botocore.exceptions import ClientError
 import boto3
 
-NS = {"marc21": "http://www.loc.gov/MARC21/slim"}
+NS = {
+    "marc21": "http://www.loc.gov/MARC21/slim",
+    "oai": "http://www.openarchives.org/OAI/2.0/"
+    }
 LOGGER = logging.getLogger('tulflow_process')
 PARSER = etree.XMLParser(remove_blank_text=True)
+
 
 def add_marc21xml_root_ns(data_in):
     """Given an ALMASFTP XML Collection document as bytes,
@@ -18,6 +22,7 @@ def add_marc21xml_root_ns(data_in):
         source_xml.attrib["xmlns"] = "http://www.loc.gov/MARC21/slim"
     source_xml = etree.fromstring(etree.tostring(source_xml))
     return source_xml
+
 
 def expand_alma_sftp_tarball(key, source_obj):
     """Given an AlmaSFTP S3 bytestream, expand and return XML file."""
@@ -35,6 +40,7 @@ def expand_alma_sftp_tarball(key, source_obj):
     for item in source_tar:
         return source_tar.extractfile(item).read()
 
+
 def get_record_001(record):
     """Given a MARC/XML record (lxml.etree.Element), validate & return OO1 text."""
     record_ids = record.xpath("marc21:controlfield[@tag='001']", namespaces=NS)
@@ -51,6 +57,7 @@ def get_record_001(record):
 
     return record_ids[0].text
 
+
 def generate_bw_parent_field(parent_id):
     """Generates our Parent ID MARC/XML field inserted into the relevant Child Records."""
     new_field = etree.Element("{http://www.loc.gov/MARC21/slim}datafield")
@@ -62,17 +69,29 @@ def generate_bw_parent_field(parent_id):
     subfield.text = parent_id
     return new_field
 
+
 def remove_s3_object(bucket, key, access_id, access_secret):
     """Removes an S3 object."""
-    s3_client = boto3.client('s3', aws_access_key_id=access_id, aws_secret_access_key=access_secret)
+    s3_client = boto3.client(
+        "s3",
+        "us-east-1",
+        aws_access_key_id=access_id,
+        aws_secret_access_key=access_secret
+    )
     try:
         s3_client.delete_object(Bucket=bucket, Key=key)
     except ClientError as error:
         LOGGER.error(error)
 
+
 def get_s3_content(bucket, key, access_id, access_secret):
     """Get the contents of S3 object located at given S3 Key."""
-    s3_client = boto3.client('s3', aws_access_key_id=access_id, aws_secret_access_key=access_secret)
+    s3_client = boto3.client(
+        "s3",
+        "us-east-1",
+        aws_access_key_id=access_id,
+        aws_secret_access_key=access_secret
+    )
     try:
         response = s3_client.get_object(Bucket=bucket, Key=key)
         body = response['Body'].read()
@@ -81,9 +100,34 @@ def get_s3_content(bucket, key, access_id, access_secret):
         LOGGER.error(error)
         return None
 
+
+def list_s3_content(bucket, access_id, access_secret, prefix=""):
+    """Get a list of S3 objects located in a Bucket at the given Prefix"""
+    s3_client = boto3.client(
+        "s3",
+        "us-east-1",
+        aws_access_key_id=access_id,
+        aws_secret_access_key=access_secret
+    )
+    try:
+        response = s3_client.list_objects(Bucket=bucket, Prefix=prefix)
+        objects = []
+        for key in response['Contents']:
+            objects.append(key['Key'])
+        return objects
+    except ClientError as error:
+        LOGGER.error(error)
+        return None
+
+
 def generate_s3_object(body, bucket, key, access_id, access_secret):
     """Given a bytestring, write it to S3."""
-    s3_client = boto3.client("s3", aws_access_key_id=access_id, aws_secret_access_key=access_secret)
+    s3_client = boto3.client(
+        "s3",
+        "us-east-1",
+        aws_access_key_id=access_id,
+        aws_secret_access_key=access_secret
+    )
     try:
         s3_client.put_object(Bucket=bucket, Key=key, Body=body)
     except ClientError as error:

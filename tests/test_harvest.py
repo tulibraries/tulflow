@@ -1,8 +1,10 @@
 """Tests suite for tulflow harvest (Functions for harvesting OAI in Airflow Tasks)."""
 from datetime import datetime
 import hashlib
-import logging
 import unittest
+import boto3
+from lxml import etree
+from moto import mock_s3
 from unittest import mock
 from unittest.mock import patch
 from airflow.hooks.S3_hook import S3Hook
@@ -11,10 +13,14 @@ from airflow.utils import timezone
 from lxml import etree
 from sickle.iterator import OAIItemIterator
 import httpretty
-from tulflow.harvest import dag_s3_prefix, dag_write_string_to_s3, harvest_oai, process_xml, write_log, oai_to_s3
+from tulflow import harvest
 from types import SimpleNamespace
 
 DEFAULT_DATE = timezone.datetime(2019, 8, 16)
+NS = {
+    "marc21": "http://www.loc.gov/MARC21/slim",
+    "oai": "http://www.openarchives.org/OAI/2.0/"
+    }
 
 lizards = """
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
@@ -81,7 +87,9 @@ animals = """
 """
 
 marc = """
-<OAI-PMH xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
     <responseDate>2019-11-08T13:43:00Z</responseDate>
     <request verb="ListRecords" metadataPrefix="marc21" set="blacklight">https://na02.alma.exlibrisgroup.com/view/oai/01TULI_INST/request</request>
     <ListRecords>
@@ -94,7 +102,7 @@ marc = """
                 <setSpec>rapid_print_books</setSpec>
             </header>
             <metadata>
-                <record xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+                <record xmlns="http://www.loc.gov/MARC21/slim" xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
                     <leader>01407nam a2200445 4500</leader>
                     <controlfield tag="005">20190715090942.0</controlfield>
                     <controlfield tag="008">690326s1969 nju b 000 0 eng </controlfield>
@@ -135,8 +143,52 @@ marc = """
 </OAI-PMH>
 """
 
+marc_single = """
+<record xmlns="http://www.openarchives.org/OAI/2.0/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+    <header>
+        <identifier>oai:alma.01TULI_INST:991000000269703811</identifier>
+        <datestamp>2019-07-15T15:17:33Z</datestamp>
+        <setSpec>blacklight</setSpec>
+        <setSpec>blacklight_qa</setSpec>
+        <setSpec>rapid_print_books</setSpec>
+    </header>
+    <metadata>
+        <record xmlns="http://www.loc.gov/MARC21/slim" xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+            <leader>01407nam a2200445 4500</leader>
+            <controlfield tag="005">20190715090942.0</controlfield>
+            <controlfield tag="008">690326s1969 nju b 000 0 eng </controlfield>
+            <controlfield tag="001">991000000269703811</controlfield>
+            <datafield tag="010" ind1=" " ind2=" ">
+                <subfield code="a">68020157</subfield>
+            </datafield>
+            <datafield tag="035" ind1=" " ind2=" ">
+                <subfield code="a">(PPT)b10000276-01tuli_inst</subfield>
+            </datafield>
+            <datafield tag="040" ind1=" " ind2=" ">
+                <subfield code="a">DLC</subfield>
+                <subfield code="b">eng</subfield>
+                <subfield code="c">DLC</subfield>
+                <subfield code="d">PPT</subfield>
+            </datafield>
+            <datafield tag="090" ind1=" " ind2=" ">
+                <subfield code="a">HM131.E85</subfield>
+            </datafield>
+            <datafield tag="100" ind1="1" ind2=" ">
+                <subfield code="a">Etzioni, Amitai.</subfield>
+                <subfield code="0">http://id.loc.gov/authorities/names/n79089329</subfield>
+            </datafield>
+            <datafield tag="245" ind1="1" ind2="0">
+                <subfield code="a">Readings on modern organizations.</subfield>
+            </datafield>
+        </record>
+    </metadata>
+</record>
+"""
+
 lookup = """child_id,parent_id,parent_xml
-991000000269703811,9910367273103811,"<datafield>test</datafield>||<ns0:datafield>9910367273103811</ns0:datafield>"
+991000000269703811,9910367273103811,"<datafield>test</datafield>||<datafield>9910367273103811</datafield>"
 """
 
 
@@ -151,7 +203,7 @@ class TestDagS3Interaction(unittest.TestCase):
     def test_dag_s3_prefix(self):
         """Test Creating S3 Bucket ('prefix')."""
         timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
-        prefix = dag_s3_prefix(self.dag_id, timestamp)
+        prefix = harvest.dag_s3_prefix(self.dag_id, timestamp)
         self.assertEqual(prefix, "{}/{}".format(self.dag_id, timestamp))
 
 
@@ -168,7 +220,7 @@ class TestDagS3Interaction(unittest.TestCase):
         key = "{}/{}".format(prefix, our_hash)
 
 
-        dag_write_string_to_s3(string=string, prefix=prefix, **kwargs)
+        harvest.dag_write_string_to_s3(string=string, prefix=prefix, **kwargs)
         mock.assert_called_once_with(string, "my-bucket", key, "puppies", "kittens")
 
 
@@ -195,7 +247,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             'until': None
         }
 
-        response = harvest_oai(**kwargs)
+        response = harvest.harvest_oai(**kwargs)
         xml_output = etree.tostring(response.next().xml, pretty_print=True, encoding='utf-8')
         self.assertEqual(type(response), OAIItemIterator)
         self.assertIn(b"<identifier>oai:lizards</identifier>", xml_output)
@@ -220,9 +272,10 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         }
 
         with self.assertLogs() as log:
-            response = harvest_oai(**kwargs)
-            process_xml(response, write_log, "test-dir", **kwargs)
+            response = harvest.harvest_oai(**kwargs)
+            harvest.process_xml(response, harvest.write_log, "test-dir", **kwargs)
         self.assertIn("INFO:root:OAI Records Harvested & Processed: 2", log.output)
+        self.assertIn("INFO:root:OAI Records Harvest & Marked for Deletion: 0", log.output)
 
 
     @httpretty.activate
@@ -243,29 +296,33 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         }
 
         with self.assertLogs() as log:
-            response = harvest_oai(**kwargs)
-            process_xml(response, write_log, "test-dir", **kwargs)
+            response = harvest.harvest_oai(**kwargs)
+            harvest.process_xml(response, harvest.write_log, "test-dir", **kwargs)
         self.assertIn("INFO:root:OAI Records Harvested & Processed: 1", log.output)
-        self.assertIn("INFO:root:OAI Records Harvest & Marked for Deletion: 0", log.output)
+        self.assertIn("INFO:root:OAI Records Harvest & Marked for Deletion: 1", log.output)
 
     @mock_s3
     def test_perform_xml_lookup(self, **kwargs):
         """Test Calling handling XML Element to String with Deletes."""
-        kwargs["access_key"] = "cats"
+        kwargs["access_id"] = "cats"
         kwargs["access_secret"] = "dogs"
-        kwargs["bucket"] = "alma-test"
+        kwargs["bucket_name"] = "alma-test"
         kwargs["lookup_key"] = "sc_catalog_pipeline/0000-00-00/lookup.tsv"
 
         conn = boto3.client(
             "s3",
-            aws_access_key_id=kwargs.get("access_key"),
+            aws_access_key_id=kwargs.get("access_id"),
             aws_secret_access_key=kwargs.get("access_secret")
         )
-        conn.create_bucket(Bucket=kwargs.get("bucket"))
-        conn.put_object(Bucket=kwargs.get("bucket"), Key=kwargs.get("lookup_key"), Body=lookup)
-        marc_xml = etree.fromstring(marc)
-        resp_xml = perform_xml_lookup(marc_xml, **kwargs)
-        self.assertTrue(resp_xml, "")
+        conn.create_bucket(Bucket=kwargs.get("bucket_name"))
+        conn.put_object(Bucket=kwargs.get("bucket_name"), Key=kwargs.get("lookup_key"), Body=lookup)
+        marc_xml = etree.fromstring(marc_single)
+        with self.assertLogs() as log:
+            resp_xml = harvest.perform_xml_lookup(marc_xml, **kwargs)
+        self.assertIn("INFO:root:Reading in Record 991000000269703811", log.output)
+        self.assertIn("INFO:root:Child XML record found 991000000269703811", log.output)
+        self.assertIn(b"<datafield>test</datafield>", etree.tostring(resp_xml))
+        self.assertIn(b"<datafield>9910367273103811</datafield>", etree.tostring(resp_xml))
 
     @mock.patch('tulflow.harvest.harvest_oai')
     @mock.patch('tulflow.harvest.dag_s3_prefix')
@@ -281,7 +338,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         kwargs['dag'] = dag
         kwargs['timestamp'] = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
-        oai_to_s3(**kwargs)
+        harvest.oai_to_s3(**kwargs)
         self.assertTrue(mock_harvest.called)
         self.assertTrue(mock_prefix.called)
         self.assertTrue(mock_process.called)

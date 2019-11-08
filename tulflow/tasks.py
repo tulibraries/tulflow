@@ -1,8 +1,11 @@
 """Generic Airflow Tasks Functions, Abstracted for Reuse."""
 import re
+import pprint
 from airflow.hooks.base_hook import BaseHook
 from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
 from airflow.operators.http_operator import SimpleHttpOperator
+
+PP = pprint.PrettyPrinter(indent=4)
 
 
 def execute_slackpostonfail(context, message=None):
@@ -108,3 +111,12 @@ def get_solr_url(conn, core):
     solr_url += '/solr/' + core
 
     return solr_url
+
+def conditionally_trigger(context, dag_run_obj):
+    """This function decides whether or not to Trigger the remote DAG"""
+    c_p = context['params']['condition_param']
+    print("Controller DAG : conditionally_trigger = {}".format(c_p))
+    if context['params']['condition_param']:
+        dag_run_obj.payload = {'message': context['params']['message']}
+        PP.pprint(dag_run_obj.payload)
+        return dag_run_obj

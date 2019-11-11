@@ -61,7 +61,7 @@ def process_xml(data, writer, outdir, **kwargs):
         if parser:
             record = parser(record, **kwargs)
         if record.xpath(".//oai:header[@status='deleted']", namespaces=NS):
-            logging.info("Deleted record %i", deleted_count)
+            logging.info("Deleted record %s", record.xpath(".//oai:identifier", namespaces=NS)[0].text)
             deleted_count += 1
             deleted_collection.append(record)
             if deleted_count % int(records_per_file) == 0:
@@ -69,7 +69,7 @@ def process_xml(data, writer, outdir, **kwargs):
                 writer(string, outdir + "/deleted", **kwargs)
                 deleted_collection = etree.Element("collection")
         else:
-            logging.info("Updated record %i", count)
+            logging.info("Updated record %s", record.xpath(".//oai:identifier", namespaces=NS)[0].text)
             count += 1
             collection.append(record)
             if count % int(records_per_file) == 0:

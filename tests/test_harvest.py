@@ -15,6 +15,7 @@ from sickle.iterator import OAIItemIterator
 import httpretty
 from tulflow import harvest
 from types import SimpleNamespace
+from moto import mock_s3
 
 DEFAULT_DATE = timezone.datetime(2019, 8, 16)
 NS = {
@@ -191,6 +192,74 @@ lookup = """child_id,parent_id,parent_xml
 991000000269703811,9910367273103811,"<datafield>test</datafield>||<datafield>9910367273103811</datafield>"
 """
 
+listSets = """
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH
+    xmlns="http://www.openarchives.org/OAI/2.0/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+    <responseDate>2019-11-11T21:17:32Z</responseDate>
+    <request verb="ListSets">http://digitalcollections.plymouth.edu/oai/oai.php</request>
+    <ListSets>
+        <set>
+            <setSpec>a</setSpec>
+            <setName>A</setName>
+            <setDescription>
+                <oai_dc:dc
+                    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                    xmlns:dc="http://purl.org/dc/elements/1.1/"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd" />
+            </setDescription>
+        </set>
+        <set>
+            <setSpec>b</setSpec>
+            <setName>B</setName>
+            <setDescription>
+                <oai_dc:dc
+                    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                    xmlns:dc="http://purl.org/dc/elements/1.1/"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd" />
+            </setDescription>
+        </set>
+        <set>
+            <setSpec>x</setSpec>
+            <setName>X</setName>
+            <setDescription>
+                <oai_dc:dc
+                    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                    xmlns:dc="http://purl.org/dc/elements/1.1/"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd" />
+            </setDescription>
+        </set>
+        <set>
+            <setSpec>y</setSpec>
+            <setName>Y</setName>
+            <setDescription>
+                <oai_dc:dc
+                    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                    xmlns:dc="http://purl.org/dc/elements/1.1/"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd" />
+            </setDescription>
+        </set>
+        <set>
+            <setSpec>z</setSpec>
+            <setName>Z</setName>
+            <setDescription>
+                <oai_dc:dc
+                    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                    xmlns:dc="http://purl.org/dc/elements/1.1/"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd" />
+            </setDescription>
+        </set>
+    </ListSets>
+</OAI-PMH>
+"""
+
 
 class TestDagS3Interaction(unittest.TestCase):
     """Test Class for S3 Post Wrapper."""
@@ -229,6 +298,40 @@ class TestOAIHarvestInteraction(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.maxDiff = None
+
+    def test_oai_sets_all(self, **kwargs):
+        """Test that all sets are lined up for harvest."""
+        kwargs["all_sets"] = True
+        kwargs["included_sets"] = ["a", "b", "c"]
+        kwargs["excluded_sets"] = ["x", "y", "z"]
+
+        returned_sets = harvest.generate_oai_sets(**kwargs)
+        self.assertEqual(returned_sets, [])
+
+    def test_oai_sets_incl(self, **kwargs):
+        """Test that all sets are lined up for harvest."""
+        kwargs["all_sets"] = False
+        kwargs["included_sets"] = ["a", "b", "c"]
+        kwargs["excluded_sets"] = ["x", "y", "z"]
+
+        returned_sets = harvest.generate_oai_sets(**kwargs)
+        self.assertEqual(returned_sets, ["a", "b", "c"])
+
+    @httpretty.activate
+    def test_oai_sets_excl(self, **kwargs):
+        """Test that all sets are lined up for harvest."""
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body=listSets
+        )
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["all_sets"] = False
+        kwargs["included_sets"] = []
+        kwargs["excluded_sets"] = ["x", "y", "z"]
+
+        returned_sets = harvest.generate_oai_sets(**kwargs)
+        self.assertListEqual(returned_sets, ["a", "b"])
 
     @httpretty.activate
     def test_harvest_oai(self, **kwargs):

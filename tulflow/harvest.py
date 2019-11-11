@@ -22,16 +22,42 @@ def oai_to_s3(**kwargs):
     """Wrapper function for using OAI Harvest, Default Processor, and S3 Writer."""
     kwargs['harvest_params'] = {
         'metadataPrefix': kwargs.get('metadata_prefix'),
-        'set': kwargs.get('set'),
         'from': kwargs.get('harvest_from_date'),
         'until': kwargs.get('harvest_until_date')
     }
     dag_id = kwargs.get('dag').dag_id
     dag_start_date = kwargs.get('timestamp')
 
-    data = harvest_oai(**kwargs)
-    outdir = dag_s3_prefix(dag_id, dag_start_date)
-    process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
+    sets = generate_oai_sets(**kwargs)
+    if sets:
+        for oai_set in sets:
+            kwargs["harvest_params"]["set"] = oai_set
+            data = harvest_oai(**kwargs)
+            outdir = dag_s3_prefix(dag_id, dag_start_date)
+            process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
+    else:
+        data = harvest_oai(**kwargs)
+        outdir = dag_s3_prefix(dag_id, dag_start_date)
+        process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
+
+
+def generate_oai_sets(**kwargs):
+    """Generate the oai sets we want to harvest."""
+    all_sets = kwargs.get("all_sets")
+    included_sets = kwargs.get("included_sets")
+    excluded_sets = kwargs.get("excluded_sets")
+    oai_endpoint = kwargs.get("oai_endpoint")
+
+    if all_sets:
+        return []
+    elif included_sets:
+        return included_sets
+    elif excluded_sets:
+        list_sets = Sickle(oai_endpoint).ListSets()
+        all_sets = [oai_set.xml.find("oai:setSpec", namespaces=NS).text for oai_set in list_sets]
+        remaining_sets = list(set(all_sets) - set(excluded_sets))
+        return remaining_sets
+    return []
 
 
 def harvest_oai(**kwargs):

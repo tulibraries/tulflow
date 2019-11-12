@@ -15,6 +15,7 @@ from sickle.iterator import OAIItemIterator
 import httpretty
 from tulflow import harvest
 from types import SimpleNamespace
+from moto import mock_s3
 
 DEFAULT_DATE = timezone.datetime(2019, 8, 16)
 NS = {
@@ -191,23 +192,91 @@ lookup = """child_id,parent_id,parent_xml
 991000000269703811,9910367273103811,"<datafield>test</datafield>||<datafield>9910367273103811</datafield>"
 """
 
+listSets = """
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH
+    xmlns="http://www.openarchives.org/OAI/2.0/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+    <responseDate>2019-11-11T21:17:32Z</responseDate>
+    <request verb="ListSets">http://digitalcollections.plymouth.edu/oai/oai.php</request>
+    <ListSets>
+        <set>
+            <setSpec>a</setSpec>
+            <setName>A</setName>
+            <setDescription>
+                <oai_dc:dc
+                    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                    xmlns:dc="http://purl.org/dc/elements/1.1/"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd" />
+            </setDescription>
+        </set>
+        <set>
+            <setSpec>b</setSpec>
+            <setName>B</setName>
+            <setDescription>
+                <oai_dc:dc
+                    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                    xmlns:dc="http://purl.org/dc/elements/1.1/"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd" />
+            </setDescription>
+        </set>
+        <set>
+            <setSpec>x</setSpec>
+            <setName>X</setName>
+            <setDescription>
+                <oai_dc:dc
+                    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                    xmlns:dc="http://purl.org/dc/elements/1.1/"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd" />
+            </setDescription>
+        </set>
+        <set>
+            <setSpec>y</setSpec>
+            <setName>Y</setName>
+            <setDescription>
+                <oai_dc:dc
+                    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                    xmlns:dc="http://purl.org/dc/elements/1.1/"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd" />
+            </setDescription>
+        </set>
+        <set>
+            <setSpec>z</setSpec>
+            <setName>Z</setName>
+            <setDescription>
+                <oai_dc:dc
+                    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                    xmlns:dc="http://purl.org/dc/elements/1.1/"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd" />
+            </setDescription>
+        </set>
+    </ListSets>
+</OAI-PMH>
+"""
+
 
 class TestDagS3Interaction(unittest.TestCase):
     """Test Class for S3 Post Wrapper."""
     @classmethod
     def setUpClass(self):
-        self.dag_id = 's3_stuff'
+        self.dag_id = "s3_stuff"
         self.maxDiff = None
 
 
     def test_dag_s3_prefix(self):
-        """Test Creating S3 Bucket ('prefix')."""
-        timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+        """Test Creating S3 Bucket ("prefix")."""
+        timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         prefix = harvest.dag_s3_prefix(self.dag_id, timestamp)
         self.assertEqual(prefix, "{}/{}".format(self.dag_id, timestamp))
 
 
-    @mock.patch('tulflow.process.generate_s3_object')
+    @mock.patch("tulflow.process.generate_s3_object")
     def test_write_push_string_to_s3(self, mock):
         """Test Writing String to S3 using our Function."""
         string = "<fooooooooo>"
@@ -216,7 +285,7 @@ class TestDagS3Interaction(unittest.TestCase):
         kwargs["access_id"] = "puppies"
         kwargs["access_secret"] = "kittens"
         kwargs["bucket_name"] = "my-bucket"
-        our_hash = hashlib.md5(string.encode('utf-8')).hexdigest()
+        our_hash = hashlib.md5(string.encode("utf-8")).hexdigest()
         key = "{}/{}".format(prefix, our_hash)
 
 
@@ -230,6 +299,45 @@ class TestOAIHarvestInteraction(unittest.TestCase):
     def setUpClass(self):
         self.maxDiff = None
 
+
+    def test_oai_sets_all(self, **kwargs):
+        """Test that all sets are lined up for harvest."""
+        kwargs["all_sets"] = True
+        kwargs["included_sets"] = ["a", "b", "c"]
+        kwargs["excluded_sets"] = ["x", "y", "z"]
+
+        returned_sets = harvest.generate_oai_sets(**kwargs)
+        self.assertEqual(returned_sets, [])
+
+
+    def test_oai_sets_incl(self, **kwargs):
+        """Test that all sets are lined up for harvest."""
+        kwargs["all_sets"] = False
+        kwargs["included_sets"] = ["a", "b", "c"]
+        kwargs["excluded_sets"] = ["x", "y", "z"]
+
+        returned_sets = harvest.generate_oai_sets(**kwargs)
+        self.assertEqual(returned_sets, ["a", "b", "c"])
+
+
+    @httpretty.activate
+    def test_oai_sets_excl(self, **kwargs):
+        """Test that all sets are lined up for harvest."""
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body=listSets
+        )
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["all_sets"] = False
+        kwargs["included_sets"] = []
+        kwargs["excluded_sets"] = ["x", "y", "z"]
+
+        returned_sets = harvest.generate_oai_sets(**kwargs)
+        returned_sets.sort()
+        self.assertListEqual(returned_sets, ["a", "b"])
+
+
     @httpretty.activate
     def test_harvest_oai(self, **kwargs):
         """Test Calling OAI-PMH HTTP Endpoint & Returning XML String."""
@@ -239,20 +347,21 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             body=lizards
         )
 
-        kwargs['oai_endpoint'] = "http://127.0.0.1/combine/oai"
-        kwargs['harvest_params'] = {
-            'metadataPrefix': 'generic',
-            'set': 'dpla_test',
-            'from': None,
-            'until': None
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "generic",
+            "included_sets": "dpla_test",
+            "from": None,
+            "until": None
         }
 
         response = harvest.harvest_oai(**kwargs)
-        xml_output = etree.tostring(response.next().xml, pretty_print=True, encoding='utf-8')
+        xml_output = etree.tostring(response.next().xml, pretty_print=True, encoding="utf-8")
         self.assertEqual(type(response), OAIItemIterator)
         self.assertIn(b"<identifier>oai:lizards</identifier>", xml_output)
         self.assertIn(b"<setSpec>dpla_test</setSpec>", xml_output)
         self.assertIn(b"<dcterms:title>lizards</dcterms:title>", xml_output)
+
 
     @httpretty.activate
     def test_process_xml_dpla(self, **kwargs):
@@ -263,12 +372,12 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             body=animals
         )
 
-        kwargs['oai_endpoint'] = "http://test/combine/oai"
-        kwargs['harvest_params'] = {
-            'metadataPrefix': 'generic',
-            'set': 'dpla_test',
-            'from': None,
-            'until': None
+        kwargs["oai_endpoint"] = "http://test/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "generic",
+            "included_sets": ["dpla_test"],
+            "from": None,
+            "until": None
         }
 
         with self.assertLogs() as log:
@@ -287,12 +396,12 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             body=marc
         )
 
-        kwargs['oai_endpoint'] = "http://127.0.0.1/alma/oai"
-        kwargs['harvest_params'] = {
-            'metadataPrefix': 'marc21',
-            'set': 'blacklight',
-            'from': 2019-10-21,
-            'until': None
+        kwargs["oai_endpoint"] = "http://127.0.0.1/alma/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "marc21",
+            "included_sets": ["blacklight"],
+            "from": 2019-10-21,
+            "until": None
         }
 
         with self.assertLogs() as log:
@@ -300,6 +409,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             harvest.process_xml(response, harvest.write_log, "test-dir", **kwargs)
         self.assertIn("INFO:root:OAI Records Harvested & Processed: 1", log.output)
         self.assertIn("INFO:root:OAI Records Harvest & Marked for Deletion: 1", log.output)
+
 
     @mock_s3
     def test_perform_xml_lookup(self, **kwargs):
@@ -324,19 +434,20 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         self.assertIn(b"<datafield>test</datafield>", etree.tostring(resp_xml))
         self.assertIn(b"<datafield>9910367273103811</datafield>", etree.tostring(resp_xml))
 
-    @mock.patch('tulflow.harvest.harvest_oai')
-    @mock.patch('tulflow.harvest.dag_s3_prefix')
-    @mock.patch('tulflow.harvest.process_xml')
+
+    @mock.patch("tulflow.harvest.harvest_oai")
+    @mock.patch("tulflow.harvest.dag_s3_prefix")
+    @mock.patch("tulflow.harvest.process_xml")
     def test_oai_to_s3_harvest(self, mock_harvest, mock_prefix, mock_process, **kwargs):
         """Test oai_to_s3 wraps harvest_oai function."""
-        dag = DAG(dag_id='test_slacksuccess', start_date=DEFAULT_DATE)
-        kwargs['oai_endpoint'] = "http://test/combine/oai"
-        kwargs['metadataPrefix'] = "blergh"
-        kwargs['set'] = "set"
-        kwargs['from'] = "from"
-        kwargs['until'] = "until"
-        kwargs['dag'] = dag
-        kwargs['timestamp'] = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        dag = DAG(dag_id="test_slacksuccess", start_date=DEFAULT_DATE)
+        kwargs["oai_endpoint"] = "http://test/combine/oai"
+        kwargs["metadataPrefix"] = "blergh"
+        kwargs["included_sets"] = ["set"]
+        kwargs["from"] = "from"
+        kwargs["until"] = "until"
+        kwargs["dag"] = dag
+        kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         harvest.oai_to_s3(**kwargs)
         self.assertTrue(mock_harvest.called)

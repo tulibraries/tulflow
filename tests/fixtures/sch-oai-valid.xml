@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/"
+   xmlns:edm="http://www.europeana.eu/schemas/edm/"
+   xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dpla="http://dp.la/about/map/"
+   xmlns:schema="http://schema.org" xmlns:oai="http://www.openarchives.org/OAI/2.0/"
+   xmlns:oai_qdc="http://worldcat.org/xmlschemas/qdc-1.0/">
+   <oai_dc:dc>
+      <dcterms:title>Celebration at Independence Hall</dcterms:title>
+      <dcterms:creator>pdcp_noharvest</dcterms:creator>
+      <dcterms:creator>Philadelphia Evening Bulletin</dcterms:creator>
+      <dcterms:publisher>Philadelphia Evening Bulletin</dcterms:publisher>
+      <dcterms:publisher>Philadelphia Evening Bulletin</dcterms:publisher>
+      <dcterms:description>Photo shows pennants and streamers hanging from clock and bell tower of
+         Independence Hall and Commodore John Barry monument. There is a tent and loud speaker
+         system immediately in front of Independence Hall entrance. Note dirigible in left upper
+         quadrant of photo.</dcterms:description>
+      <dcterms:description>This is a test record from the PDCP Metadata Team. Please do not
+         reference this item for research. Thank you.</dcterms:description>
+      <dcterms:spatial>Philadelphia (Pa.);Independence National Historical Park (Philadelphia,
+         Pa.)</dcterms:spatial>
+      <dcterms:date>1924</dcterms:date>
+      <dcterms:subject>Statues</dcterms:subject>
+      <dcterms:subject/>
+      <dcterms:type>Image</dcterms:type>
+      <dcterms:rights>This material is made available for private study, scholarship, and research
+         use. For access to the original, contact: Temple University Libraries. Special Collections
+         Research Center, scrc@temple.edu, 215-204-8257.</dcterms:rights>
+      <schema:fileFormat>image/jp2</schema:fileFormat>
+      <dcterms:identifier>valid</dcterms:identifier>
+      <edm:isShownAt>http://digital.library.temple.edu/cdm/ref/collection/p16002coll25/id/0</edm:isShownAt>
+      <edm:dataProvider>Temple University Libraries</edm:dataProvider>
+      <edm:provider>PA Digital</edm:provider>
+   </oai_dc:dc>
+   <oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/"
+      xmlns:edm="http://www.europeana.eu/schemas/edm/"
+      xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+      xmlns:dpla="http://dp.la/about/map/" xmlns:schema="http://schema.org"
+      xmlns:oai="http://www.openarchives.org/OAI/2.0/"
+      xmlns:oai_qdc="http://worldcat.org/xmlschemas/qdc-1.0/">
+      <dcterms:title>Micky Dolenz of the Monkees with the Temple owl mascot and a Temple University
+         football player</dcterms:title>
+      <dcterms:description>Micky Dolenz identified from other photos of the Monkees rock group. The
+         Monkees played a concert at a Temple University football game. The date of the
+         concert/football game was found to be 1986 through research in newspaper
+         databases.</dcterms:description>
+      <dcterms:spatial>1985-1987</dcterms:spatial>
+      <dcterms:temporal>1985-1987</dcterms:temporal>
+      <dcterms:date>circa=1986</dcterms:date>
+      <dcterms:subject>Football players</dcterms:subject>
+      <dcterms:subject>Mascots</dcterms:subject>
+      <dcterms:type>Image</dcterms:type>
+      <dcterms:rights>This material is subject to copyright law and is made available for private
+         study, scholarship, and research purposes only. For access to the original or a high
+         resolution reproduction, and for permission to publish, please contact Temple University
+         Libraries, Special Collection Research Center, scrc@temple.edu,
+         215-204-8257.</dcterms:rights>
+      <schema:fileFormat>image/jp2;</schema:fileFormat>
+      <dcterms:identifier>valid2</dcterms:identifier>
+      <edm:isShownAt>http://digital.library.temple.edu/cdm/ref/collection/p16002coll25/id/34</edm:isShownAt>
+      <edm:dataProvider>Temple University Libraries</edm:dataProvider>
+      <edm:provider>PA Digital</edm:provider>
+   </oai_dc:dc>
+   <oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/"
+      xmlns:edm="http://www.europeana.eu/schemas/edm/"
+      xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+      xmlns:dpla="http://dp.la/about/map/" xmlns:schema="http://schema.org"
+      xmlns:oai="http://www.openarchives.org/OAI/2.0/"
+      xmlns:oai_qdc="http://worldcat.org/xmlschemas/qdc-1.0/">
+      <dcterms:title>Russell Conwell and others at the dedication of Conwell Hall</dcterms:title>
+      <dcterms:description>"Participants in the dedication of Conwell Hall in January of 1924
+         included (from the left) Josiah Penniman, President of the University of Pennsylvania; the
+         Rev. Floyd Tomkins, rector of Holy Trinity Protestant Episcopal Church; President Conwell;
+         Charles E. Beury, Trustee and Chairman of the Building Committee; Laura Carnell, Associate
+         President; Wilmer Krusen, Vice President of the University and Philadelphia's Director of
+         Health."</dcterms:description>
+      <dcterms:description>This is a test record from the PDCP Metadata Team. Please do not
+         reference this item for research. Thank you.</dcterms:description>
+      <dcterms:description>Test local rights and DPLA rights.</dcterms:description>
+      <dcterms:date>1924-01-23</dcterms:date>
+      <dcterms:subject>Conwell, Russell Herman, 1843-1925</dcterms:subject>
+      <dcterms:subject> Penniman, Josiah Harmar, 1868-1941</dcterms:subject>
+      <dcterms:subject> Tomkins, Floyd W. (Floyd Williams), 1850-1932</dcterms:subject>
+      <dcterms:subject> Beury, Charles Ezra, 1879-1953</dcterms:subject>
+      <dcterms:subject> Carnell, Laura, 1867-1929</dcterms:subject>
+      <dcterms:subject>Krusen, Wilmer</dcterms:subject>
+      <dcterms:type>Image</dcterms:type>
+      <dcterms:rights>This material is subject to copyright law and is made available for private
+         study, scholarship, and research purposes only. For access to the original or a high
+         resolution reproduction, and for permission to publish, please contact Temple University
+         Libraries, Special Collections Research Center, scrc@temple.edu,
+         215-204-8257.</dcterms:rights>
+      <schema:fileFormat>image/jp2;</schema:fileFormat>
+      <dcterms:identifier>valid3</dcterms:identifier>
+      <edm:isShownAt>http://digital.library.temple.edu/cdm/ref/collection/p16002coll25/id/35</edm:isShownAt>
+      <edm:dataProvider>Temple University Libraries</edm:dataProvider>
+      <edm:provider>PA Digital</edm:provider>
+   </oai_dc:dc>
+</metadata>

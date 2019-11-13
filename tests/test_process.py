@@ -1,6 +1,7 @@
 """Tests suite for tulflow harvest (Functions for harvesting OAI in Airflow Tasks)."""
 import unittest
 import boto3
+import httpretty
 from lxml import etree
 from moto import mock_s3
 from tulflow import process
@@ -105,6 +106,36 @@ class TestDataProcessInteractions(unittest.TestCase):
         test_run = process.generate_bw_parent_field("FAKE_PARENT_ID")
         self.assertEqual(etree.tostring(test_run), desired_xml)
 
+    @httpretty.activate
+    def test_get_github_content_exists(self):
+        """Test getting existing file from GitHub."""
+        httpretty.register_uri(
+            httpretty.GET,
+            "https://raw.github.com/tulibraries/aggregator_mdx/master/transforms/temple.xsl",
+            body=open("tests/fixtures/temple.xsl").read()
+        )
+        repository = "tulibraries/aggregator_mdx"
+        filename = "transforms/temple.xsl"
+
+        test_run = process.get_github_content(repository, filename)
+        self.assertEqual(test_run, open("tests/fixtures/temple.xsl").read())
+
+    @httpretty.activate
+    def test_get_github_content_missing(self):
+        """Test getting missing file from GitHub & return appropriate error."""
+        httpretty.register_uri(
+            httpretty.GET,
+            "https://raw.github.com/tulibraries/aggregator_mdx/master/transforms/temple-fake.xsl",
+            status=404
+        )
+        repository = "tulibraries/aggregator_mdx"
+        filename = "transforms/temple-fake.xsl"
+
+        with self.assertLogs() as log:
+            with self.assertRaises(SystemExit) as pytest_wrapped_e:
+                process.get_github_content(repository, filename)
+        self.assertEqual(pytest_wrapped_e.exception.code, 1)
+        self.assertIn("ERROR:root:404 Client Error: Not Found for url: https://raw.github.com/tulibraries/aggregator_mdx/master/transforms/temple-fake.xsl", log.output)
 
 class TestS3ProcessInteractions(unittest.TestCase):
     """Test Class for S3 data processing functions."""

@@ -1,10 +1,12 @@
 """Generic Data (primarily XML) Processing Functions, Abstracted for Reuse."""
 import io
 import logging
+import sys
 import tarfile
 from lxml import etree
 from botocore.exceptions import ClientError
 import boto3
+import requests
 
 NS = {
     "marc21": "http://www.loc.gov/MARC21/slim",
@@ -69,6 +71,20 @@ def generate_bw_parent_field(parent_id):
     subfield.text = parent_id
     return new_field
 
+def get_github_content(repository, filename, branch="master"):
+    """Get the contents of GitHub file."""
+    raw_url = "https://raw.github.com/{repo}/{branch}/{filename}".format(
+        repo=repository,
+        branch=branch,
+        filename=filename
+    )
+    try:
+        resp = requests.get(raw_url)
+        resp.raise_for_status()
+        return resp.text
+    except requests.exceptions.RequestException as error:
+        logging.error(error)
+        sys.exit(1)
 
 def remove_s3_object(bucket, key, access_id, access_secret):
     """Removes an S3 object."""
@@ -112,8 +128,9 @@ def list_s3_content(bucket, access_id, access_secret, prefix=""):
     try:
         response = s3_client.list_objects(Bucket=bucket, Prefix=prefix)
         objects = []
-        for key in response['Contents']:
-            objects.append(key['Key'])
+        if response.get("Contents"):
+            for key in response['Contents']:
+                objects.append(key['Key'])
         return objects
     except ClientError as error:
         LOGGER.error(error)

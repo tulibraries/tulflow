@@ -118,7 +118,7 @@ class TestDataProcessInteractions(unittest.TestCase):
         filename = "transforms/temple.xsl"
 
         test_run = process.get_github_content(repository, filename)
-        self.assertEqual(test_run, open("tests/fixtures/temple.xsl").read())
+        self.assertEqual(test_run, open("tests/fixtures/temple.xsl", "rb").read())
 
     @httpretty.activate
     def test_get_github_content_missing(self):

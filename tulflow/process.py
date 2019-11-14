@@ -81,7 +81,7 @@ def get_github_content(repository, filename, branch="master"):
     try:
         resp = requests.get(raw_url)
         resp.raise_for_status()
-        return resp.text
+        return resp.content
     except requests.exceptions.RequestException as error:
         logging.error(error)
         sys.exit(1)

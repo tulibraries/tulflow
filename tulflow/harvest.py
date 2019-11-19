@@ -20,13 +20,13 @@ NS = {
 
 def oai_to_s3(**kwargs):
     """Wrapper function for using OAI Harvest, Default Processor, and S3 Writer."""
-    kwargs['harvest_params'] = {
-        'metadataPrefix': kwargs.get('metadata_prefix'),
-        'from': kwargs.get('harvest_from_date'),
-        'until': kwargs.get('harvest_until_date')
+    kwargs["harvest_params"] = {
+        "metadataPrefix": kwargs.get("metadata_prefix"),
+        "from": kwargs.get("harvest_from_date"),
+        "until": kwargs.get("harvest_until_date")
     }
-    dag_id = kwargs.get('dag').dag_id
-    dag_start_date = kwargs.get('timestamp')
+    dag_id = kwargs.get("dag").dag_id
+    dag_start_date = kwargs.get("timestamp")
 
     oai_sets = generate_oai_sets(**kwargs)
     if oai_sets:
@@ -70,8 +70,8 @@ def generate_oai_sets(**kwargs):
 
 def harvest_oai(**kwargs):
     """Create OAI ListRecords Iterator for Harvesting Data."""
-    oai_endpoint = kwargs.get('oai_endpoint')
-    harvest_params = kwargs.get('harvest_params')
+    oai_endpoint = kwargs.get("oai_endpoint")
+    harvest_params = kwargs.get("harvest_params")
     logging.info("Harvesting from %s", oai_endpoint)
     logging.info("Harvesting %s", harvest_params)
     request = Sickle(oai_endpoint)
@@ -81,37 +81,43 @@ def harvest_oai(**kwargs):
 
 def process_xml(data, writer, outdir, **kwargs):
     """Process & Write XML data to S3."""
-    parser = kwargs.get('parser')
-    records_per_file = kwargs.get('records_per_file')
+    parser = kwargs.get("parser")
+    records_per_file = kwargs.get("records_per_file")
     if not records_per_file:
         records_per_file = 1000
     count = deleted_count = 0
     collection = etree.Element("collection")
+    collection.attrib["dag-run"] = kwargs.get("dag").dag_id
+    collection.attrib["dag-timestamp"] = kwargs.get("timestamp")
     deleted_collection = etree.Element("collection")
+    deleted_collection.attrib["airflow-run-dag"] = kwargs.get("dag").dag_id
+    deleted_collection.attrib["airflow-run-timestamp"] = kwargs.get("timestamp")
     logging.info("Processing XML")
 
     for record in data:
+        record_id = record.header.identifier
         record = record.xml
+        record.attrib["airflow-record-id"] = record_id
         if parser:
             record = parser(record, **kwargs)
         if record.xpath(".//oai:header[@status='deleted']", namespaces=NS):
-            logging.info("Deleted record %s", record.xpath(".//oai:identifier", namespaces=NS)[0].text)
+            logging.info("Deleted record %s", record_id)
             deleted_count += 1
             deleted_collection.append(record)
             if deleted_count % int(records_per_file) == 0:
-                string = etree.tostring(deleted_collection).decode('utf-8')
+                string = etree.tostring(deleted_collection).decode("utf-8")
                 writer(string, outdir + "/deleted", **kwargs)
                 deleted_collection = etree.Element("collection")
         else:
-            logging.info("Updated record %s", record.xpath(".//oai:identifier", namespaces=NS)[0].text)
+            logging.info("Updated record %s", record_id)
             count += 1
             collection.append(record)
             if count % int(records_per_file) == 0:
-                string = etree.tostring(collection).decode('utf-8')
+                string = etree.tostring(collection).decode("utf-8")
                 writer(string, outdir + "/new-updated", **kwargs)
                 collection = etree.Element("collection")
-    writer(etree.tostring(collection).decode('utf-8'), outdir + "/new-updated", **kwargs)
-    writer(etree.tostring(deleted_collection).decode('utf-8'), outdir + "/deleted", **kwargs)
+    writer(etree.tostring(collection).decode("utf-8"), outdir + "/new-updated", **kwargs)
+    writer(etree.tostring(deleted_collection).decode("utf-8"), outdir + "/deleted", **kwargs)
     logging.info("OAI Records Harvested & Processed: %s", count)
     logging.info("OAI Records Harvest & Marked for Deletion: %s", deleted_count)
 
@@ -128,7 +134,7 @@ def perform_xml_lookup(oai_record, **kwargs):
     for record in oai_record.xpath(".//marc21:record", namespaces=NS):
         record_id = process.get_record_001(record)
         logging.info("Reading in Record %s", record_id)
-        parent_txt = lookup_csv.loc[lookup_csv.child_id == int(record_id), 'parent_xml'].values
+        parent_txt = lookup_csv.loc[lookup_csv.child_id == int(record_id), "parent_xml"].values
         if len(set(parent_txt)) >= 1:
             logging.info("Child XML record found %s", record_id)
             for parent_node in parent_txt[0].split("||"):
@@ -145,19 +151,19 @@ def dag_write_string_to_s3(string, prefix, **kwargs):
     """Push a string in memory to s3 with a defined prefix"""
     access_id = kwargs.get("access_id")
     access_secret = kwargs.get("access_secret")
-    bucket_name = kwargs.get('bucket_name')
+    bucket_name = kwargs.get("bucket_name")
     logging.info("Writing to S3 Bucket %s", bucket_name)
 
-    our_hash = hashlib.md5(string.encode('utf-8')).hexdigest()
+    our_hash = hashlib.md5(string.encode("utf-8")).hexdigest()
     filename = "{}/{}".format(prefix, our_hash)
     process.generate_s3_object(string, bucket_name, filename, access_id, access_secret)
 
 
 def write_log(string, prefix, **kwargs):
     """Write the data to logging info."""
-    prefix = kwargs.get('prefix')
+    prefix = kwargs.get("prefix")
     logging.info(prefix)
-    string = kwargs.get('string')
+    string = kwargs.get("string")
     logging.info(string)
 
 

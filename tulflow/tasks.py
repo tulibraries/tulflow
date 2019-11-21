@@ -4,6 +4,8 @@ import pprint
 from airflow.hooks.base_hook import BaseHook
 from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
 from airflow.operators.http_operator import SimpleHttpOperator
+from airflow.operators.python_operator import PythonOperator
+from tulflow.solr_api_utils import SolrApiUtils
 
 PP = pprint.PrettyPrinter(indent=4)
 
@@ -89,6 +91,23 @@ def swap_sc_alias(dag, sc_conn_id, sc_coll_name, sc_configset_name):
 
     return task_instance
 
+def refresh_sc_collection_for_alias(dag, sc_conn, sc_coll_name, sc_alias, configset):
+    """Removes a collection from an alias, deletes the collection, creates a new collection, and adds it to the alias"""
+    task_instance = PythonOperator(
+        task_id="refresh_sc_collection_for_alias",
+        python_callable=SolrApiUtils.remove_and_recreate_collection_from_alias,
+        op_kwargs={
+          "collection": sc_coll_name,
+          "configset": configset,
+          "alias": sc_alias,
+          "solr_url": sc_conn.host,
+          "solr_port": sc_conn.port,
+          "solr_auth_user": sc_conn.login or "",
+          "solr_auth_pass": sc_conn.password or "",
+        },
+        dag=dag
+    )
+    return task_instance
 
 def get_solr_url(conn, core):
     """  Generates a solr url from  passed in connection and core.

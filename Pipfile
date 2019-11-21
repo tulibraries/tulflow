@@ -12,6 +12,7 @@ httpretty = "*"
 lxml = "*"
 boto3 = "*"
 moto = "*"
+requests-mock = "*"
 
 [packages]
 setuptools = "*"

@@ -7,8 +7,8 @@ from tulflow import process, validate
 import logging
 from mock import patch
 
-class TestSchematronValidation(unittest.TestCase):
-    """Test Class for functions that validating & filtering XML with Schematron."""
+class TestSchematronFiltering(unittest.TestCase):
+    """Test Class for functions that filtering XML with Schematron."""
     maxDiff = None
     kwargs = {
         "source_prefix": "dpla_test/transformed",
@@ -47,13 +47,17 @@ class TestSchematronValidation(unittest.TestCase):
         with self.assertLogs() as log:
             validate.filter_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-valid.xml", log.output)
-        test_valid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix"))
+        test_valid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "/")
         test_valid_objects_ar = [object.get("Key") for object in test_valid_objects["Contents"]]
         self.assertEqual(test_valid_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
         self.assertEqual(test_valid_objects_ar, ["dpla_test/transformed-filtered/sch-oai-valid.xml"])
-        test_invalid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "-invalid")
+
+        test_invalid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "-invalid.csv")
+        test_invalid_objects_ar = [object.get("Key") for object in test_invalid_objects["Contents"]]
         self.assertEqual(test_invalid_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
-        self.assertEqual(test_invalid_objects.get("Contents"), None)
+        self.assertEqual(test_invalid_objects_ar, ["dpla_test/transformed-filtered-invalid.csv"])
+        test_invalid_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-invalid.csv")
+        self.assertEqual(test_invalid_content["Body"].read(), b"""id,report,record,source_file\r\n""")
 
 
     @mock_s3
@@ -83,15 +87,9 @@ class TestSchematronValidation(unittest.TestCase):
         with self.assertLogs() as log:
             validate.filter_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-invalid.xml", log.output)
-        self.assertIn("ERROR:root:Invalid record found:", log.output[1])
-        self.assertIn("<dcterms:identifier>invalid-missingtitle</dcterms:identifier>", log.output[1])
-        self.assertIn("ERROR:root:Schematron Report:", log.output[2])
-        self.assertIn("<svrl:text>There must be a title</svrl:text>", log.output[2])
-        self.assertIn("ERROR:root:Invalid record found:", log.output[3])
-        self.assertIn("<dcterms:identifier>invalid-missingrights</dcterms:identifier>", log.output[3])
-        self.assertIn("ERROR:root:Schematron Report:", log.output[4])
-        self.assertIn("<svrl:text>There must be a rights statement</svrl:text>", log.output[4])
-        self.assertEqual(len(log.output), 11)
+        self.assertIn("ERROR:root:Invalid record found: invalid-missingtitle", log.output[1])
+        self.assertIn("ERROR:root:Invalid record found: invalid-missingrights", log.output[2])
+        self.assertEqual(len(log.output), 7)
         test_valid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "/")
         test_valid_objects_ar = [object.get("Key") for object in test_valid_objects["Contents"]]
         test_valid_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered/sch-oai-invalid.xml")
@@ -99,16 +97,14 @@ class TestSchematronValidation(unittest.TestCase):
         self.assertEqual(test_valid_objects_ar, ["dpla_test/transformed-filtered/sch-oai-invalid.xml"])
         self.assertEqual(test_valid_content["Body"].read(), b"""<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dpla="http://dp.la/about/map/" xmlns:schema="http://schema.org" xmlns:oai="http://www.openarchives.org/OAI/2.0/" xmlns:oai_qdc="http://worldcat.org/xmlschemas/qdc-1.0/">\n   </metadata>""")
 
-        invalid_prefix = self.kwargs.get("destination_prefix") + "-invalid/"
+        invalid_prefix = self.kwargs.get("destination_prefix") + "-invalid.csv"
         test_invalid_objects = conn.list_objects(Bucket=bucket, Prefix=invalid_prefix)
-        test_invalid_objects_ar = [object.get("Key") for object in test_invalid_objects["Contents"]]
-        test_invalid_content_xml = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-invalid/sch-oai-invalid.xml1")
-        test_invalid_content_report = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-invalid/sch-oai-invalid.xml1-report")
         self.assertEqual(test_invalid_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
-        self.assertIn("dpla_test/transformed-filtered-invalid/sch-oai-invalid.xml1", test_invalid_objects_ar)
-        self.assertEqual(len(test_invalid_objects_ar), 10)
-        self.assertIn(b"<dcterms:identifier>invalid-missingtitle</dcterms:identifier>", test_invalid_content_xml["Body"].read())
-        self.assertIn(b"<svrl:text>There must be a rights statement</svrl:text>", test_invalid_content_report["Body"].read())
+        test_invalid_objects_ar = [object.get("Key") for object in test_invalid_objects["Contents"]]
+        self.assertEqual(len(test_invalid_objects_ar), 1)
+        self.assertIn("dpla_test/transformed-filtered-invalid.csv", test_invalid_objects_ar)
+        test_invalid_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-invalid.csv")["Body"].read()
+        self.assertIn(b"""id,report,record,source_file\r\n""", test_invalid_content)
 
 
     @mock_s3
@@ -138,45 +134,29 @@ class TestSchematronValidation(unittest.TestCase):
         with self.assertLogs() as log:
             validate.filter_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-mix.xml", log.output)
-        self.assertIn("ERROR:root:Invalid record found:", log.output[1])
-        self.assertIn("<dcterms:identifier>invalid-missingtitle</dcterms:identifier>", log.output[1])
-        self.assertIn("ERROR:root:Schematron Report:", log.output[2])
-        self.assertIn("<svrl:text>There must be a title</svrl:text>", log.output[2])
-        self.assertIn("ERROR:root:Invalid record found:", log.output[3])
-        self.assertIn("<dcterms:identifier>invalid-missingrights</dcterms:identifier>", log.output[3])
-        self.assertIn("ERROR:root:Schematron Report:", log.output[4])
-        self.assertIn("<svrl:text>There must be a rights statement</svrl:text>", log.output[4])
-        self.assertEqual(len(log.output), 11)
+        self.assertIn("ERROR:root:Invalid record found: invalid-missingtitle", log.output[1])
+        self.assertIn("ERROR:root:Invalid record found: invalid-missingrights", log.output[2])
+        self.assertEqual(len(log.output), 7)
 
         test_valid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "/")
         test_valid_objects_ar = [object.get("Key") for object in test_valid_objects["Contents"]]
         test_valid_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered/sch-oai-mix.xml")["Body"].read()
         self.assertEqual(test_valid_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
         self.assertEqual(test_valid_objects_ar, ["dpla_test/transformed-filtered/sch-oai-mix.xml"])
-        self.assertIn(b"<oai_dc:dc>", test_valid_content)
+        self.assertIn(b'<oai_dc:dc airflow-record-id="valid">', test_valid_content)
         self.assertIn(b"<dcterms:identifier>valid</dcterms:identifier>", test_valid_content)
         self.assertIn(b"<dcterms:identifier>valid2</dcterms:identifier>", test_valid_content)
         self.assertIn(b"<dcterms:identifier>valid3</dcterms:identifier>", test_valid_content)
 
-        invalid_prefix = self.kwargs.get("destination_prefix") + "-invalid/"
+        invalid_prefix = self.kwargs.get("destination_prefix") + "-invalid.csv"
         test_invalid_objects = conn.list_objects(Bucket=bucket, Prefix=invalid_prefix)
-        test_invalid_objects_ar = [object.get("Key") for object in test_invalid_objects["Contents"]]
-        test_invalid_content_xml = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-invalid/sch-oai-mix.xml2")
-        test_invalid_content_report = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-invalid/sch-oai-mix.xml2-report")
         self.assertEqual(test_invalid_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
-        self.assertIn("dpla_test/transformed-filtered-invalid/sch-oai-mix.xml2", test_invalid_objects_ar)
-        self.assertIn("dpla_test/transformed-filtered-invalid/sch-oai-mix.xml2-report", test_invalid_objects_ar)
-        self.assertIn("dpla_test/transformed-filtered-invalid/sch-oai-mix.xml3", test_invalid_objects_ar)
-        self.assertIn("dpla_test/transformed-filtered-invalid/sch-oai-mix.xml3-report", test_invalid_objects_ar)
-        self.assertIn("dpla_test/transformed-filtered-invalid/sch-oai-mix.xml4", test_invalid_objects_ar)
-        self.assertIn("dpla_test/transformed-filtered-invalid/sch-oai-mix.xml4-report", test_invalid_objects_ar)
-        self.assertIn("dpla_test/transformed-filtered-invalid/sch-oai-mix.xml5", test_invalid_objects_ar)
-        self.assertIn("dpla_test/transformed-filtered-invalid/sch-oai-mix.xml5-report", test_invalid_objects_ar)
-        self.assertIn("dpla_test/transformed-filtered-invalid/sch-oai-mix.xml6", test_invalid_objects_ar)
-        self.assertIn("dpla_test/transformed-filtered-invalid/sch-oai-mix.xml6-report", test_invalid_objects_ar)
-        self.assertEqual(len(test_invalid_objects_ar), 10)
-        self.assertIn(b"<dcterms:identifier>invalid-missingtitle</dcterms:identifier>", test_invalid_content_xml["Body"].read())
-        self.assertIn(b"<svrl:text>There must be a rights statement</svrl:text>", test_invalid_content_report["Body"].read())
+        test_invalid_objects_ar = [object.get("Key") for object in test_invalid_objects["Contents"]]
+        self.assertIn("dpla_test/transformed-filtered-invalid.csv", test_invalid_objects_ar)
+        self.assertEqual(len(test_invalid_objects_ar), 1)
+        test_invalid_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-invalid.csv")["Body"].read()
+        self.assertIn(b"<dcterms:identifier>invalid-missingtitle</dcterms:identifier>", test_invalid_content)
+        self.assertIn(b"<svrl:text>There must be a rights statement</svrl:text>", test_invalid_content)
 
 
     @mock_s3
@@ -205,7 +185,8 @@ class TestSchematronValidation(unittest.TestCase):
         # run tests
         with self.assertLogs() as log:
             validate.filter_s3_schematron(**self.kwargs)
-        self.assertEqual(["INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-empty.xml"], log.output)
+        self.assertIn("INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-empty.xml", log.output)
+        self.assertIn("INFO:root:Invalid Records report: https://tulib-airflow-test.s3.amazonaws.com/dpla_test/transformed-filtered-invalid.csv", log.output)
         test_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "/")
         test_objects_ar = [object.get("Key") for object in test_objects["Contents"]]
         test_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered/sch-oai-empty.xml")

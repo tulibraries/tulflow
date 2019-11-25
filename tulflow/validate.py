@@ -79,7 +79,7 @@ def report_s3_schematron(**kwargs):
 
     # Iterate through S3 Files, Validate, & Save Report to CSV
     for s3_key in process.list_s3_content(bucket, access_id, access_secret, source_prefix):
-        logging.info("Validating & Filtering File: %s", s3_key)
+        logging.info("Validating & Reporting On File: %s", s3_key)
         s3_content = process.get_s3_content(bucket, s3_key, access_id, access_secret)
         s3_xml = etree.fromstring(s3_content)
         for record in s3_xml.iterchildren():

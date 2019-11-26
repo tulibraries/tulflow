@@ -11,6 +11,7 @@ def filter_s3_schematron(**kwargs):
     """Wrapper function for using S3 Retrieval, Schematron Filtering, and S3 Writer."""
     source_prefix = kwargs.get("source_prefix")
     dest_prefix = kwargs.get("destination_prefix")
+    report_prefix = kwargs.get("report_prefix")
     bucket = kwargs.get("bucket")
     schematron_file = kwargs.get("schematron_filename")
     access_id = kwargs.get("access_id")
@@ -54,7 +55,7 @@ def filter_s3_schematron(**kwargs):
         filename = s3_key.replace(source_prefix, dest_prefix)
         updated_s3_xml = etree.tostring(s3_xml)
         process.generate_s3_object(updated_s3_xml, bucket, filename, access_id, access_secret)
-    invalid_filename = dest_prefix + "-invalid.csv"
+    invalid_filename = report_prefix + "-invalid.csv"
     logging.info("Invalid Records report: https://%s.s3.amazonaws.com/%s", bucket, invalid_filename)
     process.generate_s3_object(csv_in_mem.getvalue(), bucket, invalid_filename, access_id, access_secret)
 

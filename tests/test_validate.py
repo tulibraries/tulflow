@@ -13,6 +13,7 @@ class TestSchematronFiltering(unittest.TestCase):
     kwargs = {
         "source_prefix": "dpla_test/transformed",
         "destination_prefix": "dpla_test/transformed-filtered",
+        "report_prefix": "dpla_test/harvest_filter",
         "bucket": "tulib-airflow-test",
         "schematron_filename": "validations/padigital_reqd_fields.sch",
         "access_id": "kittens",
@@ -51,11 +52,11 @@ class TestSchematronFiltering(unittest.TestCase):
         self.assertEqual(test_valid_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
         self.assertEqual(test_valid_objects_ar, ["dpla_test/transformed-filtered/sch-oai-valid.xml"])
 
-        test_invalid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "-invalid.csv")
+        test_invalid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("report_prefix") + "-invalid.csv")
         test_invalid_objects_ar = [object.get("Key") for object in test_invalid_objects["Contents"]]
         self.assertEqual(test_invalid_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
-        self.assertEqual(test_invalid_objects_ar, ["dpla_test/transformed-filtered-invalid.csv"])
-        test_invalid_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-invalid.csv")
+        self.assertEqual(test_invalid_objects_ar, ["dpla_test/harvest_filter-invalid.csv"])
+        test_invalid_content = conn.get_object(Bucket=bucket, Key="dpla_test/harvest_filter-invalid.csv")
         self.assertEqual(test_invalid_content["Body"].read(), b"""id,report,record,source_file\r\n""")
 
 
@@ -96,13 +97,13 @@ class TestSchematronFiltering(unittest.TestCase):
         self.assertEqual(test_valid_objects_ar, ["dpla_test/transformed-filtered/sch-oai-invalid.xml"])
         self.assertEqual(test_valid_content["Body"].read(), b"""<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dpla="http://dp.la/about/map/" xmlns:schema="http://schema.org" xmlns:oai="http://www.openarchives.org/OAI/2.0/" xmlns:oai_qdc="http://worldcat.org/xmlschemas/qdc-1.0/">\n   </metadata>""")
 
-        invalid_prefix = self.kwargs.get("destination_prefix") + "-invalid.csv"
+        invalid_prefix = self.kwargs.get("report_prefix") + "-invalid.csv"
         test_invalid_objects = conn.list_objects(Bucket=bucket, Prefix=invalid_prefix)
         self.assertEqual(test_invalid_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
         test_invalid_objects_ar = [object.get("Key") for object in test_invalid_objects["Contents"]]
         self.assertEqual(len(test_invalid_objects_ar), 1)
-        self.assertIn("dpla_test/transformed-filtered-invalid.csv", test_invalid_objects_ar)
-        test_invalid_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-invalid.csv")["Body"].read()
+        self.assertIn("dpla_test/harvest_filter-invalid.csv", test_invalid_objects_ar)
+        test_invalid_content = conn.get_object(Bucket=bucket, Key="dpla_test/harvest_filter-invalid.csv")["Body"].read()
         self.assertIn(b"""id,report,record,source_file\r\n""", test_invalid_content)
 
 
@@ -147,13 +148,13 @@ class TestSchematronFiltering(unittest.TestCase):
         self.assertIn(b"<dcterms:identifier>valid2</dcterms:identifier>", test_valid_content)
         self.assertIn(b"<dcterms:identifier>valid3</dcterms:identifier>", test_valid_content)
 
-        invalid_prefix = self.kwargs.get("destination_prefix") + "-invalid.csv"
+        invalid_prefix = self.kwargs.get("report_prefix") + "-invalid.csv"
         test_invalid_objects = conn.list_objects(Bucket=bucket, Prefix=invalid_prefix)
         self.assertEqual(test_invalid_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
         test_invalid_objects_ar = [object.get("Key") for object in test_invalid_objects["Contents"]]
-        self.assertIn("dpla_test/transformed-filtered-invalid.csv", test_invalid_objects_ar)
+        self.assertIn("dpla_test/harvest_filter-invalid.csv", test_invalid_objects_ar)
         self.assertEqual(len(test_invalid_objects_ar), 1)
-        test_invalid_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-invalid.csv")["Body"].read()
+        test_invalid_content = conn.get_object(Bucket=bucket, Key="dpla_test/harvest_filter-invalid.csv")["Body"].read()
         self.assertIn(b"<dcterms:identifier>invalid-missingtitle</dcterms:identifier>", test_invalid_content)
         self.assertIn(b"<svrl:text>There must be a rights statement</svrl:text>", test_invalid_content)
 
@@ -185,7 +186,7 @@ class TestSchematronFiltering(unittest.TestCase):
         with self.assertLogs() as log:
             validate.filter_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-empty.xml", log.output)
-        self.assertIn("INFO:root:Invalid Records report: https://tulib-airflow-test.s3.amazonaws.com/dpla_test/transformed-filtered-invalid.csv", log.output)
+        self.assertIn("INFO:root:Invalid Records report: https://tulib-airflow-test.s3.amazonaws.com/dpla_test/harvest_filter-invalid.csv", log.output)
         test_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "/")
         test_objects_ar = [object.get("Key") for object in test_objects["Contents"]]
         test_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered/sch-oai-empty.xml")

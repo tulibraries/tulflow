@@ -31,7 +31,7 @@ def transform_s3_xsl(**kwargs):
     transformed.attrib["dag-timestamp"] = kwargs.get("timestamp", "no-timestamp-provided")
     xsl = "https://raw.github.com/{repo}/{branch}/{filename}".format(
         repo=kwargs.get("xsl_repository", "tulibraries/aggregator_mdx"),
-        branch=kwargs.get("xsl_repository", "master"),
+        branch=kwargs.get("xsl_branch", "master"),
         filename=kwargs.get("xsl_filename")
     )
 

@@ -92,18 +92,18 @@ def swap_sc_alias(dag, sc_conn_id, sc_coll_name, sc_configset_name):
     return task_instance
 
 def refresh_sc_collection_for_alias(dag, sc_conn, sc_coll_name, sc_alias, configset):
-    """Removes a collection from an alias, deletes the collection, creates a new collection, and adds it to the alias"""
+    """Removes collection from alias, deletes collection, creates new collection & adds to alias"""
     task_instance = PythonOperator(
         task_id="refresh_sc_collection_for_alias",
         python_callable=SolrApiUtils.remove_and_recreate_collection_from_alias,
         op_kwargs={
-          "collection": sc_coll_name,
-          "configset": configset,
-          "alias": sc_alias,
-          "solr_url": sc_conn.host,
-          "solr_port": sc_conn.port,
-          "solr_auth_user": sc_conn.login or "",
-          "solr_auth_pass": sc_conn.password or "",
+            "collection": sc_coll_name,
+            "configset": configset,
+            "alias": sc_alias,
+            "solr_url": sc_conn.host,
+            "solr_port": sc_conn.port,
+            "solr_auth_user": sc_conn.login or "",
+            "solr_auth_pass": sc_conn.password or "",
         },
         dag=dag
     )

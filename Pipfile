@@ -6,11 +6,8 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 pylint = "*"
-apache-airflow = ">=1.10.3"
 nose = "*"
 httpretty = "*"
-lxml = "*"
-boto3 = "*"
 moto = "*"
 requests-mock = "*"
 
@@ -20,9 +17,9 @@ wheel = "*"
 sickle = "*"
 pexpect = "*"
 xmltodict = "*"
-apache-airflow = "*"
+apache-airflow = ">=1.10.3"
 boto3 = "*"
 lxml = "*"
 
 [requires]
-python_version = "3.6.6"
+python_version = "3.7.2"

@@ -66,8 +66,8 @@ class SolrApiUtils():
         else:
             logging.info(f"Collection {collection} did not exist. Continuing without error")
 
-    def create_collection(self, collection, configset="_default" ,numShards=1, replicationFactor=1, maxShardsPerNode=1 ):
-        path = f"/solr/admin/collections?action=CREATE&name={collection}&collection.configSet=configset&numShards=1&replicationFactor=1&maxShardsPerNode=1"
+    def create_collection(self, collection, configset="_default", numShards=1, replicationFactor=1, maxShardsPerNode=1 ):
+        path = f"/solr/admin/collections?action=CREATE&name={collection}&collection.configSet={configset}&numShards={numShards}&replicationFactor={replicationFactor}&maxShardsPerNode={maxShardsPerNode}"
         response = self.get_from_solr_api(path)
         try:
             response.raise_for_status()

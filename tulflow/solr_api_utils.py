@@ -75,7 +75,7 @@ class SolrApiUtils():
 
     def create_collection(self, collection, configset="_default", numShards=1, replicationFactor=1, maxShardsPerNode=1):
         """Create a SolrCloud collection (not through Airflow Task; that is in tasks.py)"""
-        path = f"/solr/admin/collections?action=CREATE&name={collection}&collection.configSet={configset}&numShards={numShards}&replicationFactor={replicationFactor}&maxShardsPerNode={maxShardsPerNode}"
+        path = f"/solr/admin/collections?action=CREATE&name={collection}&collection.configName={configset}&numShards={numShards}&replicationFactor={replicationFactor}&maxShardsPerNode={maxShardsPerNode}"
         response = self.get_from_solr_api(path)
         try:
             response.raise_for_status()

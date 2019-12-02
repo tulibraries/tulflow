@@ -1,9 +1,9 @@
 """Tests suite for tulflow harvest (Functions for harvesting OAI in Airflow Tasks)."""
 import json
 from re import compile as re_compile
+import unittest
 import requests_mock
 from tulflow.solr_api_utils import SolrApiUtils
-import unittest
 from unittest.mock import Mock, patch
 
 
@@ -24,9 +24,9 @@ class TestSolrApiUtils(unittest.TestCase):
     @requests_mock.mock()
     def test_get_collections(self, rm):
         response = json.dumps({
-          "responseHeader": {"status":0,"QTime":1},
-          "collections": ["test_collection1", "test_collection2"]
-          })
+            "responseHeader": {"status":0, "QTime":1},
+            "collections": ["test_collection1", "test_collection2"]
+        })
         rm.get(self.matcher, text=response)
         collections = self.solrcloud.get_collections()
         self.assertEqual(collections, ["test_collection1", "test_collection2"])
@@ -34,21 +34,22 @@ class TestSolrApiUtils(unittest.TestCase):
     @requests_mock.mock()
     def test_get_aliases(self, rm):
         response = json.dumps({
-          "responseHeader": {"status":0,"QTime":1},
-          "aliases": {
-            "test_alias1": "test_coll1,test_coll2",
-            "test_alias2": "test_coll3,test_coll4"
+            "responseHeader": {"status":0, "QTime":1},
+            "aliases": {
+                "test_alias1": "test_coll1,test_coll2",
+                "test_alias2": "test_coll3,test_coll4"
             }
-          })
+        })
         rm.get(self.matcher, text=response)
         aliases = self.solrcloud.get_aliases()
         self.assertEqual(aliases, {
-          "test_alias1": "test_coll1,test_coll2",
-          "test_alias2": "test_coll3,test_coll4"})
+            "test_alias1": "test_coll1,test_coll2",
+            "test_alias2": "test_coll3,test_coll4"
+        })
 
     @patch('tulflow.solr_api_utils.SolrApiUtils.get_configsets')
     def test_most_recent_configsets(self, mock_get_configsets):
-        mock_get_configsets.return_value = ['tul_cob-catalog-9','tul_cob-catalog-10', 'tul_cob-web-2','_default', 'tul_cob-web-3']
+        mock_get_configsets.return_value = ['tul_cob-catalog-9', 'tul_cob-catalog-10', 'tul_cob-web-2', '_default', 'tul_cob-web-3']
         most_recent = self.solrcloud.most_recent_configsets()
         self.assertEqual(most_recent, ["tul_cob-catalog-10", "tul_cob-web-3"])
 
@@ -74,13 +75,13 @@ class TestSolrApiUtils(unittest.TestCase):
     @patch('tulflow.solr_api_utils.SolrApiUtils.get_alias_collections')
     def test_remove_collection_from_alias(self, mock_get_alias_collections, mock_create_or_modify_alias_and_set_collections):
         alias = "funcake-oai"
-        mock_get_alias_collections.return_value = ['funcake-villanova','funcake-temple']
+        mock_get_alias_collections.return_value = ['funcake-villanova', 'funcake-temple']
         self.solrcloud.remove_collection_from_alias('funcake-villanova', alias)
         mock_create_or_modify_alias_and_set_collections.assert_called_with(alias=alias, collections=['funcake-temple'])
         # make sure we don't error out of the collection is not part of the alias already
         try:
             self.solrcloud.remove_collection_from_alias('funcake-not-present', alias)
-        except Exception:
+        except Exception as e:
             self.fail(f"Removing a collection not present in the alias raised an error: {e}")
 
 
@@ -90,7 +91,7 @@ class TestSolrApiUtils(unittest.TestCase):
         alias = "funcake-oai"
         mock_get_alias_collections.return_value = ['funcake-temple']
         self.solrcloud.add_collection_to_alias('funcake-villanova', alias)
-        mock_create_or_modify_alias_and_set_collections.assert_called_with(alias=alias, collections=['funcake-temple','funcake-villanova'])
+        mock_create_or_modify_alias_and_set_collections.assert_called_with(alias=alias, collections=['funcake-temple', 'funcake-villanova'])
 
 
     @patch('tulflow.solr_api_utils.SolrApiUtils.remove_collection_from_alias')
@@ -109,12 +110,11 @@ class TestSolrApiUtils(unittest.TestCase):
 
     @patch('tulflow.solr_api_utils.SolrApiUtils.get_from_solr_api')
     def test_create_collection(self, mock_get_from_solr_api):
-        collection="test_collection"
-        configset="test_configset"
-        numShards=5
-        replicationFactor=5
-        maxShardsPerNode=2
-        self.solrcloud.create_collection(collection=collection, configset=configset,numShards=numShards, replicationFactor=replicationFactor, maxShardsPerNode=maxShardsPerNode)
-        path = f"/solr/admin/collections?action=CREATE&name={collection}&collection.configSet={configset}&numShards={numShards}&replicationFactor={replicationFactor}&maxShardsPerNode={maxShardsPerNode}"
+        collection = "test_collection"
+        configset = "test_configset"
+        numShards = 5
+        replicationFactor = 5
+        maxShardsPerNode = 2
+        self.solrcloud.create_collection(collection=collection, configset=configset, numShards=numShards, replicationFactor=replicationFactor, maxShardsPerNode=maxShardsPerNode)
+        path = f"/solr/admin/collections?action=CREATE&name={collection}&collection.configName={configset}&numShards={numShards}&replicationFactor={replicationFactor}&maxShardsPerNode={maxShardsPerNode}"
         mock_get_from_solr_api.assert_called_with(path)
-

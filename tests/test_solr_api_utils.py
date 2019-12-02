@@ -106,3 +106,15 @@ class TestSolrApiUtils(unittest.TestCase):
         mock_delete_collection.assert_called_with(collection)
         mock_create_collection.assert_called_with(collection=collection, configset=configset )
         mock_add_collection_to_alias.assert_called_with(collection=collection, alias=alias)
+
+    @patch('tulflow.solr_api_utils.SolrApiUtils.get_from_solr_api')
+    def test_create_collection(self, mock_get_from_solr_api):
+        collection="test_collection"
+        configset="test_configset"
+        numShards=5
+        replicationFactor=5
+        maxShardsPerNode=2
+        self.solrcloud.create_collection(collection=collection, configset=configset,numShards=numShards, replicationFactor=replicationFactor, maxShardsPerNode=maxShardsPerNode)
+        path = f"/solr/admin/collections?action=CREATE&name={collection}&collection.configSet={configset}&numShards={numShards}&replicationFactor={replicationFactor}&maxShardsPerNode={maxShardsPerNode}"
+        mock_get_from_solr_api.assert_called_with(path)
+

@@ -7,34 +7,9 @@ from airflow.operators.http_operator import SimpleHttpOperator
 from airflow.hooks.base_hook import BaseHook
 from airflow.models import Connection, DAG, TaskInstance
 from airflow.utils import timezone
-from tulflow.tasks import create_sc_collection, execute_slackpostonfail, get_solr_url, refresh_sc_collection_for_alias, slackpostonsuccess, swap_sc_alias
+from tulflow.tasks import create_sc_collection, get_solr_url, refresh_sc_collection_for_alias, swap_sc_alias
 
 DEFAULT_DATE = timezone.datetime(2019, 8, 16)
-
-
-class TestSlackPostSuccess(unittest.TestCase):
-    """Test Class for Successes being posted to Slack generic task function tests."""
-    @patch.object(BaseHook, "get_connection", return_value=Connection(
-        conn_id='AIRFLOW_CONN_SLACK_WEBHOOK',
-        conn_type='http',
-        host='https://hooks.slack.com/services',
-        password='puppies'
-        )
-    )
-
-    def test_slackpostonsuccess(self, mocker):
-        """Test slackpostsuccess operator instance contains expected config values."""
-        dag = DAG(dag_id='test_slacksuccess', start_date=DEFAULT_DATE)
-        task = SlackWebhookOperator(dag=dag, task_id='test_slacksuccess')
-        task_instance = TaskInstance(task=task, execution_date=DEFAULT_DATE)
-        task_instance.get_template_context()
-        operator = slackpostonsuccess(dag)
-
-        self.assertEqual("AIRFLOW_CONN_SLACK_WEBHOOK", operator.http_conn_id)
-        self.assertEqual("slackpostonsuccess", operator.task_id)
-        self.assertEqual("puppies", operator.webhook_token)
-        self.assertIn(":partygritty:", operator.message)
-        self.assertEqual("airflow", operator.username)
 
 
 class TestSolrCloudTasks(unittest.TestCase):

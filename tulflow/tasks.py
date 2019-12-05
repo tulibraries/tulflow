@@ -10,9 +10,9 @@ from tulflow.solr_api_utils import SolrApiUtils
 PP = pprint.PrettyPrinter(indent=4)
 
 
-def execute_slackpostonfail(context, message=None):
+def execute_slackpostonfail(context, conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", message=None):
     """Task Method to Post Failed DAG or Task Completion on Slack."""
-    conn = BaseHook.get_connection("AIRFLOW_CONN_SLACK_WEBHOOK")
+    conn = BaseHook.get_connection(conn_id)
     task_instance = context.get("task_instance")
     log_url = task_instance.log_url
     task_id = task_instance.task_id
@@ -23,7 +23,7 @@ def execute_slackpostonfail(context, message=None):
 
     slack_post = SlackWebhookOperator(
         task_id="slackpostonfail",
-        http_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK",
+        http_conn_id=conn_id,
         webhook_token=conn.password,
         message=":poop: " + message,
         username="airflow",
@@ -33,20 +33,28 @@ def execute_slackpostonfail(context, message=None):
     return slack_post.execute(context=context)
 
 
-def slackpostonsuccess(dag, message="Oh, happy day!"):
+def execute_slackpostonsuccess(context, conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", message=None):
     """Task Method to Post Successful DAG or Task Completion on Slack."""
-    conn = BaseHook.get_connection("AIRFLOW_CONN_SLACK_WEBHOOK")
+    conn = BaseHook.get_connection(conn_id)
+    task_instance = context.get("task_instance")
+    log_url = task_instance.log_url
+    task_id = task_instance.task_id
+    dag_id = task_instance.dag_id
+    task_date = context.get("execution_date")
+    if not message:
+        message = "DAG success: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
 
     slack_post = SlackWebhookOperator(
         task_id="slackpostonsuccess",
-        http_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK",
+        http_conn_id=conn_id,
         webhook_token=conn.password,
         message=":partygritty: " + message,
         username="airflow",
         trigger_rule="all_success",
-        dag=dag)
+        dag=context.get("dag")
+    )
 
-    return slack_post
+    return slack_post.execute(context=context)
 
 
 def create_sc_collection(dag, sc_conn_id, sc_coll_name, sc_coll_repl, sc_configset_name):

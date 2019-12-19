@@ -99,7 +99,7 @@ def swap_sc_alias(dag, sc_conn_id, sc_coll_name, sc_configset_name):
 
     return task_instance
 
-def refresh_sc_collection_for_alias(dag, sc_conn, sc_coll_name, sc_alias, configset):
+def refresh_sc_collection_for_alias(dag, sc_conn, sc_coll_name, sc_alias, configset,numShards=None, replicationFactor=None, maxShardsPerNode=None):
     """Removes collection from alias, deletes collection, creates new collection & adds to alias"""
     task_instance = PythonOperator(
         task_id="refresh_sc_collection_for_alias",
@@ -112,6 +112,9 @@ def refresh_sc_collection_for_alias(dag, sc_conn, sc_coll_name, sc_alias, config
             "solr_port": sc_conn.port,
             "solr_auth_user": sc_conn.login or "",
             "solr_auth_pass": sc_conn.password or "",
+            "numShards": numShards,
+            "replicationFactor": replicationFactor,
+            "maxShardsPerNode": maxShardsPerNode
         },
         dag=dag
     )

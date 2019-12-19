@@ -71,6 +71,15 @@ class TestSolrApiUtils(unittest.TestCase):
         nothingness = self.solrcloud.collection_exists('sartre')
         self.assertFalse(nothingness)
 
+    def test_filter_init_collection(self):
+        aliases = ["test-init", "test-real", "test-realer"]
+        #uses default of ending with "-init"
+        filtered = self.solrcloud.filter_init_collection(aliases)
+        self.assertFalse("test-init" in filtered)
+        # Also accepts specific name
+        filtered = self.solrcloud.filter_init_collection(aliases, "test-realer")
+        self.assertFalse("test-realer" in filtered)
+
     @patch('tulflow.solr_api_utils.SolrApiUtils.create_or_modify_alias_and_set_collections')
     @patch('tulflow.solr_api_utils.SolrApiUtils.get_alias_collections')
     def test_remove_collection_from_alias(self, mock_get_alias_collections, mock_create_or_modify_alias_and_set_collections):
@@ -102,10 +111,10 @@ class TestSolrApiUtils(unittest.TestCase):
         collection = "test_collection"
         alias = "test_alias"
         configset = "test_configset"
-        SolrApiUtils.remove_and_recreate_collection_from_alias(collection=collection, configset=configset, alias=alias, solr_url="http://sc.example.com", solr_port="443")
+        SolrApiUtils.remove_and_recreate_collection_from_alias(collection=collection, configset=configset, alias=alias, solr_url="http://sc.example.com", solr_port="443", replicationFactor=3)
         mock_remove_collection_from_alias.assert_called_with(collection=collection, alias=alias)
         mock_delete_collection.assert_called_with(collection)
-        mock_create_collection.assert_called_with(collection=collection, configset=configset )
+        mock_create_collection.assert_called_with(collection=collection, configset=configset, replicationFactor=3)
         mock_add_collection_to_alias.assert_called_with(collection=collection, alias=alias)
 
     @patch('tulflow.solr_api_utils.SolrApiUtils.get_from_solr_api')

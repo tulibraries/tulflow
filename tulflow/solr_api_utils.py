@@ -7,15 +7,18 @@ import requests
 
 class SolrApiUtils():
     """Class for interacting with SolrCloud API over HTTP."""
+
     @classmethod
-    def remove_and_recreate_collection_from_alias(cls, collection, alias, solr_url, configset="_default", solr_port=None, solr_auth_user=None, solr_auth_pass=None):
+    def remove_and_recreate_collection_from_alias(cls, collection, alias, solr_url, configset="_default", solr_port=None, solr_auth_user=None, solr_auth_pass=None, numShards=None, replicationFactor=None, maxShardsPerNode=None):
         """Method to remove & re-add collection to SolrCloud Alias."""
         url = solr_url + (f":{solr_port}" if solr_port else "")
         logging.info("Trying %s", url)
         sc = cls(url, auth_user=solr_auth_user, auth_pass=solr_auth_pass)
         sc.remove_collection_from_alias(collection=collection, alias=alias)
         sc.delete_collection(collection)
-        sc.create_collection(collection=collection, configset=configset)
+        create_params = {"collection": collection, "configset": configset, "numShards": numShards, "replicationFactor": replicationFactor, "maxShardsPerNode": maxShardsPerNode}
+        cleaned_create_params = {k: v for k, v in create_params.items() if v is not None}
+        sc.create_collection(**cleaned_create_params)
         sc.add_collection_to_alias(collection=collection, alias=alias)
 
     def __init__(self, solr_url, auth_user=None, auth_pass=None):
@@ -115,6 +118,12 @@ class SolrApiUtils():
             return self.get_aliases().get(alias).split(",")
         raise LookupError(f"{alias} is not an existing alias")
 
+    def get_alias_collections_without_init(self, alias):
+        """Get list of aliases without the collection used to initialize an alias"""
+        collections = self.get_alias_collections(alias)
+        return self.filter_init_collection(collections)
+
+
     def is_collection_in_alias(self, collection, alias):
         """Issue HTTP Get Request to SolrCloud API to see if Collection is behind an Alias."""
         return collection in self.get_alias_collections(alias)
@@ -138,10 +147,20 @@ class SolrApiUtils():
 
     def add_collection_to_alias(self, collection, alias):
         """Add a SolrCloud Collection to an Existing Alias."""
-        collections = self.get_alias_collections(alias)
+        collections = self.get_alias_collections_without_init(alias)
         collections.append(collection)
         self.create_or_modify_alias_and_set_collections(alias=alias, collections=collections)
         self.__unsetattr("aliases")
+
+    def filter_init_collection(self, collections_list, init_collection_name=None):
+        """Remove initial dummy collection added to create alias"""
+        if not init_collection_name:
+            test = lambda collection: not collection.endswith("-init")
+        else:
+            test = lambda collection: (collection != init_collection_name)
+        return [collection for collection in collections_list if test(collection)]
+
+
 
     def __unsetattr(self, attr):
         if hasattr(self, attr):

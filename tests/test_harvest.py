@@ -413,7 +413,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
 
 
     @mock_s3
-    def test_perform_xml_lookup(self, **kwargs):
+    def test_perform_xml_lookup_with_cache(self, **kwargs):
         """Test Calling handling XML Element to String with Deletes."""
         kwargs["access_id"] = "cats"
         kwargs["access_secret"] = "dogs"
@@ -429,7 +429,8 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         conn.put_object(Bucket=kwargs.get("bucket_name"), Key=kwargs.get("lookup_key"), Body=lookup)
         marc_xml = etree.fromstring(marc_single)
         with self.assertLogs() as log:
-            resp_xml = harvest.perform_xml_lookup(marc_xml, **kwargs)
+            parser = harvest.perform_xml_lookup_with_cache()
+            resp_xml = parser(marc_xml, **kwargs)
         self.assertIn("INFO:root:Reading in Record 991000000269703811", log.output)
         self.assertIn("INFO:root:Child XML record found 991000000269703811", log.output)
         self.assertIn(b"<datafield>test</datafield>", etree.tostring(resp_xml))

@@ -58,9 +58,9 @@ def prepare_saxon_engine(saxon_jar="saxon.jar", saxon_path="/tmp/saxon/"):
 
     if not os.path.exists(saxon_path + saxon_jar):
         os.mkdir(saxon_path)
-        request_url = "http://central.maven.org/maven2/net/sf/saxon/Saxon-HE/"
+        request_url = "https://repo1.maven.org/maven2/net/sf/saxon/Saxon-HE/"
         request_url += saxon_version + "/Saxon-HE-" + saxon_version + ".jar"
-        resp = requests.get(request_url, allow_redirects=True)
+        resp = requests.get(request_url, allow_redirects=True, verify=False)
         if hashlib.sha1(resp.content).hexdigest() == saxon_download_sha1:
             open(saxon_path + saxon_jar, "wb").write(resp.content)
             os.chmod(saxon_path + saxon_jar, 0o744)

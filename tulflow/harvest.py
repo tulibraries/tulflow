@@ -137,7 +137,7 @@ def perform_xml_lookup_with_cache():
         """Parse additions/updates & add boundwiths."""
 
         if len(cache) == 0:
-            print("*** Fetching CSV lookup file from s3 ***")
+            logging.info("*** Fetching CSV lookup file from s3 ***")
             access_id = kwargs.get("access_id")
             access_secret = kwargs.get("access_secret")
             bucket = kwargs.get("bucket_name")

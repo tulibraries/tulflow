@@ -8,7 +8,7 @@ Small Python package / library for common ETL-adjacent functions, primarily used
 
 If you make any updates or additions to this repository, a release will need to be created in order for the related Airflow DAGS to pick it up.
 
-Releases are currently managed by PyPi and this project can be found [here](https://pypi.org/project/tulflow/).
+Releases are currently managed by PyPi and this project can be found [here](https://pypi.org/project/tulflow/). In order for releases to be pushed to PyPi, you will need to update ```setup.py``` with the new version number. 
 
 Within your DAG project, you will need to update the Pipfile to use the latest version of Tulflow.
 

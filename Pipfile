@@ -19,8 +19,9 @@ pexpect = "*"
 xmltodict = "*"
 apache-airflow = ">=1.10.3"
 boto3 = "*"
-lxml = "*"
+lxml = "==4.4.3"
 requests = "*"
+werkzeug="<1.0.0"
 
 [requires]
 python_version = "3.6"

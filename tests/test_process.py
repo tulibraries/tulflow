@@ -47,7 +47,7 @@ class TestDataProcessInteractions(unittest.TestCase):
         test_out = etree.fromstring(open("tests/fixtures/alma_bibs__new_1_ns.xml", "rb").read())
         test_run = process.add_marc21xml_root_ns(test_bytes)
         self.assertEqual(etree.tostring(test_run), etree.tostring(test_out))
-        self.assertIn("{http://www.loc.gov/MARC21/slim}", test_run.tag)
+        self.assertEqual(test_run.attrib, {'xmlns': 'http://www.loc.gov/MARC21/slim'})
 
     def test_add_marc21xml_root_namespace_dup(self):
         """Test converting ALMASFTP XML Collection document as bytes
@@ -102,7 +102,7 @@ class TestDataProcessInteractions(unittest.TestCase):
         self.assertEqual(log.output, logs)
 
     def test_generate_bw_parent_new_field(self):
-        desired_xml = b"""<ns0:datafield xmlns:ns0="http://www.loc.gov/MARC21/slim" ind1=" " ind2=" " tag="ADF"><ns0:subfield code="a">FAKE_PARENT_ID</ns0:subfield></ns0:datafield>"""
+        desired_xml = b"""<marc21:datafield xmlns:marc21="http://www.loc.gov/MARC21/slim" ind1=" " ind2=" " tag="ADF"><marc21:subfield code="a">FAKE_PARENT_ID</marc21:subfield></marc21:datafield>"""
         test_run = process.generate_bw_parent_field("FAKE_PARENT_ID")
         self.assertEqual(etree.tostring(test_run), desired_xml)
 

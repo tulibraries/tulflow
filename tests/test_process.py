@@ -47,7 +47,7 @@ class TestDataProcessInteractions(unittest.TestCase):
         test_out = etree.fromstring(open("tests/fixtures/alma_bibs__new_1_ns.xml", "rb").read())
         test_run = process.add_marc21xml_root_ns(test_bytes)
         self.assertEqual(etree.tostring(test_run), etree.tostring(test_out))
-        self.assertEqual(test_run.attrib, {'xmlns': 'http://www.loc.gov/MARC21/slim'})
+        self.assertIn("{http://www.loc.gov/MARC21/slim}", test_run.tag)
 
     def test_add_marc21xml_root_namespace_dup(self):
         """Test converting ALMASFTP XML Collection document as bytes

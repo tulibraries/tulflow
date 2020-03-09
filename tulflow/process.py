@@ -12,6 +12,10 @@ NS = {
     "marc21": "http://www.loc.gov/MARC21/slim",
     "oai": "http://www.openarchives.org/OAI/2.0/"
     }
+
+etree.register_namespace("marc21", "http://www.loc.gov/MARC21/slim")
+etree.register_namespace("oai", "http://www.openarchives.org/OAI/2.0")
+
 LOGGER = logging.getLogger('tulflow_process')
 PARSER = etree.XMLParser(remove_blank_text=True)
 

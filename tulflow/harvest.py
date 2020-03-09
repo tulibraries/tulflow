@@ -79,6 +79,23 @@ def harvest_oai(**kwargs):
     return data
 
 
+class OaiXml:
+    """oai-pmh xml etree wrapper"""
+    def __init__(self, dag_id, timestamp):
+        etree.register_namespace("oai", "http://www.openarchives.org/OAI/2.0/")
+        etree.register_namespace("marc21", "http://www.loc.gov/MARC21/slim")
+        self.root = etree.Element("{http://www.openarchives.org/OAI/2.0/}OAI-PMH")
+        self.root.attrib["dag-id"] = dag_id
+        self.root.attrib["dag-timestamp"] = timestamp
+        self.list_records = etree.SubElement(self.root, "{http://www.openarchives.org/OAI/2.0/}ListRecords")
+
+    def append(self, record):
+        self.list_records.append(record)
+
+    def tostring(self):
+       return etree.tostring(self.root).decode("utf-8")
+
+
 def process_xml(data, writer, outdir, **kwargs):
     """Process & Write XML data to S3."""
     parser = kwargs.get("parser")
@@ -93,13 +110,10 @@ def process_xml(data, writer, outdir, **kwargs):
         timestamp = "no-timestamp-provided"
     if not records_per_file:
         records_per_file = 1000
+
     count = deleted_count = 0
-    collection = etree.Element("collection")
-    collection.attrib["dag-id"] = run_id
-    collection.attrib["dag-timestamp"] = timestamp
-    deleted_collection = etree.Element("collection")
-    deleted_collection.attrib["dag-id"] = run_id
-    deleted_collection.attrib["dag-timestamp"] = timestamp
+    oai_updates = OaiXml(run_id, timestamp)
+    oai_deletes = OaiXml(run_id, timestamp)
     logging.info("Processing XML")
 
     for record in data:
@@ -109,23 +123,22 @@ def process_xml(data, writer, outdir, **kwargs):
         if parser:
             record = parser(record, **kwargs)
         if record.xpath(".//oai:header[@status='deleted']", namespaces=NS):
-            logging.info("Deleted record %s", record_id)
+            logging.info("Added record %s to deleted xml file(s)", record_id)
             deleted_count += 1
-            deleted_collection.append(record)
+            oai_deletes.append(record)
+
             if deleted_count % int(records_per_file) == 0:
-                string = etree.tostring(deleted_collection).decode("utf-8")
-                writer(string, outdir + "/deleted", **kwargs)
-                deleted_collection = etree.Element("collection")
+                writer(oai_deletes.tostring(), outdir + "/deleted", **kwargs)
+                oai_deletes = OaiXml(run_id, timestamp)
         else:
-            logging.info("Updated record %s", record_id)
+            logging.info("Added record %s to new-updated xml file", record_id)
             count += 1
-            collection.append(record)
+            oai_updates.append(record)
             if count % int(records_per_file) == 0:
-                string = etree.tostring(collection).decode("utf-8")
-                writer(string, outdir + "/new-updated", **kwargs)
-                collection = etree.Element("collection")
-    writer(etree.tostring(collection).decode("utf-8"), outdir + "/new-updated", **kwargs)
-    writer(etree.tostring(deleted_collection).decode("utf-8"), outdir + "/deleted", **kwargs)
+                writer(oai_updates.tostring(), outdir + "/new-updated", **kwargs)
+                oai_updates = OaiXml(run_id, timestamp)
+    writer(oai_updates.tostring(), outdir + "/new-updated", **kwargs)
+    writer(oai_deletes.tostring(), outdir + "/deleted", **kwargs)
     logging.info("OAI Records Harvested & Processed: %s", count)
     logging.info("OAI Records Harvest & Marked for Deletion: %s", deleted_count)
 

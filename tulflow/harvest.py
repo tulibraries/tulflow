@@ -29,16 +29,24 @@ def oai_to_s3(**kwargs):
     dag_start_date = kwargs["timestamp"]
 
     oai_sets = generate_oai_sets(**kwargs)
+    all_processed = []
     if oai_sets:
         for oai_set in oai_sets:
             kwargs["harvest_params"]["set"] = oai_set
             data = harvest_oai(**kwargs)
             outdir = dag_s3_prefix(dag_id, dag_start_date)
-            process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
+            processed = process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
+            all_processed.append(processed)
     else:
         data = harvest_oai(**kwargs)
         outdir = dag_s3_prefix(dag_id, dag_start_date)
-        process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
+        processed = process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
+        all_processed.append(processed)
+    all_updated = sum([set['updated'] for set in all_processed])
+    all_deleted = sum([set['deleted'] for set in all_processed])
+    logging.info("Total OAI Records Harvested & Processed: %s", all_updated)
+    logging.info("Total OAI Records Harvest & Marked for Deletion: %s", all_deleted)
+    return {"updated": all_updated, "deleted": all_deleted}
 
 
 def generate_oai_sets(**kwargs):
@@ -128,6 +136,7 @@ def process_xml(data, writer, outdir, **kwargs):
     writer(etree.tostring(deleted_collection).decode("utf-8"), outdir + "/deleted", **kwargs)
     logging.info("OAI Records Harvested & Processed: %s", count)
     logging.info("OAI Records Harvest & Marked for Deletion: %s", deleted_count)
+    return {"updated": count, "deleted": deleted_count}
 
 
 def perform_xml_lookup_with_cache():

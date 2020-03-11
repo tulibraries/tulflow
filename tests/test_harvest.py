@@ -382,9 +382,10 @@ class TestOAIHarvestInteraction(unittest.TestCase):
 
         with self.assertLogs() as log:
             response = harvest.harvest_oai(**kwargs)
-            harvest.process_xml(response, harvest.write_log, "test-dir", **kwargs)
-        self.assertIn("INFO:root:OAI Records Harvested & Processed: 2", log.output)
-        self.assertIn("INFO:root:OAI Records Harvest & Marked for Deletion: 0", log.output)
+            processed = harvest.process_xml(response, harvest.write_log, "test-dir", **kwargs)
+            self.assertIn("INFO:root:OAI Records Harvested & Processed: 2", log.output)
+            self.assertIn("INFO:root:OAI Records Harvest & Marked for Deletion: 0", log.output)
+            self.assertEqual(processed, {"updated": 2, "deleted": 0 })
 
 
     @httpretty.activate
@@ -440,7 +441,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
     @mock.patch("tulflow.harvest.harvest_oai")
     @mock.patch("tulflow.harvest.dag_s3_prefix")
     @mock.patch("tulflow.harvest.process_xml")
-    def test_oai_to_s3_harvest(self, mock_harvest, mock_prefix, mock_process, **kwargs):
+    def test_oai_to_s3_harvest(self, mock_process, mock_prefix, mock_harvest, **kwargs):
         """Test oai_to_s3 wraps harvest_oai function."""
         dag = DAG(dag_id="test_slacksuccess", start_date=DEFAULT_DATE)
         kwargs["oai_endpoint"] = "http://test/combine/oai"
@@ -455,3 +456,40 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         self.assertTrue(mock_harvest.called)
         self.assertTrue(mock_prefix.called)
         self.assertTrue(mock_process.called)
+
+
+    @mock.patch("tulflow.harvest.harvest_oai")
+    @mock.patch("tulflow.harvest.dag_s3_prefix")
+    @mock.patch("tulflow.harvest.process_xml")
+    def test_oai_to_s3_harvest_return_value_mult_set(self, mock_process, mock_prefix, mock_harvest, **kwargs):
+        """Test oai_to_s3 wraps harvest_oai function."""
+        dag = DAG(dag_id="test_slacksuccess", start_date=DEFAULT_DATE)
+        kwargs["oai_endpoint"] = "http://test/combine/oai"
+        kwargs["metadataPrefix"] = "blergh"
+        kwargs["included_sets"] = ["set1", "set2"]
+        kwargs["from"] = "from"
+        kwargs["until"] = "until"
+        kwargs["dag"] = dag
+        kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        mock_process.return_value = {"updated": 2, "deleted": 0 }
+        response = harvest.oai_to_s3(**kwargs)
+        self.assertEqual(response, {"updated": 4, "deleted": 0 })
+
+    @mock.patch("tulflow.harvest.harvest_oai")
+    @mock.patch("tulflow.harvest.dag_s3_prefix")
+    @mock.patch("tulflow.harvest.process_xml")
+    def test_oai_to_s3_harvest_return_value_no_set(self, mock_process, mock_prefix, mock_harvest, **kwargs):
+        """Test oai_to_s3 wraps harvest_oai function."""
+        dag = DAG(dag_id="test_slacksuccess", start_date=DEFAULT_DATE)
+        kwargs["oai_endpoint"] = "http://test/combine/oai"
+        kwargs["metadataPrefix"] = "blergh"
+        kwargs["from"] = "from"
+        kwargs["until"] = "until"
+        kwargs["all_sets"] = True
+        kwargs["dag"] = dag
+        kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        
+        mock_process.return_value = {"updated": 2, "deleted": 0 }
+        response = harvest.oai_to_s3(**kwargs)
+        self.assertEqual(response, {"updated": 2, "deleted": 0 })
+

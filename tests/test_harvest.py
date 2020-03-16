@@ -140,6 +140,13 @@ marc = """
                 <setSpec>blacklight</setSpec>
             </header>
         </record>
+        <record>
+            <header status="deleted">
+                <identifier>oai:alma.01TULI_INST:991000000939703812</identifier>
+                <datestamp>2018-04-02T21:02:12Z</datestamp>
+                <setSpec>blacklight</setSpec>
+            </header>
+        </record>
     </ListRecords>
 </OAI-PMH>
 """
@@ -409,8 +416,10 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             response = harvest.harvest_oai(**kwargs)
             harvest.process_xml(response, harvest.write_log, "test-dir", **kwargs)
         self.assertIn("INFO:root:OAI Records Harvested & Processed: 1", log.output)
-        self.assertIn("INFO:root:OAI Records Harvest & Marked for Deletion: 1", log.output)
-        self.assertIn('INFO:root:<collection dag-id="no-dag-provided" dag-timestamp="no-timestamp-provided"><ns0:record xmlns:ns0="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" airflow-record-id="oai:alma.01TULI_INST:991000000269703811"><ns0:header><ns0:identifier>oai:alma.01TULI_INST:991000000269703811</ns0:identifier><ns0:datestamp>2019-07-15T15:17:33Z</ns0:datestamp><ns0:setSpec>blacklight</ns0:setSpec><ns0:setSpec>blacklight_qa</ns0:setSpec><ns0:setSpec>rapid_print_books</ns0:setSpec></ns0:header><ns0:metadata><record xmlns="http://www.loc.gov/MARC21/slim" xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd"><leader>01407nam a2200445 4500</leader><controlfield tag="005">20190715090942.0</controlfield><controlfield tag="008">690326s1969 nju b 000 0 eng </controlfield><controlfield tag="001">991000000269703811</controlfield><datafield tag="010" ind1=" " ind2=" "><subfield code="a">68020157</subfield></datafield><datafield tag="035" ind1=" " ind2=" "><subfield code="a">(PPT)b10000276-01tuli_inst</subfield></datafield><datafield tag="040" ind1=" " ind2=" "><subfield code="a">DLC</subfield><subfield code="b">eng</subfield><subfield code="c">DLC</subfield><subfield code="d">PPT</subfield></datafield><datafield tag="090" ind1=" " ind2=" "><subfield code="a">HM131.E85</subfield></datafield><datafield tag="100" ind1="1" ind2=" "><subfield code="a">Etzioni, Amitai.</subfield><subfield code="0">http://id.loc.gov/authorities/names/n79089329</subfield></datafield><datafield tag="245" ind1="1" ind2="0"><subfield code="a">Readings on modern organizations.</subfield></datafield></record></ns0:metadata></ns0:record></collection>', log.output)
+        self.assertIn("INFO:root:OAI Records Harvest & Marked for Deletion: 2", log.output)
+        self.assertIn('INFO:root:<oai:OAI-PMH xmlns:oai="http://www.openarchives.org/OAI/2.0/" dag-id="no-dag-provided" dag-timestamp="no-timestamp-provided"><oai:ListRecords><oai:record xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" airflow-record-id="oai:alma.01TULI_INST:991000000269703811"><oai:header><oai:identifier>oai:alma.01TULI_INST:991000000269703811</oai:identifier><oai:datestamp>2019-07-15T15:17:33Z</oai:datestamp><oai:setSpec>blacklight</oai:setSpec><oai:setSpec>blacklight_qa</oai:setSpec><oai:setSpec>rapid_print_books</oai:setSpec></oai:header><oai:metadata><record xmlns="http://www.loc.gov/MARC21/slim" xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd"><leader>01407nam a2200445 4500</leader><controlfield tag="005">20190715090942.0</controlfield><controlfield tag="008">690326s1969 nju b 000 0 eng </controlfield><controlfield tag="001">991000000269703811</controlfield><datafield tag="010" ind1=" " ind2=" "><subfield code="a">68020157</subfield></datafield><datafield tag="035" ind1=" " ind2=" "><subfield code="a">(PPT)b10000276-01tuli_inst</subfield></datafield><datafield tag="040" ind1=" " ind2=" "><subfield code="a">DLC</subfield><subfield code="b">eng</subfield><subfield code="c">DLC</subfield><subfield code="d">PPT</subfield></datafield><datafield tag="090" ind1=" " ind2=" "><subfield code="a">HM131.E85</subfield></datafield><datafield tag="100" ind1="1" ind2=" "><subfield code="a">Etzioni, Amitai.</subfield><subfield code="0">http://id.loc.gov/authorities/names/n79089329</subfield></datafield><datafield tag="245" ind1="1" ind2="0"><subfield code="a">Readings on modern organizations.</subfield></datafield></record></oai:metadata></oai:record></oai:ListRecords></oai:OAI-PMH>', log.output)
+        # assert multiple deletions get added as expected
+        self.assertIn('INFO:root:<oai:OAI-PMH xmlns:oai="http://www.openarchives.org/OAI/2.0/" dag-id="no-dag-provided" dag-timestamp="no-timestamp-provided"><oai:ListRecords><oai:record airflow-record-id="oai:alma.01TULI_INST:991000000939703811"><oai:header status="deleted"><oai:identifier>oai:alma.01TULI_INST:991000000939703811</oai:identifier><oai:datestamp>2018-04-02T21:02:12Z</oai:datestamp><oai:setSpec>blacklight</oai:setSpec></oai:header></oai:record><oai:record airflow-record-id="oai:alma.01TULI_INST:991000000939703812"><oai:header status="deleted"><oai:identifier>oai:alma.01TULI_INST:991000000939703812</oai:identifier><oai:datestamp>2018-04-02T21:02:12Z</oai:datestamp><oai:setSpec>blacklight</oai:setSpec></oai:header></oai:record></oai:ListRecords></oai:OAI-PMH>', log.output)
 
 
     @mock_s3

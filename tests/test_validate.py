@@ -45,12 +45,13 @@ class TestSchematronFiltering(unittest.TestCase):
 
         # run tests
         with self.assertLogs() as log:
-            validate.filter_s3_schematron(**self.kwargs)
+            response = validate.filter_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-valid.xml", log.output)
         test_valid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "/")
         test_valid_objects_ar = [object.get("Key") for object in test_valid_objects["Contents"]]
         self.assertEqual(test_valid_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
         self.assertEqual(test_valid_objects_ar, ["dpla_test/transformed-filtered/sch-oai-valid.xml"])
+        self.assertEqual(response, { "filtered": 0 })
 
         test_invalid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("report_prefix") + "-invalid.csv")
         test_invalid_objects_ar = [object.get("Key") for object in test_invalid_objects["Contents"]]
@@ -85,11 +86,14 @@ class TestSchematronFiltering(unittest.TestCase):
 
         # run tests
         with self.assertLogs() as log:
-            validate.filter_s3_schematron(**self.kwargs)
+            response = validate.filter_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-invalid.xml", log.output)
         self.assertIn("ERROR:root:Invalid record found: invalid-missingtitle", log.output[1])
         self.assertIn("ERROR:root:Invalid record found: invalid-missingrights", log.output[2])
-        self.assertEqual(len(log.output), 7)
+        self.assertIn("INFO:root:Total Filter Count: 5", log.output[6])
+        self.assertEqual(len(log.output), 8)
+        self.assertEqual(response, { "filtered": 5 })
+
         test_valid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "/")
         test_valid_objects_ar = [object.get("Key") for object in test_valid_objects["Contents"]]
         test_valid_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered/sch-oai-invalid.xml")
@@ -132,11 +136,12 @@ class TestSchematronFiltering(unittest.TestCase):
 
         # run tests
         with self.assertLogs() as log:
-            validate.filter_s3_schematron(**self.kwargs)
+            response = validate.filter_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-mix.xml", log.output)
         self.assertIn("ERROR:root:Invalid record found: invalid-missingtitle", log.output[1])
         self.assertIn("ERROR:root:Invalid record found: invalid-missingrights", log.output[2])
-        self.assertEqual(len(log.output), 7)
+        self.assertEqual(len(log.output), 8)
+        self.assertEqual(response, { "filtered": 5 })
 
         test_valid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "/")
         test_valid_objects_ar = [object.get("Key") for object in test_valid_objects["Contents"]]
@@ -184,7 +189,7 @@ class TestSchematronFiltering(unittest.TestCase):
 
         # run tests
         with self.assertLogs() as log:
-            validate.filter_s3_schematron(**self.kwargs)
+            response = validate.filter_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-empty.xml", log.output)
         self.assertIn("INFO:root:Invalid Records report: https://tulib-airflow-test.s3.amazonaws.com/dpla_test/harvest_filter-invalid.csv", log.output)
         test_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "/")
@@ -193,7 +198,7 @@ class TestSchematronFiltering(unittest.TestCase):
         self.assertEqual(test_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
         self.assertEqual(test_objects_ar, ["dpla_test/transformed-filtered/sch-oai-empty.xml"])
         self.assertEqual(test_content["Body"].read(), b"""<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dpla="http://dp.la/about/map/" xmlns:schema="http://schema.org" xmlns:oai="http://www.openarchives.org/OAI/2.0/" xmlns:oai_qdc="http://worldcat.org/xmlschemas/qdc-1.0/">\n</metadata>""")
-
+        self.assertEqual(response, { "filtered": 0 })
 
     @mock_s3
     @patch("tulflow.process.get_github_content")
@@ -213,11 +218,11 @@ class TestSchematronFiltering(unittest.TestCase):
         mocked_get_github_content.return_value = open("tests/fixtures/sch-sample.sch").read()
 
         # run tests
-        validate.filter_s3_schematron(**self.kwargs)
+        response = validate.filter_s3_schematron(**self.kwargs)
         test_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "/")
         self.assertEqual(test_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
         self.assertEqual(test_objects.get("Contents"), None)
-
+        self.assertEqual(response, { "filtered": 0 })
 
 class TestSchematronReporting(unittest.TestCase):
     """Test Class for functions that generate reports on XML validated with Schematron."""

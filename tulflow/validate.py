@@ -33,7 +33,7 @@ def filter_s3_schematron(**kwargs):
     # get schematron doc & return lxml.etree.Schematron validator
     schematron_doc = process.get_github_content("tulibraries/aggregator_mdx", schematron_file)
     schematron = isoschematron.Schematron(etree.fromstring(schematron_doc), store_report=True)
-
+    total_filter_count = 0
     for s3_key in process.list_s3_content(bucket, access_id, access_secret, source_prefix):
         logging.info("Validating & Filtering File: %s", s3_key)
         s3_content = process.get_s3_content(bucket, s3_key, access_id, access_secret)
@@ -46,6 +46,7 @@ def filter_s3_schematron(**kwargs):
                 record_id = record.get("airflow-record-id")
                 logging.error("Invalid record found: %s", record_id)
                 s3_xml.remove(record)
+                total_filter_count += 1
                 invalid_csv.writerow({
                     "id": record_id,
                     "report": etree.tostring(schematron.validation_report),
@@ -56,9 +57,10 @@ def filter_s3_schematron(**kwargs):
         updated_s3_xml = etree.tostring(s3_xml)
         process.generate_s3_object(updated_s3_xml, bucket, filename, access_id, access_secret)
     invalid_filename = report_prefix + "-invalid.csv"
+    logging.info("Total Filter Count: %s", total_filter_count)
     logging.info("Invalid Records report: https://%s.s3.amazonaws.com/%s", bucket, invalid_filename)
     process.generate_s3_object(csv_in_mem.getvalue(), bucket, invalid_filename, access_id, access_secret)
-
+    return {"filtered": total_filter_count}
 
 def report_s3_schematron(**kwargs):
     """Wrapper function for using S3 Retrieval, Schematron Reporting, and S3 Writer."""

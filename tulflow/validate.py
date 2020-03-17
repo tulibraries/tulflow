@@ -49,9 +49,9 @@ def filter_s3_schematron(**kwargs):
                 total_filter_count += 1
                 invalid_csv.writerow({
                     "id": record_id,
-                    "report": etree.tostring(schematron.validation_report),
-                    "record": etree.tostring(record),
-                    "source_file": s3_key
+                    "report": schematron_failed_validation_text(schematron.validation_report),
+                    "record": identifier_or_full_record(record),
+                    "source_file": f"https://s3.console.aws.amazon.com/s3/object/bucket/{s3_key}"
                 })
         filename = s3_key.replace(source_prefix, dest_prefix)
         updated_s3_xml = etree.tostring(s3_xml)
@@ -91,10 +91,22 @@ def report_s3_schematron(**kwargs):
             schematron.validate(record)
             report_csv.writerow({
                 "id": record_id,
-                "report": etree.tostring(schematron.validation_report),
-                "record": etree.tostring(record),
-                "source_file": s3_key
+                "report": schematron_failed_validation_text(schematron.validation_report),
+                "record": identifier_or_full_record(record),
+                "source_file": f"https://s3.console.aws.amazon.com/s3/object/bucket/{s3_key}"
             })
     report_filename = dest_prefix + "-report.csv"
     logging.info("Records report: https://%s.s3.amazonaws.com/%s", bucket, report_filename)
     process.generate_s3_object(csv_in_mem.getvalue(), bucket, report_filename, access_id, access_secret)
+    
+def identifier_or_full_record(record, identifier_xpath="./dcterms:identifier/text()", identifier_namespaces={"dcterms": "http://purl.org/dc/terms/"}):
+    indentifiers = record.xpath(identifier_xpath, namespaces=identifier_namespaces)
+    if indentifiers:
+        return "\n".join(indentifiers)
+    else:
+        return etree.tostring(record)
+
+def schematron_failed_validation_text(validation_report):
+    return "\n".join(
+        validation_report.xpath("./svrl:failed-assert/svrl:text/text()",namespaces={"svrl": "http://purl.oclc.org/dsdl/svrl"})
+                    )

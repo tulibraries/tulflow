@@ -268,7 +268,7 @@ class TestSchematronReporting(unittest.TestCase):
         test_report_objects_ar = [object.get("Key") for object in test_report_objects["Contents"]]
         self.assertEqual(test_report_objects_ar, ["dpla_test/transformed-filtered-report.csv"])
         test_report_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-report.csv")["Body"].read()
-        self.assertEqual(test_report_content, b'id,report,record,source_file\r\nvalid,,valid,https://s3.console.aws.amazon.com/s3/object/bucket/dpla_test/transformed/sch-oai-valid.xml\r\nvalid2,,valid2,https://s3.console.aws.amazon.com/s3/object/bucket/dpla_test/transformed/sch-oai-valid.xml\r\nvalid3,,valid3,https://s3.console.aws.amazon.com/s3/object/bucket/dpla_test/transformed/sch-oai-valid.xml\r\n')
+        self.assertEqual(test_report_content, b'id,report,record,source_file\r\nvalid,,valid,https://s3.console.aws.amazon.com/s3/object/tulib-airflow-test/dpla_test/transformed/sch-oai-valid.xml\r\nvalid2,,valid2,https://s3.console.aws.amazon.com/s3/object/tulib-airflow-test/dpla_test/transformed/sch-oai-valid.xml\r\nvalid3,,valid3,https://s3.console.aws.amazon.com/s3/object/tulib-airflow-test/dpla_test/transformed/sch-oai-valid.xml\r\n')
         self.assertIn(b'id,report,record,source_file\r\nvalid', test_report_content)
 
 

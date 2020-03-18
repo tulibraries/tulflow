@@ -51,7 +51,7 @@ def filter_s3_schematron(**kwargs):
                     "id": record_id,
                     "report": schematron_failed_validation_text(schematron.validation_report),
                     "record": identifier_or_full_record(record),
-                    "source_file": f"https://s3.console.aws.amazon.com/s3/object/bucket/{s3_key}"
+                    "source_file": f"https://s3.console.aws.amazon.com/s3/object/{bucket}/{s3_key}"
                 })
         filename = s3_key.replace(source_prefix, dest_prefix)
         updated_s3_xml = etree.tostring(s3_xml)
@@ -93,7 +93,7 @@ def report_s3_schematron(**kwargs):
                 "id": record_id,
                 "report": schematron_failed_validation_text(schematron.validation_report),
                 "record": identifier_or_full_record(record),
-                "source_file": f"https://s3.console.aws.amazon.com/s3/object/bucket/{s3_key}"
+                "source_file": f"https://s3.console.aws.amazon.com/s3/object/{bucket}/{s3_key}"
             })
     report_filename = dest_prefix + "-report.csv"
     logging.info("Records report: https://%s.s3.amazonaws.com/%s", bucket, report_filename)

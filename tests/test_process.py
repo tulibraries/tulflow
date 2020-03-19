@@ -102,7 +102,7 @@ class TestDataProcessInteractions(unittest.TestCase):
         self.assertEqual(log.output, logs)
 
     def test_generate_bw_parent_new_field(self):
-        desired_xml = b"""<marc21:datafield xmlns:marc21="http://www.loc.gov/MARC21/slim" ind1=" " ind2=" " tag="ADF"><marc21:subfield code="a">FAKE_PARENT_ID</marc21:subfield></marc21:datafield>"""
+        desired_xml = b"""<ns0:datafield xmlns:ns0="http://www.loc.gov/MARC21/slim" ind1=" " ind2=" " tag="ADF"><ns0:subfield code="a">FAKE_PARENT_ID</ns0:subfield></ns0:datafield>"""
         test_run = process.generate_bw_parent_field("FAKE_PARENT_ID")
         self.assertEqual(etree.tostring(test_run), desired_xml)
 

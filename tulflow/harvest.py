@@ -92,13 +92,12 @@ class OaiXml:
     def __init__(self, dag_id, timestamp):
         etree.register_namespace("oai", "http://www.openarchives.org/OAI/2.0/")
         etree.register_namespace("marc21", "http://www.loc.gov/MARC21/slim")
-        self.root = etree.Element("{http://www.openarchives.org/OAI/2.0/}OAI-PMH")
+        self.root = etree.Element("{http://www.openarchives.org/OAI/2.0/}collection")
         self.root.attrib["dag-id"] = dag_id
         self.root.attrib["dag-timestamp"] = timestamp
-        self.list_records = etree.SubElement(self.root, "{http://www.openarchives.org/OAI/2.0/}ListRecords")
 
     def append(self, record):
-        self.list_records.append(record)
+        self.root.append(record)
 
     def tostring(self):
        return etree.tostring(self.root).decode("utf-8")

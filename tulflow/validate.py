@@ -81,11 +81,13 @@ def report_s3_schematron(**kwargs):
     schematron = isoschematron.Schematron(etree.fromstring(schematron_doc), store_report=True)
 
     # Iterate through S3 Files, Validate, & Save Report to CSV
+    total_transform_count = 0
     for s3_key in process.list_s3_content(bucket, access_id, access_secret, source_prefix):
         logging.info("Validating & Reporting On File: %s", s3_key)
         s3_content = process.get_s3_content(bucket, s3_key, access_id, access_secret)
         s3_xml = etree.fromstring(s3_content)
         for record in s3_xml.iterchildren():
+            total_transform_count += 1
             record_id = record.get("airflow-record-id")
             logging.info("Ran report on record: %s", record_id)
             schematron.validate(record)
@@ -97,8 +99,11 @@ def report_s3_schematron(**kwargs):
             })
     report_filename = dest_prefix + "-report.csv"
     logging.info("Records report: https://%s.s3.amazonaws.com/%s", bucket, report_filename)
+    logging.info("Total Transform Count: %s", total_transform_count)
     process.generate_s3_object(csv_in_mem.getvalue(), bucket, report_filename, access_id, access_secret)
-    
+
+    return {"transformed": total_transform_count}
+
 def identifier_or_full_record(record, identifier_xpath="./dcterms:identifier/text()", identifier_namespaces={"dcterms": "http://purl.org/dc/terms/"}):
     indentifiers = record.xpath(identifier_xpath, namespaces=identifier_namespaces)
     if indentifiers:

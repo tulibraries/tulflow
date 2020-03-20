@@ -261,7 +261,7 @@ class TestSchematronReporting(unittest.TestCase):
 
         # run tests
         with self.assertLogs() as log:
-            validate.report_s3_schematron(**self.kwargs)
+            response = validate.report_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Reporting On File: dpla_test/transformed/sch-oai-valid.xml", log.output)
         test_report_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "-report.csv")
         self.assertEqual(test_report_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
@@ -270,6 +270,7 @@ class TestSchematronReporting(unittest.TestCase):
         test_report_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-report.csv")["Body"].read()
         self.assertEqual(test_report_content, b'id,report,record,source_file\r\nvalid,,valid,https://s3.console.aws.amazon.com/s3/object/tulib-airflow-test/dpla_test/transformed/sch-oai-valid.xml\r\nvalid2,,valid2,https://s3.console.aws.amazon.com/s3/object/tulib-airflow-test/dpla_test/transformed/sch-oai-valid.xml\r\nvalid3,,valid3,https://s3.console.aws.amazon.com/s3/object/tulib-airflow-test/dpla_test/transformed/sch-oai-valid.xml\r\n')
         self.assertIn(b'id,report,record,source_file\r\nvalid', test_report_content)
+        self.assertEqual(response, { "transformed": 3 })
 
 
     @mock_s3
@@ -297,7 +298,7 @@ class TestSchematronReporting(unittest.TestCase):
 
         # run tests
         with self.assertLogs() as log:
-            validate.report_s3_schematron(**self.kwargs)
+            response = validate.report_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Reporting On File: dpla_test/transformed/sch-oai-invalid.xml", log.output)
         test_report_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "-report.csv")
         self.assertEqual(test_report_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
@@ -307,6 +308,7 @@ class TestSchematronReporting(unittest.TestCase):
         self.assertIn(b'id,report,record,source_file\r\ninvalid-missingtitle', test_report_content)
         self.assertIn(b'\r\ninvalid-missingrights', test_report_content)
         self.assertIn(b'\r\ninvalid-missingitemurl', test_report_content)
+        self.assertEqual(response, { "transformed": 5 })
 
 
     @mock_s3
@@ -334,7 +336,7 @@ class TestSchematronReporting(unittest.TestCase):
 
         # run tests
         with self.assertLogs() as log:
-            validate.report_s3_schematron(**self.kwargs)
+            response = validate.report_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Reporting On File: dpla_test/transformed/sch-oai-mix.xml", log.output)
         test_report_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "-report.csv")
         self.assertEqual(test_report_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
@@ -345,7 +347,7 @@ class TestSchematronReporting(unittest.TestCase):
         self.assertIn(b'\r\ninvalid-missingtitle', test_report_content)
         self.assertIn(b'\r\ninvalid-missingrights,', test_report_content)
         self.assertIn(b'\r\ninvalid-missingitemurl,', test_report_content)
-
+        self.assertEqual(response, { "transformed": 8 })
 
     @mock_s3
     @patch("tulflow.process.get_github_content")
@@ -372,7 +374,7 @@ class TestSchematronReporting(unittest.TestCase):
 
         # run tests
         with self.assertLogs() as log:
-            validate.report_s3_schematron(**self.kwargs)
+            response = validate.report_s3_schematron(**self.kwargs)
         self.assertIn("INFO:root:Validating & Reporting On File: dpla_test/transformed/sch-oai-empty.xml", log.output)
         test_report_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "-report.csv")
         self.assertEqual(test_report_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
@@ -380,6 +382,7 @@ class TestSchematronReporting(unittest.TestCase):
         self.assertEqual(test_report_objects_ar, ["dpla_test/transformed-filtered-report.csv"])
         test_report_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-report.csv")["Body"].read()
         self.assertIn(b'id,report,record,source_file\r\n', test_report_content)
+        self.assertEqual(response, { "transformed": 0 })
 
     @mock_s3
     @patch("tulflow.process.get_github_content")
@@ -399,14 +402,15 @@ class TestSchematronReporting(unittest.TestCase):
 
         # run tests
         with self.assertLogs() as log:
-            validate.report_s3_schematron(**self.kwargs)
-        self.assertEqual(log.output, ["INFO:root:Records report: https://tulib-airflow-test.s3.amazonaws.com/dpla_test/transformed-filtered-report.csv"])
+            response = validate.report_s3_schematron(**self.kwargs)
+        self.assertEqual(log.output, ["INFO:root:Records report: https://tulib-airflow-test.s3.amazonaws.com/dpla_test/transformed-filtered-report.csv", 'INFO:root:Total Transform Count: 0'])
         test_report_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "-report.csv")
         self.assertEqual(test_report_objects["ResponseMetadata"]["HTTPStatusCode"], 200)
         test_report_objects_ar = [object.get("Key") for object in test_report_objects["Contents"]]
         self.assertEqual(test_report_objects_ar, ["dpla_test/transformed-filtered-report.csv"])
         test_report_content = conn.get_object(Bucket=bucket, Key="dpla_test/transformed-filtered-report.csv")["Body"].read()
         self.assertEqual(b'id,report,record,source_file\r\n', test_report_content)
+        self.assertEqual(response, { "transformed": 0 })
 
     def test_schematron_failed_validation_text(self):
         single_failure = etree.fromstring(b'<svrl:schematron-output xmlns:svrl="http://purl.oclc.org/dsdl/svrl" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:schold="http://www.ascc.net/xml/schematron" xmlns:sch="http://www.ascc.net/xml/schematron" xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" title="" schemaVersion=""><!--  &#160;\n\t\t  &#160;\n\t\t  &#160;\n\t\t --><svrl:ns-prefix-in-attribute-values uri="http://purl.org/dc/terms/" prefix="dcterms"/><svrl:ns-prefix-in-attribute-values uri="http://www.europeana.eu/schemas/edm/" prefix="edm"/><svrl:ns-prefix-in-attribute-values uri="http://www.openarchives.org/OAI/2.0/oai_dc/" prefix="oai_dc"/><svrl:active-pattern id="RequiredElementsPattern" name="Required PA Digital Elements"/><svrl:fired-rule context="oai_dc:dc"/><svrl:failed-assert test="edm:preview" id="Required1" role="error" location="/*[local-name()=\'dc\' and namespace-uri()=\'http://www.openarchives.org/OAI/2.0/oai_dc/\']"><svrl:text>There must be a thumbnail URL</svrl:text></svrl:failed-assert><svrl:active-pattern id="ThumbnailURLElementPattern" name="Additional Thumbnail URL Requirements"/></svrl:schematron-output>')

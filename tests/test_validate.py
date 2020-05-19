@@ -6,6 +6,7 @@ from moto import mock_s3
 from tulflow import process, validate
 import logging
 from mock import patch
+from airflow import AirflowException
 
 class TestSchematronFiltering(unittest.TestCase):
     """Test Class for functions that filtering XML with Schematron."""
@@ -86,13 +87,18 @@ class TestSchematronFiltering(unittest.TestCase):
 
         # run tests
         with self.assertLogs() as log:
-            response = validate.filter_s3_schematron(**self.kwargs)
+            with self.assertRaises(AirflowException) as context:
+                validate.filter_s3_schematron(**self.kwargs)
+
+        errors = ["All records filtered from dpla_test/transformed-filtered/sch-oai-invalid.xml. record_count: 5"]
+        exception = AirflowException(errors)
+        self.assertEqual(str(exception), str(context.exception))
+
         self.assertIn("INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-invalid.xml", log.output)
         self.assertIn("ERROR:root:Invalid record found: invalid-missingtitle", log.output[1])
         self.assertIn("ERROR:root:Invalid record found: invalid-missingrights", log.output[2])
         self.assertIn("INFO:root:Total Filter Count: 5", log.output[6])
         self.assertEqual(len(log.output), 8)
-        self.assertEqual(response, { "filtered": 5 })
 
         test_valid_objects = conn.list_objects(Bucket=bucket, Prefix=self.kwargs.get("destination_prefix") + "/")
         test_valid_objects_ar = [object.get("Key") for object in test_valid_objects["Contents"]]

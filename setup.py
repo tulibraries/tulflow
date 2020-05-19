@@ -21,5 +21,5 @@ setuptools.setup(
     test_suite='nose.collector',
     tests_require=['nose'],
     setup_requires=['setuptools>=17.1'],
-    version="0.5.3"
+    version="0.6.0"
 )

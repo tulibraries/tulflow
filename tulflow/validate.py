@@ -35,7 +35,7 @@ def filter_s3_schematron(**kwargs):
     schematron_doc = process.get_github_content("tulibraries/aggregator_mdx", schematron_file)
     schematron = isoschematron.Schematron(etree.fromstring(schematron_doc), store_report=True)
     total_filter_count = 0
-    errors = []
+    total_record_count = 0
     for s3_key in process.list_s3_content(bucket, access_id, access_secret, source_prefix):
         logging.info("Validating & Filtering File: %s", s3_key)
         s3_content = process.get_s3_content(bucket, s3_key, access_id, access_secret)
@@ -47,6 +47,7 @@ def filter_s3_schematron(**kwargs):
         record_count = 0
         for record in s3_xml.iterchildren():
             record_count += 1
+            total_record_count += 1
             if not schematron.validate(record):
                 record_id = record.get("airflow-record-id")
                 logging.error("Invalid record found: %s", record_id)
@@ -63,15 +64,14 @@ def filter_s3_schematron(**kwargs):
         updated_s3_xml = etree.tostring(s3_xml)
         process.generate_s3_object(updated_s3_xml, bucket, filename, access_id, access_secret)
         if filter_count == record_count and record_count != 0:
-            error = f"All records filtered from {filename}. record_count: {record_count}"
-            errors.append(error)
+            logging.warning(f"All records filtered from {filename}. record_count: {record_count}")
 
     invalid_filename = report_prefix + "-invalid.csv"
     logging.info("Total Filter Count: %s", total_filter_count)
     logging.info("Invalid Records report: https://%s.s3.amazonaws.com/%s", bucket, invalid_filename)
     process.generate_s3_object(csv_in_mem.getvalue(), bucket, invalid_filename, access_id, access_secret)
-    if len(errors) != 0:
-        raise AirflowException(errors)
+    if total_filter_count == total_record_count and total_record_count != 0:
+        raise AirflowException(f"All records were filtered out: {total_record_count}")
     return {"filtered": total_filter_count}
 
 def report_s3_schematron(**kwargs):

@@ -14,7 +14,7 @@ requests-mock = "*"
 [packages]
 setuptools = "*"
 wheel = "*"
-sickle = "*"
+sickle = ">=0.7.0"
 pexpect = "*"
 xmltodict = "*"
 apache-airflow = ">=1.10.3"

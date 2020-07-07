@@ -17,7 +17,7 @@
     xmlns:svcs="http://rdfs.org/sioc/services"
     version="2.0">
     <xsl:output omit-xml-declaration="no" method="xml" encoding="UTF-8" indent="yes"/>
-    <xsl:include href="https://raw.githubusercontent.com/tulibraries/aggregator_mdx/master/transforms/temple.xsl"/>
+    <xsl:include href="https://raw.githubusercontent.com/tulibraries/aggregator_mdx/main/transforms/temple.xsl"/>
 
     <!-- drop nodes we don't care about, namely, header values -->
     <xsl:template match="text() | @*"/>

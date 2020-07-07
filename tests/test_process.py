@@ -111,7 +111,7 @@ class TestDataProcessInteractions(unittest.TestCase):
         """Test getting existing file from GitHub."""
         httpretty.register_uri(
             httpretty.GET,
-            "https://raw.github.com/tulibraries/aggregator_mdx/master/transforms/temple.xsl",
+            "https://raw.github.com/tulibraries/aggregator_mdx/main/transforms/temple.xsl",
             body=open("tests/fixtures/temple.xsl").read()
         )
         repository = "tulibraries/aggregator_mdx"
@@ -125,7 +125,7 @@ class TestDataProcessInteractions(unittest.TestCase):
         """Test getting missing file from GitHub & return appropriate error."""
         httpretty.register_uri(
             httpretty.GET,
-            "https://raw.github.com/tulibraries/aggregator_mdx/master/transforms/temple-fake.xsl",
+            "https://raw.github.com/tulibraries/aggregator_mdx/main/transforms/temple-fake.xsl",
             status=404
         )
         repository = "tulibraries/aggregator_mdx"
@@ -135,7 +135,7 @@ class TestDataProcessInteractions(unittest.TestCase):
             with self.assertRaises(SystemExit) as pytest_wrapped_e:
                 process.get_github_content(repository, filename)
         self.assertEqual(pytest_wrapped_e.exception.code, 1)
-        self.assertIn("ERROR:root:404 Client Error: Not Found for url: https://raw.github.com/tulibraries/aggregator_mdx/master/transforms/temple-fake.xsl", log.output)
+        self.assertIn("ERROR:root:404 Client Error: Not Found for url: https://raw.github.com/tulibraries/aggregator_mdx/main/transforms/temple-fake.xsl", log.output)
 
 class TestS3ProcessInteractions(unittest.TestCase):
     """Test Class for S3 data processing functions."""

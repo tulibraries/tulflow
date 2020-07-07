@@ -75,7 +75,7 @@ def generate_bw_parent_field(parent_id):
     subfield.text = parent_id
     return new_field
 
-def get_github_content(repository, filename, branch="master"):
+def get_github_content(repository, filename, branch="main"):
     """Get the contents of GitHub file."""
     raw_url = "https://raw.github.com/{repo}/{branch}/{filename}".format(
         repo=repository,

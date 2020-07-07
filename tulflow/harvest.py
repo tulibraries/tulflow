@@ -82,7 +82,7 @@ def harvest_oai(**kwargs):
     harvest_params = kwargs.get("harvest_params")
     logging.info("Harvesting from %s", oai_endpoint)
     logging.info("Harvesting %s", harvest_params)
-    request = Sickle(oai_endpoint, retry_status_codes=[500,503])
+    request = Sickle(oai_endpoint, retry_status_codes=[500,503], max_retries=3)
     data = request.ListRecords(**harvest_params)
     return data
 

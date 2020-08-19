@@ -1,7 +1,6 @@
 language: python
 python:
 - '3.6'
-
 install:
 - pip install pipenv
 - SLUGIFY_USES_TEXT_UNIDECODE=yes pipenv install --dev
@@ -12,8 +11,20 @@ script:
 after_success:
 - true
 before_deploy:
-- true
+- VERSION='2.14.2'; OS=$TRAVIS_OS_NAME; ARCH=$TRAVIS_CPU_ARCH
+- wget https://github.com/github/hub/releases/download/v$VERSION/hub-$OS-$ARCH-$VERSION.tgz
+  -O /tmp/hub.tgz
+- tar -xvf /tmp/hub.tgz
+- export PATH=$PATH:$PWD/hub-$OS-$ARCH-$VERSION/bin
+- echo -e "machine github.com\n  login $GITHUB_TOKEN" > ~/.netrc
 deploy:
+- provider: script
+  script: ./scripts/airflow-update.sh
+  skip_cleanup: true
+  on:
+    tags: true
+    branch:
+    - "/^v(\\d+)\\.(\\d+)(\\.\\d+)?$/"
 - provider: pypi
   user: cmharlow
   password:
@@ -21,10 +32,15 @@ deploy:
   on:
     tags: true
     branch:
-      - /^v(\d+)\.(\d+)(\.\d+)?$/
+    - "/^v(\\d+)\\.(\\d+)(\\.\\d+)?$/"
 notifications:
   slack:
     rooms:
-      - secure: SDncKtH2PvP4q1sJDL/m0oJNaE78Ye0S2yQGmVOE71/a0ShzKCzt+Pa6SaklKspdcrD7D1AtgwJGwkQhxaqXtDDRI4WyYjCIi2I7VHy5drnzEddtpAi4mPedoqEC8m6lQbsmKewQFq5uFCQYetp7YHV675B3noOnGbWw0t3s0UVn17XV7G2zk3a6l4H9Rj7dM9eSbcSTl+vWoHA93ZoQpId278ZV4cTbL0lXvhAueTM1FCKAZxArHMRa3UA4ocDsO9tqiKK96Gf4qzcVzYAhc9tW2Tx/9wjvsAAKxRpdWjQ5n1oMX+oAhSIocxn9p3ye8GZ5OwgB3acigPcKt8foc6SuYrX2Ppu/s3BdJz9AK/fiRdqtpEu1PiQAbsAdhatGh2OolvaymR9LQ4NVLk+xvctUANS5TeFEnIfEl73SxPwh844PznwKiTFSvN/XAd+39R1BNHJopGgJfzaObODgI8uKtqQA4UPVxyuB3PfWAqUGJKRecqu9yaGnQhqqZdyL+o4GXqWBdXaRXwdRHtmwpbFa71RnjyWttOIMKxQhKTVhOtcAuuu3qwj+Z7q7hrxMwkL/Xq4gJ5jbfzcWbN/Tik47YXLppIOYT+57i1QeQAokHarE5/0/RhBMwn9mWqcP77IE8h+FAMaVtdOQbbULYGluhpHgENXL9f/FIDEZp/A=
+    - secure: SDncKtH2PvP4q1sJDL/m0oJNaE78Ye0S2yQGmVOE71/a0ShzKCzt+Pa6SaklKspdcrD7D1AtgwJGwkQhxaqXtDDRI4WyYjCIi2I7VHy5drnzEddtpAi4mPedoqEC8m6lQbsmKewQFq5uFCQYetp7YHV675B3noOnGbWw0t3s0UVn17XV7G2zk3a6l4H9Rj7dM9eSbcSTl+vWoHA93ZoQpId278ZV4cTbL0lXvhAueTM1FCKAZxArHMRa3UA4ocDsO9tqiKK96Gf4qzcVzYAhc9tW2Tx/9wjvsAAKxRpdWjQ5n1oMX+oAhSIocxn9p3ye8GZ5OwgB3acigPcKt8foc6SuYrX2Ppu/s3BdJz9AK/fiRdqtpEu1PiQAbsAdhatGh2OolvaymR9LQ4NVLk+xvctUANS5TeFEnIfEl73SxPwh844PznwKiTFSvN/XAd+39R1BNHJopGgJfzaObODgI8uKtqQA4UPVxyuB3PfWAqUGJKRecqu9yaGnQhqqZdyL+o4GXqWBdXaRXwdRHtmwpbFa71RnjyWttOIMKxQhKTVhOtcAuuu3qwj+Z7q7hrxMwkL/Xq4gJ5jbfzcWbN/Tik47YXLppIOYT+57i1QeQAokHarE5/0/RhBMwn9mWqcP77IE8h+FAMaVtdOQbbULYGluhpHgENXL9f/FIDEZp/A=
     on_success: always
     on_failure: always
+env:
+  global:
+  -  HUB_PROTOCOL=https
+  - secure: Q8fdSGiogby7RshrUjodfzgeRhZLuL+s5wiLS7YjDQtJpG14lZSJqfgHKRdgOtRa62yU9Qfzvn2H7ZaKilB1QbvlXTdCaXlQ1smFQC1LovC+ZxjT4+chcqnV5k40Tsvx/emz4sF/qfewpBZzaqXyxZHbVL6De+4MgjpWCXC0/gJI94jen+lElu7Xn/zyOrTai4OIkL6EvLnpVpsGPBA8dbwjcW2jDH4T5sT21Ttfc66LQANqoaWIrp0eB4OtdDPUDVuDcZH+e5XxDKnw9s6WKHfVXF8UzIehxNhpzJI8rccTC6I74y05Nj1QEGYXxRHNv+H2XVjTyIIgfSVftJiz1qZ96HI8dA3NlD8SoPwa5sLe8gi4rAODb40jHSsCSErMU/ou5mWHDgs9BWVPAnNroVnIUi30pFGghgsasozSfeNLRqc1tV6EXfc3GNb+mGGoJsEU/19bkO2OBB2k4kI0Ac3D0kzXzsajDp89Rv+dmV7rSvjNdLG1ZvMR+HOmHQDTYZJS6TwivJ46BMZrs+SgImCzjKsXLBauu8MzQddwZN7uBSAwWTR46gMmDoO6xtBhgSvSfBgZyTRDqZr3xTtA1wrmMWamZvsEtMwAt+KKEqSX6Rp3D86Gnre5JYXro6U2UGbu9n90KnZnpXnjNe9fvfCxOuMurUt8vzxJV9H6o+o=
+  - secure: WmS6o7oNOLrDgUyJnqFgeEYwjmSGoX7u96f7nH4Cfwa3HOYkhVxFch5bGeAuMo4U/QvFX7VRycyyE+5gp4T3pvTolHVQU90kgNpzGU8D9W+3Xh3cSLXbSC0YgG16TTr/L+T9NOniN4CW9JXuyE1qwllsRgifJc9uRViuT0hc34dA4DHH5frVzFRtp9gW9R5Ru2zBkCog9PFbwVovF4Rpz1UpEuHF+lTwQhEJH0GQaoJfkvQf94Csn+G7qrP9myrWaUbPfjp0VIlrAdeM4LoCmAr2A4GrMF6uPUm3zDA0sSB+wSVhwslZCru2bFwkZgY+K5gP8b/1+7/+pJyuUMrtH/hI7W+rI8gEYNWLBXQ1TpqyLr80nwg7eDQYJrxKkxBLIxHCAofkPEhVLYDz197XoSKJCMlrSEHtuQLHtqKaN9VGwHTlE3vIFeDVv1KWveVJafUBAC4de64OVwO+0GgBoBh0JJcq+gAK38ahnFXin3+at0diwugPLAGHYr1daIyyvFsrD/xfiQb8K+40K+IoXCMZsvU8F1Z8pq319c1/B1QFAPRR8hh9GyODRjG1pzrRvjuCeJRiwRrD+aU2gWkrNs+c4EwkDJg4byj5swo/iO/lch4sIm/hHNi6yOwE81Stti0NbFxA6fXKFJWLlD1NQOwphyTt+BYSU1M0aCpV0SM=

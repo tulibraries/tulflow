@@ -19,7 +19,7 @@ pexpect = "*"
 xmltodict = "*"
 apache-airflow = ">=1.10.3"
 boto3 = "*"
-lxml = "==4.4.3"
+lxml = "==4.6.2"
 requests = "*"
 werkzeug="<1.0.0"
 

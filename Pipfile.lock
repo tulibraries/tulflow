@@ -290,7 +290,7 @@
                 "sha256:b8de9eff2b35fb037368f28a7df1df4e6436f578fa74423505b6c6a778d5b5dd",
                 "sha256:c2d6341ff566f609e89a2acb2db190e5e1d23d5409d6cc8d2fe34d72443876d4"
             ],
-            "markers": "python_version < '3.8'",
+            "markers": "python_version == '3.6'",
             "version": "==2.1.1"
         },
         "iso8601": {
@@ -904,11 +904,11 @@
         },
         "wheel": {
             "hashes": [
-                "sha256:497add53525d16c173c2c1c733b8f655510e909ea78cc0e29d374243544b77a2",
-                "sha256:99a22d87add3f634ff917310a3d87e499f19e663413a52eb9232c447aa646c9f"
+                "sha256:645f81da70dcd993844005762acbb7e8628306bec414c90539d276fbd4fc7cbe",
+                "sha256:e17f05e14282d0e666327f800ef43123b40f3dbc13a86193b604f2ebfae0dabc"
             ],
             "index": "pypi",
-            "version": "==0.35.1"
+            "version": "==0.36.0"
         },
         "wtforms": {
             "hashes": [
@@ -1125,7 +1125,7 @@
                 "sha256:b8de9eff2b35fb037368f28a7df1df4e6436f578fa74423505b6c6a778d5b5dd",
                 "sha256:c2d6341ff566f609e89a2acb2db190e5e1d23d5409d6cc8d2fe34d72443876d4"
             ],
-            "markers": "python_version < '3.8'",
+            "markers": "python_version == '3.6'",
             "version": "==2.1.1"
         },
         "importlib-resources": {

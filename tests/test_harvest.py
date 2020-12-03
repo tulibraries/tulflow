@@ -1,12 +1,11 @@
 """Tests suite for tulflow harvest (Functions for harvesting OAI in Airflow Tasks)."""
 from datetime import datetime
+from unittest import mock
 import hashlib
 import unittest
+from moto import mock_s3
 import boto3
 from lxml import etree
-from moto import mock_s3
-from unittest import mock
-from unittest.mock import patch
 from airflow.hooks.S3_hook import S3Hook
 from airflow.models import DAG
 from airflow.utils import timezone
@@ -14,8 +13,6 @@ from lxml import etree
 from sickle.iterator import OAIItemIterator
 import httpretty
 from tulflow import harvest
-from types import SimpleNamespace
-from moto import mock_s3
 
 DEFAULT_DATE = timezone.datetime(2019, 8, 16)
 NS = {
@@ -497,8 +494,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         kwargs["all_sets"] = True
         kwargs["dag"] = dag
         kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        
+
         mock_process.return_value = {"updated": 2, "deleted": 0 }
         response = harvest.oai_to_s3(**kwargs)
         self.assertEqual(response, {"updated": 2, "deleted": 0 })
-

@@ -1,9 +1,9 @@
 """Tests suite for tulflow harvest (Functions for harvesting OAI in Airflow Tasks)."""
 import unittest
+from moto import mock_s3
 import boto3
 import httpretty
 from lxml import etree
-from moto import mock_s3
 from tulflow import process
 
 class TestDataProcessInteractions(unittest.TestCase):

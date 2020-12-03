@@ -2,9 +2,9 @@
 import json
 from re import compile as re_compile
 import unittest
+from unittest.mock import patch
 import requests_mock
 from tulflow.solr_api_utils import SolrApiUtils
-from unittest.mock import Mock, patch
 
 
 class TestSolrApiUtils(unittest.TestCase):

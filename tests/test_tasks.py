@@ -1,7 +1,7 @@
 """Tests suite for tulflow tasks (generic Airflow Tasks as Functions)."""
 import unittest
-import pytest
 from unittest.mock import patch
+import pytest
 from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
 from airflow.operators.http_operator import SimpleHttpOperator
 from airflow.hooks.base_hook import BaseHook

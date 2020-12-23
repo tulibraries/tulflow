@@ -1,8 +1,27 @@
 """tulflow Python package setup."""
+
+import os
+import sys
 import setuptools
+from setuptools.command.install import install
+
+VERSION = "0.6.3"
 
 with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
+
+class VerifyVersionCommand(install):
+    """Custom command to verify that the git tag matches our version"""
+    description = 'verify that the git tag matches our version'
+
+    def run(self):
+        tag = os.getenv('CIRCLE_TAG')
+
+        if tag != VERSION:
+            info = "Git tag: {0} does not match the version of this app: {1}".format(
+                tag, VERSION
+            )
+            sys.exit(info)
 
 setuptools.setup(
     name="tulflow",
@@ -18,8 +37,11 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    test_suite='nose.collector',
-    tests_require=['nose'],
-    setup_requires=['setuptools>=17.1'],
-    version="0.6.3"
+    test_suite="nose.collector",
+    tests_require=["nose"],
+    setup_requires=["setuptools>=17.1"],
+	version=VERSION,
+	cmdclass={
+        "verify": VerifyVersionCommand,
+    }
 )

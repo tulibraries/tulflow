@@ -9,6 +9,7 @@ import logging
 import pandas
 from lxml import etree
 from sickle import Sickle
+from sickle.oaiexceptions import NoRecordsMatch
 from tulflow import process
 
 
@@ -83,8 +84,11 @@ def harvest_oai(**kwargs):
     logging.info("Harvesting from %s", oai_endpoint)
     logging.info("Harvesting %s", harvest_params)
     request = Sickle(oai_endpoint, retry_status_codes=[500,503], max_retries=3)
-    data = request.ListRecords(**harvest_params)
-    return data
+    try:
+        return request.ListRecords(**harvest_params)
+    except NoRecordsMatch:
+        logging.info("No records found.")
+        return []
 
 
 class OaiXml:

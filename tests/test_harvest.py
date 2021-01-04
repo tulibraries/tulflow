@@ -369,6 +369,27 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         self.assertIn(b"<setSpec>dpla_test</setSpec>", xml_output)
         self.assertIn(b"<dcterms:title>lizards</dcterms:title>", xml_output)
 
+    @httpretty.activate
+    def test_harvest_oai_no_records(self, **kwargs):
+        """Test Calling OAI-PMH HTTP Endpoint & Returning XML String."""
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body="""
+            <?xml version="1.0" encoding="UTF-8"?><OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd"><responseDate>2021-01-04T19:12:46Z</responseDate><request verb="ListRecords" metadataPrefix="oai_qdc" set="p15860coll2">http://cdm15860.contentdm.oclc.org/oai/oai.php</request><error code="noRecordsMatch">The combination of the values of the from, until, set and metadataPrefix arguments results in an empty list. </error></OAI-PMH>
+            """
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "generic",
+            "included_sets": "dpla_test",
+            "from": None,
+            "until": None
+        }
+
+        response = harvest.harvest_oai(**kwargs)
+        self.assertEqual(response, [])
 
     @httpretty.activate
     def test_process_xml_dpla(self, **kwargs):

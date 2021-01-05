@@ -502,8 +502,13 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         kwargs["dag"] = dag
         kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         mock_process.return_value = {"updated": 2, "deleted": 0 }
-        response = harvest.oai_to_s3(**kwargs)
-        self.assertEqual(response, {"updated": 4, "deleted": 0 })
+        actual = harvest.oai_to_s3(**kwargs)
+        self.assertEqual(actual, {"updated": 4, "deleted": 0, "sets_with_no_records": []})
+
+        mock_harvest.return_value = []
+        mock_process.return_value = {"updated": 0, "deleted": 0 }
+        actual = harvest.oai_to_s3(**kwargs)
+        self.assertEqual(actual, {"updated": 0, "deleted": 0, "sets_with_no_records": ["set1", "set2"]})
 
     @mock.patch("tulflow.harvest.harvest_oai")
     @mock.patch("tulflow.harvest.dag_s3_prefix")
@@ -518,8 +523,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         kwargs["all_sets"] = True
         kwargs["dag"] = dag
         kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        
         mock_process.return_value = {"updated": 2, "deleted": 0 }
-        response = harvest.oai_to_s3(**kwargs)
-        self.assertEqual(response, {"updated": 2, "deleted": 0 })
+        actual = harvest.oai_to_s3(**kwargs)
+        self.assertEqual(actual, {"updated": 2, "deleted": 0, "sets_with_no_records": [] })
 

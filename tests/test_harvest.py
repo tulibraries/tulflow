@@ -369,6 +369,27 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         self.assertIn(b"<setSpec>dpla_test</setSpec>", xml_output)
         self.assertIn(b"<dcterms:title>lizards</dcterms:title>", xml_output)
 
+    @httpretty.activate
+    def test_harvest_oai_no_records(self, **kwargs):
+        """Test Calling OAI-PMH HTTP Endpoint & Returning XML String."""
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body="""
+            <?xml version="1.0" encoding="UTF-8"?><OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd"><responseDate>2021-01-04T19:12:46Z</responseDate><request verb="ListRecords" metadataPrefix="oai_qdc" set="p15860coll2">http://cdm15860.contentdm.oclc.org/oai/oai.php</request><error code="noRecordsMatch">The combination of the values of the from, until, set and metadataPrefix arguments results in an empty list. </error></OAI-PMH>
+            """
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "generic",
+            "included_sets": "dpla_test",
+            "from": None,
+            "until": None
+        }
+
+        response = harvest.harvest_oai(**kwargs)
+        self.assertEqual(response, [])
 
     @httpretty.activate
     def test_process_xml_dpla(self, **kwargs):
@@ -481,8 +502,13 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         kwargs["dag"] = dag
         kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         mock_process.return_value = {"updated": 2, "deleted": 0 }
-        response = harvest.oai_to_s3(**kwargs)
-        self.assertEqual(response, {"updated": 4, "deleted": 0 })
+        actual = harvest.oai_to_s3(**kwargs)
+        self.assertEqual(actual, {"updated": 4, "deleted": 0, "sets_with_no_records": []})
+
+        mock_harvest.return_value = []
+        mock_process.return_value = {"updated": 0, "deleted": 0 }
+        actual = harvest.oai_to_s3(**kwargs)
+        self.assertEqual(actual, {"updated": 0, "deleted": 0, "sets_with_no_records": ["set1", "set2"]})
 
     @mock.patch("tulflow.harvest.harvest_oai")
     @mock.patch("tulflow.harvest.dag_s3_prefix")
@@ -497,8 +523,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         kwargs["all_sets"] = True
         kwargs["dag"] = dag
         kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        
         mock_process.return_value = {"updated": 2, "deleted": 0 }
-        response = harvest.oai_to_s3(**kwargs)
-        self.assertEqual(response, {"updated": 2, "deleted": 0 })
+        actual = harvest.oai_to_s3(**kwargs)
+        self.assertEqual(actual, {"updated": 2, "deleted": 0, "sets_with_no_records": [] })
 

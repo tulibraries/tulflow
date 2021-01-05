@@ -9,6 +9,7 @@ import logging
 import pandas
 from lxml import etree
 from sickle import Sickle
+from sickle.oaiexceptions import NoRecordsMatch
 from tulflow import process
 
 
@@ -30,15 +31,20 @@ def oai_to_s3(**kwargs):
 
     oai_sets = generate_oai_sets(**kwargs)
     all_processed = []
+    sets_with_no_records = []
     if oai_sets:
         for oai_set in oai_sets:
             kwargs["harvest_params"]["set"] = oai_set
             data = harvest_oai(**kwargs)
+            if data == []:
+                sets_with_no_records.append(oai_set)
             outdir = dag_s3_prefix(dag_id, dag_start_date)
             processed = process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
             all_processed.append(processed)
     else:
         data = harvest_oai(**kwargs)
+        if data == []:
+            sets_with_no_records.append(oai_set)
         outdir = dag_s3_prefix(dag_id, dag_start_date)
         processed = process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
         all_processed.append(processed)
@@ -46,7 +52,9 @@ def oai_to_s3(**kwargs):
     all_deleted = sum([set['deleted'] for set in all_processed])
     logging.info("Total OAI Records Harvested & Processed: %s", all_updated)
     logging.info("Total OAI Records Harvest & Marked for Deletion: %s", all_deleted)
-    return {"updated": all_updated, "deleted": all_deleted}
+    logging.info("Total sets with no records: %s", len(sets_with_no_records))
+    logging.info("Sets with no records %s", sets_with_no_records)
+    return {"updated": all_updated, "deleted": all_deleted, "sets_with_no_records": sets_with_no_records}
 
 
 def generate_oai_sets(**kwargs):
@@ -83,8 +91,11 @@ def harvest_oai(**kwargs):
     logging.info("Harvesting from %s", oai_endpoint)
     logging.info("Harvesting %s", harvest_params)
     request = Sickle(oai_endpoint, retry_status_codes=[500,503], max_retries=3)
-    data = request.ListRecords(**harvest_params)
-    return data
+    try:
+        return request.ListRecords(**harvest_params)
+    except NoRecordsMatch:
+        logging.info("No records found.")
+        return []
 
 
 class OaiXml:

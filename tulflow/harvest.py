@@ -7,11 +7,12 @@ import hashlib
 import io
 import logging
 import pandas
+import sickle
 from lxml import etree
 from sickle import Sickle
+from sickle.models import xml_to_dict
 from sickle.oaiexceptions import NoRecordsMatch
 from tulflow import process
-
 
 NS = {
     "marc21": "http://www.loc.gov/MARC21/slim",
@@ -84,15 +85,54 @@ def generate_oai_sets(**kwargs):
     return []
 
 
+class HarvestIterator(sickle.iterator.OAIItemIterator):
+    def next(self):
+        """Return the next record/header/set."""
+        while True:
+            for item in self._items:
+                mapped = self.mapper(item)
+                if self.ignore_deleted and mapped.deleted:
+                    continue
+                if hasattr(mapped, 'metadata') and mapped.metadata == None:
+                    logging.info("Skipping record with no metadata: %s", mapped.header.identifier)
+                    continue
+                return mapped
+            if self.resumption_token and self.resumption_token.token:
+                self._next_response()
+            else:
+                raise StopIteration
+    pass
+
+# TODO: Remove if https://github.com/mloesch/sickle/pull/47 gets merged.
+class HarvestRecord(sickle.models.Record):
+    def get_metadata(self):
+        # We want to get record/metadata/<container>/*
+        # <container> would be the element ``dc``
+        # in the ``oai_dc`` case.
+        meta_data = self.xml.find('.//' + self._oai_namespace + 'metadata')
+        if meta_data != None:
+            return xml_to_dict(meta_data.getchildren()[0], strip_ns=self._strip_ns)
+    pass
+
 def harvest_oai(**kwargs):
     """Create OAI ListRecords Iterator for Harvesting Data."""
     oai_endpoint = kwargs.get("oai_endpoint")
     harvest_params = kwargs.get("harvest_params")
     logging.info("Harvesting from %s", oai_endpoint)
     logging.info("Harvesting %s", harvest_params)
-    request = Sickle(oai_endpoint, retry_status_codes=[500,503], max_retries=3)
+    sickle = Sickle(oai_endpoint, retry_status_codes=[500,503], max_retries=3)
+
+    class_mapping = harvest_params.get("class_mapping", {
+        "ListRecords": HarvestRecord,
+        })
+    iterator = harvest_params.get("iterator", HarvestIterator)
+    for key in class_mapping:
+        sickle.class_mapping[key] = class_mapping[key]
+
+    sickle.iterator = iterator
+
     try:
-        return request.ListRecords(**harvest_params)
+        return sickle.ListRecords(**harvest_params)
     except NoRecordsMatch:
         logging.info("No records found.")
         return []

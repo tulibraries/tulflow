@@ -11,7 +11,6 @@ from airflow.hooks.S3_hook import S3Hook
 from airflow.models import DAG
 from airflow.utils import timezone
 from lxml import etree
-from sickle.iterator import OAIItemIterator
 import httpretty
 from tulflow import harvest
 from types import SimpleNamespace
@@ -362,9 +361,9 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             "until": None
         }
 
-        response = harvest.harvest_oai(**kwargs)
-        xml_output = etree.tostring(response.next().xml, pretty_print=True, encoding="utf-8")
-        self.assertEqual(type(response), OAIItemIterator)
+        records = harvest.harvest_oai(**kwargs)
+        xml_output = etree.tostring(records.next().xml, pretty_print=True, encoding="utf-8")
+        self.assertEqual(type(records), harvest.HarvestIterator)
         self.assertIn(b"<identifier>oai:lizards</identifier>", xml_output)
         self.assertIn(b"<setSpec>dpla_test</setSpec>", xml_output)
         self.assertIn(b"<dcterms:title>lizards</dcterms:title>", xml_output)
@@ -388,8 +387,45 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             "until": None
         }
 
-        response = harvest.harvest_oai(**kwargs)
-        self.assertEqual(response, [])
+        records = harvest.harvest_oai(**kwargs)
+        self.assertEqual(records, [])
+
+    @httpretty.activate
+    def test_harvest_oai_no_metadata(self, **kwargs):
+        """Test Calling OAI-PMH HTTP Endpoint & Returning XML String."""
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body = """
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+    <responseDate>2019-08-30T13:46:14Z</responseDate>
+    <request verb="ListRecords" set="dpla_test">http://10.5.0.10/combine/oai</request>
+    <ListRecords>
+        <record>
+            <header>
+                <identifier>oai:lizards</identifier>
+                <datestamp>2019-08-30T13:45:28Z</datestamp>
+                <setSpec>dpla_test</setSpec>
+            </header>
+        </record>
+    </ListRecords>
+</OAI-PMH>
+"""
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "generic",
+            "included_sets": "dpla_test",
+            "from": None,
+            "until": None
+        }
+
+        records = harvest.harvest_oai(**kwargs)
+        # Skips records with no metadata.
+        self.assertEqual(len(list(records)), 0)
 
     @httpretty.activate
     def test_process_xml_dpla(self, **kwargs):

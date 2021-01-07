@@ -6,7 +6,7 @@ orbs:
 jobs:
   build-and-test:
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.6.8
         environment:
           PIPENV_VENV_IN_PROJECT: true
           SLUGIFY_USES_TEXT_UNIDECODE: yes
@@ -14,10 +14,6 @@ jobs:
       - checkout
       - python/install-packages:
           args: --dev
-          pkg-manager: pipenv
-      - run:
-          command: pipenv run airflow initdb
-          name: Init Airflow
       - run:
           command: pipenv run pylint tulflow -E
           name: Lint
@@ -27,7 +23,7 @@ jobs:
 
   build-and-deploy:
     docker:
-      - image: circleci/python:3.6.6
+      - image: circleci/python:3.6.8
         environment:
           PIPENV_VENV_IN_PROJECT: true
           SLUGIFY_USES_TEXT_UNIDECODE: yes

@@ -4,7 +4,6 @@ import boto3
 from lxml import etree
 from moto import mock_s3
 from tulflow import process, validate
-import logging
 from mock import patch
 from airflow import AirflowException
 

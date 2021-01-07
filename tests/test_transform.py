@@ -19,6 +19,9 @@ class TestXSLTransform(unittest.TestCase):
         "access_secret": "puppies"
     }
 
+    def setUp(self):
+        transform.prepare_saxon_engine()
+
     @mock_s3
     @patch('subprocess.check_output')
     def test_transform_s3_xml_simple(self, mocked_subprocess):

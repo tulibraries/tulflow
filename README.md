@@ -1,6 +1,6 @@
 # TULFLOW
 
-[![Build Status](https://travis-ci.com/tulibraries/tulflow.svg?branch=main)](https://travis-ci.com/tulibraries/tulflow)
+[![Build Status](https://circleci.com/gh/tulibraries/tulflow.svg?style=svg&circle-token=3f42b93c7525db72aa5411eded38a862296ed707)](https://circleci.com/gh/tulibraries/tulflow)
 
 Small Python package / library for common ETL-adjacent functions, primarily used in the TU Libraries Airflow tasks.
 

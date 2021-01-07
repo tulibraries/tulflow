@@ -8,9 +8,10 @@ import logging
 import os
 import subprocess
 import sys
-from lxml import etree
 import requests
+from lxml import etree
 from tulflow import process
+from pathlib import Path
 
 # pylint: disable=unexpected-keyword-arg
 def transform_s3_xsl(**kwargs):
@@ -57,7 +58,7 @@ def prepare_saxon_engine(saxon_jar="saxon.jar", saxon_path="/tmp/saxon/"):
     saxon_download_sha1 = "c1f413a1b810dbf0d673ffd3b27c8829a82ac31c"
 
     if not os.path.exists(saxon_path + saxon_jar):
-        os.mkdir(saxon_path)
+        Path(saxon_path).mkdir(parents=True, exist_ok=True)
         request_url = "https://repo1.maven.org/maven2/net/sf/saxon/Saxon-HE/"
         request_url += saxon_version + "/Saxon-HE-" + saxon_version + ".jar"
         resp = requests.get(request_url, allow_redirects=True, verify=False)

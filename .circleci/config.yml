@@ -44,14 +44,13 @@ jobs:
           name: Create package
           command: |
             # create a source distribution
+
             python3 setup.py sdist
             # create a wheel
             python3 setup.py bdist_wheel
       - run:
           name: Upload to pypi
-          command: |
-            cd ~/project
-            python3  -m twine upload --repository tulflow dist/*
+          command: python3  -m twine upload dist/*
 
 
 workflows:

@@ -29,12 +29,11 @@ jobs:
           SLUGIFY_USES_TEXT_UNIDECODE: yes
     steps:
       - checkout
-      - python/install-packages:
-          args: --user twine
-          pkg-manager: pip
       - run:
-          name: Verify git tag vs. version
-          command: python3 setup.py verify
+          name: Verify git tag vs. version.
+          command: |
+            pip install --user twine
+            python3 setup.py verify
       - run:
           name: Init .pypirc
           command: |

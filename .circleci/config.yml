@@ -49,7 +49,9 @@ jobs:
             python3 setup.py bdist_wheel
       - run:
           name: Upload to pypi
-          command: python3  -m twine upload --repository tulflow dist/*
+          command: |
+            cd ~/project
+            python3  -m twine upload --repository tulflow dist/*
 
 
 workflows:

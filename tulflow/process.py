@@ -19,6 +19,20 @@ etree.register_namespace("oai", "http://www.openarchives.org/OAI/2.0")
 LOGGER = logging.getLogger('tulflow_process')
 PARSER = etree.XMLParser(remove_blank_text=True)
 
+def s3_client(access_id, access_secret):
+    kwargs = {}
+    if access_id:
+        kwargs['aws_access_key_id'] = access_id
+
+    if access_secret:
+        kwargs['aws_secret_access_key'] = access_secret
+
+    return boto3.client(
+        "s3",
+        "us-east-1",
+        **kwargs
+    )
+
 
 def add_marc21xml_root_ns(data_in):
     """Given an ALMASFTP XML Collection document as bytes,
@@ -92,28 +106,16 @@ def get_github_content(repository, filename, branch="main"):
 
 def remove_s3_object(bucket, key, access_id, access_secret):
     """Removes an S3 object."""
-    s3_client = boto3.client(
-        "s3",
-        "us-east-1",
-        aws_access_key_id=access_id,
-        aws_secret_access_key=access_secret
-    )
     try:
-        s3_client.delete_object(Bucket=bucket, Key=key)
+        s3_client(access_id, access_secret).delete_object(Bucket=bucket, Key=key)
     except ClientError as error:
         LOGGER.error(error)
 
 
 def get_s3_content(bucket, key, access_id, access_secret):
     """Get the contents of S3 object located at given S3 Key."""
-    s3_client = boto3.client(
-        "s3",
-        "us-east-1",
-        aws_access_key_id=access_id,
-        aws_secret_access_key=access_secret
-    )
     try:
-        response = s3_client.get_object(Bucket=bucket, Key=key)
+        response = s3_client(access_id, access_secret).get_object(Bucket=bucket, Key=key)
         body = response['Body'].read()
         return body
     except ClientError as error:
@@ -123,14 +125,8 @@ def get_s3_content(bucket, key, access_id, access_secret):
 
 def list_s3_content(bucket, access_id, access_secret, prefix=""):
     """Get a list of S3 objects located in a Bucket at the given Prefix"""
-    s3_client = boto3.client(
-        "s3",
-        "us-east-1",
-        aws_access_key_id=access_id,
-        aws_secret_access_key=access_secret
-    )
     try:
-        response = s3_client.list_objects(Bucket=bucket, Prefix=prefix)
+        response = s3_client(access_id, access_secret).list_objects(Bucket=bucket, Prefix=prefix)
         objects = []
         if response.get("Contents"):
             for key in response['Contents']:
@@ -142,14 +138,7 @@ def list_s3_content(bucket, access_id, access_secret, prefix=""):
 
 
 def generate_s3_object(body, bucket, key, access_id, access_secret):
-    """Given a bytestring, write it to S3."""
-    s3_client = boto3.client(
-        "s3",
-        "us-east-1",
-        aws_access_key_id=access_id,
-        aws_secret_access_key=access_secret
-    )
     try:
-        s3_client.put_object(Bucket=bucket, Key=key, Body=body)
+        s3_client(access_id, access_secret).put_object(Bucket=bucket, Key=key, Body=body)
     except ClientError as error:
         LOGGER.error(error)

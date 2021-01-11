@@ -30,7 +30,8 @@ jobs:
     steps:
       - checkout
       - python/install-packages:
-          args: twine
+          args: --user twine
+          pkg-manager: pip
       - run:
           name: Verify git tag vs. version
           command: python3 setup.py verify

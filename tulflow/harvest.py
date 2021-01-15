@@ -39,8 +39,6 @@ def oai_to_s3(**kwargs):
             data = harvest_oai(**kwargs)
             if data == []:
                 sets_with_no_records.append(oai_set)
-                logging.info("Skipping processing % set because it has no data.", oai_set)
-                continue
             outdir = dag_s3_prefix(dag_id, dag_start_date)
             processed = process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
             all_processed.append(processed)

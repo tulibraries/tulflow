@@ -541,9 +541,24 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         actual = harvest.oai_to_s3(**kwargs)
         self.assertEqual(actual, {"updated": 4, "deleted": 0, "sets_with_no_records": []})
 
+    @mock.patch("tulflow.harvest.harvest_oai")
+    @mock.patch("tulflow.harvest.dag_s3_prefix")
+    @mock.patch("tulflow.harvest.process_xml")
+    def test_oai_to_s3_harvest_not_process_empty_data(self, mock_process, mock_prefix, mock_harvest, **kwargs):
+        """Test oai_to_s3 does not process empty data"""
+        dag = DAG(dag_id="test_slacksuccess", start_date=DEFAULT_DATE)
+        kwargs["oai_endpoint"] = "http://test/combine/oai"
+        kwargs["metadataPrefix"] = "blergh"
+        kwargs["included_sets"] = ["set1", "set2"]
+        kwargs["from"] = "from"
+        kwargs["until"] = "until"
+        kwargs["dag"] = dag
+        kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
         mock_harvest.return_value = []
         mock_process.return_value = {"updated": 0, "deleted": 0 }
         actual = harvest.oai_to_s3(**kwargs)
+        self.assertFalse(mock_process.called)
         self.assertEqual(actual, {"updated": 0, "deleted": 0, "sets_with_no_records": ["set1", "set2"]})
 
     @mock.patch("tulflow.harvest.harvest_oai")

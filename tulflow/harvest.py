@@ -153,7 +153,7 @@ class OaiXml:
         self.root.append(record)
 
     def tostring(self):
-       return etree.tostring(self.root).decode("utf-8")
+        return etree.tostring(self.root, encoding="utf-8").decode("utf-8")
 
 
 def process_xml(data, writer, outdir, **kwargs):

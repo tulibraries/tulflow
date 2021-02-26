@@ -18,7 +18,7 @@ sickle = ">=0.7.0"
 pexpect = "*"
 xmltodict = "*"
 apache-airflow = "==1.10.14"
-lxml = "==4.6.1"
+lxml = "==4.6.2"
 requests = "*"
 
 [requires]

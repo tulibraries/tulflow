@@ -17,7 +17,7 @@ wheel = "*"
 sickle = ">=0.7.0"
 pexpect = "*"
 xmltodict = "*"
-apache-airflow = "==1.10.14"
+apache-airflow = "==2.0.2"
 lxml = "==4.6.3"
 requests = "*"
 

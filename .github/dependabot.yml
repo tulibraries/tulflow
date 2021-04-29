@@ -1,0 +1,34 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: requests-mock
+    versions:
+    - 1.9.0
+  - dependency-name: pylint
+    versions:
+    - 2.6.2
+    - 2.7.0
+    - 2.7.3
+    - 2.8.1
+  - dependency-name: apache-airflow
+    versions:
+    - 2.0.0
+    - 2.0.1
+  - dependency-name: moto
+    versions:
+    - 2.0.0
+    - 2.0.1
+    - 2.0.2
+    - 2.0.3
+    - 2.0.4
+  - dependency-name: cryptography
+    versions:
+    - 3.3.2
+  - dependency-name: pytest
+    versions:
+    - 6.2.2

@@ -40,6 +40,7 @@ def add_marc21xml_root_ns(data_in):
     source_xml = etree.fromstring(data_in, parser=PARSER)
     if (not source_xml.attrib.get("xmlns")) and ("{http://www.loc.gov/MARC21/slim}" not in source_xml.tag):
         source_xml.attrib["xmlns"] = "http://www.loc.gov/MARC21/slim"
+    # The reason this is here is to catch encoding errors early.
     source_xml = etree.fromstring(etree.tostring(source_xml, encoding="utf-8"), parser=PARSER)
     return source_xml
 

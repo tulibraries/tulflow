@@ -43,12 +43,12 @@ def transform_s3_xsl(**kwargs):
         for record in s3_xml.iterchildren():
             record_id = record.get("airflow-record-id")
             logging.info("Transforming Record %s", record_id)
-            result_str = subprocess.check_output(["java", "-jar", saxon, "-xsl:" + xsl, "-s:-"], input=etree.tostring(record))
+            result_str = subprocess.check_output(["java", "-jar", saxon, "-xsl:" + xsl, "-s:-"], input=etree.tostring(record, encoding="utf-8"))
             result = etree.fromstring(result_str)
             result.attrib["airflow-record-id"] = record_id
             transformed.append(result)
         filename = s3_key.replace(source_prefix, dest_prefix)
-        transformed_xml = etree.tostring(transformed)
+        transformed_xml = etree.tostring(transformed, encoding="utf-8")
         process.generate_s3_object(transformed_xml, bucket, filename, access_id, access_secret)
 
 

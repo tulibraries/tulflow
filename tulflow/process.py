@@ -40,7 +40,8 @@ def add_marc21xml_root_ns(data_in):
     source_xml = etree.fromstring(data_in, parser=PARSER)
     if (not source_xml.attrib.get("xmlns")) and ("{http://www.loc.gov/MARC21/slim}" not in source_xml.tag):
         source_xml.attrib["xmlns"] = "http://www.loc.gov/MARC21/slim"
-    source_xml = etree.fromstring(etree.tostring(source_xml))
+    # The reason this is here is to catch encoding errors early.
+    source_xml = etree.fromstring(etree.tostring(source_xml, encoding="utf-8"), parser=PARSER)
     return source_xml
 
 
@@ -67,12 +68,12 @@ def get_record_001(record):
 
     if record_ids == [] or record_ids[0].text is None:
         LOGGER.error("Record without an 001 MMS Identifier:")
-        LOGGER.error(str(etree.tostring(record)))
+        LOGGER.error(str(etree.tostring(record, encoding="utf8")))
         return None
 
     if len(record_ids) > 1:
         LOGGER.error("Record with multiple 001 MMS Identifiers:")
-        LOGGER.error(str(etree.tostring(record)))
+        LOGGER.error(str(etree.tostring(record, encoding="utf8")))
         return None
 
     return record_ids[0].text

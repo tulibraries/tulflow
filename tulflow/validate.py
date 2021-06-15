@@ -61,7 +61,7 @@ def filter_s3_schematron(**kwargs):
                 })
         total_filter_count += filter_count
         filename = s3_key.replace(source_prefix, dest_prefix)
-        updated_s3_xml = etree.tostring(s3_xml)
+        updated_s3_xml = etree.tostring(s3_xml, encoding="utf-8").decode("utf-8")
         process.generate_s3_object(updated_s3_xml, bucket, filename, access_id, access_secret)
         if filter_count == record_count and record_count != 0:
             logging.warning(f"All records filtered from {filename}. record_count: {record_count}")
@@ -121,7 +121,8 @@ def identifier_or_full_record(record, identifier_xpath="./dcterms:identifier/tex
     if indentifiers:
         return "\n".join(indentifiers)
     else:
-        return etree.tostring(record)
+        return etree.tostring(record, encoding="utf-8").decode("utf-8")
+
 
 def schematron_failed_validation_text(validation_report):
     return "\n".join(

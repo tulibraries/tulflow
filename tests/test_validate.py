@@ -2,6 +2,7 @@
 import unittest
 import boto3
 from lxml import etree
+from unittest import mock
 from moto import mock_s3
 from tulflow import process, validate
 from unittest.mock import patch

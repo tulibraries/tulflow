@@ -3,6 +3,7 @@
 import os
 import sys
 import setuptools
+from unittest import mock
 from setuptools.command.install import install
 
 VERSION = "v0.8.5"

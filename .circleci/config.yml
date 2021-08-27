@@ -13,7 +13,8 @@ jobs:
     steps:
       - checkout
       - python/install-packages:
-          args: --dev
+          args: pytest
+          pkg-manager: pipenv
       - run:
           command: pipenv run pylint tulflow -E
           name: Lint

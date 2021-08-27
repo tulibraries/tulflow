@@ -3,9 +3,7 @@ import logging
 import csv
 import io
 from airflow import AirflowException
-from unittest import mock
 from lxml import etree, isoschematron
-
 from tulflow import process
 
 

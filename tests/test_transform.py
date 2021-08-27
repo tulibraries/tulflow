@@ -1,10 +1,10 @@
 """Tests suite for tulflow.transform (functions for transforming XML or JSON in Airflow Tasks)."""
 import unittest
+from tulflow import transform
+from unittest import mock
 import boto3
 from lxml import etree
 from moto import mock_s3
-from tulflow import transform
-import logging
 from mock import patch
 
 class TestXSLTransform(unittest.TestCase):

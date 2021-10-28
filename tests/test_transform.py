@@ -5,7 +5,7 @@ from lxml import etree
 from moto import mock_s3
 from tulflow import transform
 import logging
-from mock import patch
+from unittest.mock import patch
 
 class TestXSLTransform(unittest.TestCase):
     """Test Class for functions that transform XML from S3 with XSL."""

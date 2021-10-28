@@ -4,7 +4,7 @@ import boto3
 from lxml import etree
 from moto import mock_s3
 from tulflow import process, validate
-from mock import patch
+from unittest.mock import patch
 from airflow import AirflowException
 
 class TestSchematronFiltering(unittest.TestCase):

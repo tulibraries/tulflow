@@ -12,7 +12,7 @@ moto = "*"
 requests-mock = "*"
 
 [packages]
-cryptography = "==3.3.2"
+cryptography = "==36.0.0"
 setuptools = "*"
 wheel = "*"
 sickle = ">=0.7.0"

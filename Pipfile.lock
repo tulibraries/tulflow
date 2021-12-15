@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c754bef8ecf0f5578fd6714f7aee414ef4c9e8ddb4e6b14d3ccecdfa5c0447c4"
+            "sha256": "7c65bb05d8826eaa155ad1be45d1bda0112d84c04b2340a1d0d900be535ea671"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -1175,11 +1175,11 @@
         },
         "wtforms": {
             "hashes": [
-                "sha256:7b504fc724d0d1d4d5d5c114e778ec88c37ea53144683e084215eed5155ada4c",
-                "sha256:81195de0ac94fbc8368abbaf9197b88c4f3ffd6c2719b5bf5fc9da744f3d829c"
+                "sha256:232dbb0094847dca2f45c72136b5ca1d5dca2a3e24ccd2229823b8b74b3c6698",
+                "sha256:4abfbaa1d529a1d0ac927d44af8dbb9833afd910e56448a103f1893b0b176886"
             ],
             "index": "pypi",
-            "version": "==2.3.3"
+            "version": "==3.0.0"
         },
         "xmltodict": {
             "hashes": [
@@ -1363,7 +1363,7 @@
                 "sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7",
                 "sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951"
             ],
-            "markers": "python_version < '4.0' and python_full_version >= '3.6.1'",
+            "markers": "python_version < '4' and python_full_version >= '3.6.1'",
             "version": "==5.10.1"
         },
         "jinja2": {

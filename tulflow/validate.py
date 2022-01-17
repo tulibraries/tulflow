@@ -1,10 +1,9 @@
 """Generic Data (primarily XML & JSON) Validation Methods."""
-from airflow import AirflowException
+import logging
 import csv
 import io
+from airflow import AirflowException
 from lxml import etree, isoschematron
-import logging
-import re
 from tulflow import process
 
 

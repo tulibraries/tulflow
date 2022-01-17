@@ -14,11 +14,12 @@ jobs:
       - checkout
       - python/install-packages:
           args: --dev
+          pkg-manager: pipenv
       - run:
           command: pipenv run pylint tulflow -E
           name: Lint
       - run:
-          command: pipenv run nosetests
+          command: pipenv run pytest
           name: Test
 
   build-and-deploy:

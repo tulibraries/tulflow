@@ -33,6 +33,7 @@ class TestSolrCloudTasks(unittest.TestCase):
             dagrun = dag.create_dagrun(
                 run_id="test_existing_templated_value", state=State.SUCCESS,
                 execution_date=DEFAULT_DATE, start_date=DEFAULT_DATE,
+                data_interval=(DEFAULT_DATE, DEFAULT_DATE),
                 session=session,
                 )
         operator = create_sc_collection(dag, 'SOLRCLOUD', 'test-collection', '2', 'test-configset')
@@ -62,6 +63,7 @@ class TestSolrCloudTasks(unittest.TestCase):
             dagrun = dag.create_dagrun(
                 run_id="test_existing_templated_value", state=State.SUCCESS,
                 execution_date=DEFAULT_DATE, start_date=DEFAULT_DATE,
+                data_interval=(DEFAULT_DATE, DEFAULT_DATE),
                 session=session,
                 )
         operator = swap_sc_alias(dag, 'SOLRCLOUD', 'new-collection', 'my-alias')
@@ -90,6 +92,7 @@ class TestSolrCloudTasks(unittest.TestCase):
             dagrun = dag.create_dagrun(
                 run_id="test_existing_templated_value", state=State.SUCCESS,
                 execution_date=DEFAULT_DATE, start_date=DEFAULT_DATE,
+                data_interval=(DEFAULT_DATE, DEFAULT_DATE),
                 session=session,
                 )
         task = refresh_sc_collection_for_alias(dag=dag, sc_conn=mocker, sc_coll_name='my-collection', sc_alias='my-alias', configset="my-configset")

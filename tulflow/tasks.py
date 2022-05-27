@@ -1,10 +1,10 @@
 """Generic Airflow Tasks Functions, Abstracted for Reuse."""
 import re
 import pprint
-from airflow.hooks.base_hook import BaseHook
-from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
-from airflow.operators.http_operator import SimpleHttpOperator
-from airflow.operators.python_operator import PythonOperator
+from airflow.hooks.base import BaseHook
+from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
+from airflow.providers.http.operators.http import SimpleHttpOperator
+from airflow.operators.python import PythonOperator
 from tulflow.solr_api_utils import SolrApiUtils
 
 PP = pprint.PrettyPrinter(indent=4)

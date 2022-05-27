@@ -30,14 +30,14 @@ class TestSolrCloudTasks(unittest.TestCase):
         session = settings.Session()
         dag = DAG(dag_id='test_create_sc_collection', start_date=DEFAULT_DATE)
         with dag:
-            dagrun = dag.create_dagrun(
+            dr = dag.create_dagrun(
                 run_id="test_existing_templated_value", state=State.SUCCESS,
                 execution_date=DEFAULT_DATE, start_date=DEFAULT_DATE,
                 data_interval=(DEFAULT_DATE, DEFAULT_DATE),
                 session=session,
                 )
         operator = create_sc_collection(dag, 'SOLRCLOUD', 'test-collection', '2', 'test-configset')
-        task_instance = TaskInstance(task=operator, run_id=dagrun.run_id, state=State.SUCCESS)
+        task_instance = TaskInstance(task=operator, run_id=dr.run_id, state=State.SUCCESS)
 
         self.assertEqual("SOLRCLOUD", operator.http_conn_id)
         self.assertEqual("CREATE", operator.data['action'])
@@ -60,14 +60,14 @@ class TestSolrCloudTasks(unittest.TestCase):
         session = settings.Session()
         dag = DAG(dag_id='test_swap_sc_alias', start_date=DEFAULT_DATE)
         with dag:
-            dagrun = dag.create_dagrun(
+            dr = dag.create_dagrun(
                 run_id="test_existing_templated_value", state=State.SUCCESS,
                 execution_date=DEFAULT_DATE, start_date=DEFAULT_DATE,
                 data_interval=(DEFAULT_DATE, DEFAULT_DATE),
                 session=session,
                 )
         operator = swap_sc_alias(dag, 'SOLRCLOUD', 'new-collection', 'my-alias')
-        task_instance = TaskInstance(task=operator, run_id=dagrun.run_id, state=State.SUCCESS)
+        task_instance = TaskInstance(task=operator, run_id=dr.run_id, state=State.SUCCESS)
 
         self.assertEqual("SOLRCLOUD", operator.http_conn_id)
         self.assertEqual("CREATEALIAS", operator.data['action'])
@@ -89,14 +89,14 @@ class TestSolrCloudTasks(unittest.TestCase):
         session = settings.Session()
         dag = DAG(dag_id='test_refresh_sc_collection_for_alias', start_date=DEFAULT_DATE)
         with dag:
-            dagrun = dag.create_dagrun(
+            dr = dag.create_dagrun(
                 run_id="test_existing_templated_value", state=State.SUCCESS,
                 execution_date=DEFAULT_DATE, start_date=DEFAULT_DATE,
                 data_interval=(DEFAULT_DATE, DEFAULT_DATE),
                 session=session,
                 )
         task = refresh_sc_collection_for_alias(dag=dag, sc_conn=mocker, sc_coll_name='my-collection', sc_alias='my-alias', configset="my-configset")
-        task_instance = TaskInstance(task=task, run_id=dagrun.run_id, state=State.SUCCESS)
+        task_instance = TaskInstance(task=task, run_id=dr.run_id, state=State.SUCCESS)
 
         self.assertEqual("my-collection", task.op_kwargs['collection'])
         self.assertEqual("my-alias", task.op_kwargs['alias'])

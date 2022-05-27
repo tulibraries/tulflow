@@ -19,9 +19,6 @@ jobs:
           command: pipenv run pylint tulflow -E
           name: Lint
       - run:
-          command: airflow db init
-          name: Initialize database
-      - run:
           command: pipenv run pytest
           name: Test
 

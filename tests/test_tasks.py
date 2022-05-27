@@ -5,7 +5,7 @@ import pytest
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.hooks.base import BaseHook
-from airflow.models import Connection, DAG, TaskInstance
+from airflow.models import Connection, DAG, TaskInstance, DagRun
 from airflow.utils import timezone
 from tulflow.tasks import create_sc_collection, get_solr_url, refresh_sc_collection_for_alias, swap_sc_alias
 from airflow.utils.state import State

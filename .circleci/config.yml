@@ -16,6 +16,9 @@ jobs:
           args: --dev
           pkg-manager: pipenv
       - run:
+           command: pipenv run airflow db init
+           name: Init Airflow
+      - run:
           command: pipenv run pylint tulflow -E
           name: Lint
       - run:

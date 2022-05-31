@@ -31,9 +31,8 @@ class TestSolrCloudTasks(unittest.TestCase):
         dag = DAG(dag_id='test_create_sc_collection', start_date=DEFAULT_DATE)
         with dag:
             dr = dag.create_dagrun(
-                run_id="test_existing_templated_value", state=State.SUCCESS,
-                execution_date=DEFAULT_DATE, start_date=DEFAULT_DATE,
-                data_interval=(DEFAULT_DATE, DEFAULT_DATE),
+                run_id="test_existing_value_create", state=State.SUCCESS,
+                start_date=DEFAULT_DATE,
                 session=session,
                 )
         operator = create_sc_collection(dag, 'SOLRCLOUD', 'test-collection', '2', 'test-configset')
@@ -61,9 +60,8 @@ class TestSolrCloudTasks(unittest.TestCase):
         dag = DAG(dag_id='test_swap_sc_alias', start_date=DEFAULT_DATE)
         with dag:
             dr = dag.create_dagrun(
-                run_id="test_existing_templated_value", state=State.SUCCESS,
-                execution_date=DEFAULT_DATE, start_date=DEFAULT_DATE,
-                data_interval=(DEFAULT_DATE, DEFAULT_DATE),
+                run_id="test_existing_value_swap", state=State.SUCCESS,
+                start_date=DEFAULT_DATE,
                 session=session,
                 )
         operator = swap_sc_alias(dag, 'SOLRCLOUD', 'new-collection', 'my-alias')
@@ -90,9 +88,8 @@ class TestSolrCloudTasks(unittest.TestCase):
         dag = DAG(dag_id='test_refresh_sc_collection_for_alias', start_date=DEFAULT_DATE)
         with dag:
             dr = dag.create_dagrun(
-                run_id="test_existing_templated_value", state=State.SUCCESS,
-                execution_date=DEFAULT_DATE, start_date=DEFAULT_DATE,
-                data_interval=(DEFAULT_DATE, DEFAULT_DATE),
+                run_id="test_existing_value_refresh", state=State.SUCCESS,
+                start_date=DEFAULT_DATE,
                 session=session,
                 )
         task = refresh_sc_collection_for_alias(dag=dag, sc_conn=mocker, sc_coll_name='my-collection', sc_alias='my-alias', configset="my-configset")

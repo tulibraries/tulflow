@@ -27,6 +27,7 @@ class TestSolrCloudTasks(unittest.TestCase):
 
     def test_create_sc_collection(self, mocker):
         """Test create_sc_collection operator instance contains expected config values."""
+        settings.Session.rollback()
         session = settings.Session()
         dag = DAG(dag_id='test_create_sc_collection', start_date=DEFAULT_DATE)
         with dag:
@@ -56,6 +57,7 @@ class TestSolrCloudTasks(unittest.TestCase):
 
     def test_swap_sc_alias(self, mocker):
         """Test swap_sc_alias operator instance contains expected config values."""
+        settings.Session.rollback()
         session = settings.Session()
         dag = DAG(dag_id='test_swap_sc_alias', start_date=DEFAULT_DATE)
         with dag:
@@ -84,6 +86,7 @@ class TestSolrCloudTasks(unittest.TestCase):
 
     def test_refresh_sc_collection_for_alias(self, mocker):
         """Test refresh_sc_collection_for_alias task instance contains expected config values."""
+        settings.Session.rollback()
         session = settings.Session()
         dag = DAG(dag_id='test_refresh_sc_collection_for_alias', start_date=DEFAULT_DATE)
         with dag:

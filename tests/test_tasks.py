@@ -32,7 +32,7 @@ class TestSolrCloudTasks(unittest.TestCase):
         with dag:
             dr = dag.create_dagrun(
                 run_id="test_existing_value_create", state=State.SUCCESS,
-                start_date=DEFAULT_DATE,
+                start_date=DEFAULT_DATE, data_interval=(DEFAULT_DATE, DEFAULT_DATE),
                 session=session,
                 )
         operator = create_sc_collection(dag, 'SOLRCLOUD', 'test-collection', '2', 'test-configset')
@@ -45,7 +45,6 @@ class TestSolrCloudTasks(unittest.TestCase):
         self.assertEqual("2", operator.data['replicationFactor'])
         self.assertEqual("test-configset", operator.data['collection.configName'])
         self.assertEqual("create_collection", task_instance.task_id)
-        settings.Session.rollback()
 
     @patch.object(BaseHook, "get_connection", return_value=Connection(
         conn_id='SOLRCLOUD',
@@ -61,7 +60,7 @@ class TestSolrCloudTasks(unittest.TestCase):
         with dag:
             dr = dag.create_dagrun(
                 run_id="test_existing_value_swap", state=State.SUCCESS,
-                start_date=DEFAULT_DATE,
+                start_date=DEFAULT_DATE, data_interval=(DEFAULT_DATE, DEFAULT_DATE),
                 session=session,
                 )
         operator = swap_sc_alias(dag, 'SOLRCLOUD', 'new-collection', 'my-alias')
@@ -72,7 +71,6 @@ class TestSolrCloudTasks(unittest.TestCase):
         self.assertEqual("my-alias", operator.data['name'])
         self.assertEqual(["new-collection"], operator.data['collections'])
         self.assertEqual("solr_alias_swap", task_instance.task_id)
-        settings.Session.rollback()
 
     @patch.object(BaseHook, "get_connection", return_value=Connection(
         conn_id='SOLRCLOUD',
@@ -89,7 +87,7 @@ class TestSolrCloudTasks(unittest.TestCase):
         with dag:
             dr = dag.create_dagrun(
                 run_id="test_existing_value_refresh", state=State.SUCCESS,
-                start_date=DEFAULT_DATE,
+                start_date=DEFAULT_DATE, data_interval=(DEFAULT_DATE, DEFAULT_DATE),
                 session=session,
                 )
         task = refresh_sc_collection_for_alias(dag=dag, sc_conn=mocker, sc_coll_name='my-collection', sc_alias='my-alias', configset="my-configset")
@@ -99,7 +97,6 @@ class TestSolrCloudTasks(unittest.TestCase):
         self.assertEqual("my-alias", task.op_kwargs['alias'])
         self.assertEqual("my-configset", task.op_kwargs['configset'])
         self.assertEqual("refresh_sc_collection_for_alias", task_instance.task_id)
-        settings.Session.rollback()
 
 class TestTasksGetSolrUrl(unittest.TestCase):
     """Tests for tasks.get_solr_url function."""

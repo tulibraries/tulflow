@@ -42,11 +42,11 @@
         },
         "apache-airflow-providers-amazon": {
             "hashes": [
-                "sha256:94de52c4ff66b324839d94946f2ac696a9629a876862ef5471a4db43fcb4b112",
-                "sha256:aca7fb3980463ce72a65579086b9a89164f393c54812c357ac3ac82c88fc0ac6"
+                "sha256:0123f10c91eaf6e2602a494af50eb94b31eb1fac7f706b75af6ba37456f931ce",
+                "sha256:c3fe728194917a53d90f71d70ff36ef1fe1f6899948c83752e344e5d0c2652be"
             ],
             "index": "pypi",
-            "version": "==4.0.0"
+            "version": "==4.1.0"
         },
         "apache-airflow-providers-common-sql": {
             "hashes": [
@@ -937,6 +937,14 @@
             ],
             "markers": "python_version >= '3.6'",
             "version": "==0.26.1"
+        },
+        "mypy-boto3-appflow": {
+            "hashes": [
+                "sha256:839781c795657eebc1783620b9a68783ddba6838c3b7b58ca5681181f743271c",
+                "sha256:dfe8ea8df705184a7eeb3ad52e318e9454c54286bd629a4b95e57b4630b457e1"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==1.24.0"
         },
         "mypy-boto3-rds": {
             "hashes": [
@@ -1913,7 +1921,7 @@
                 "sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7",
                 "sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951"
             ],
-            "markers": "python_version < '4.0' and python_full_version >= '3.6.1'",
+            "markers": "python_version < '4' and python_full_version >= '3.6.1'",
             "version": "==5.10.1"
         },
         "jinja2": {
@@ -2206,7 +2214,7 @@
                 "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc",
                 "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"
             ],
-            "markers": "python_version >= '3.7'",
+            "markers": "python_version < '3.11'",
             "version": "==2.0.1"
         },
         "typing-extensions": {

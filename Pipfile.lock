@@ -106,11 +106,11 @@
         },
         "apache-airflow-providers-ssh": {
             "hashes": [
-                "sha256:361d612a71073e61751f4c62b29b34ec6c076ce225d8f833b7d0ceb0cc6ba13a",
-                "sha256:edf55252d48af6c8abe338bf2a4bdfc94aa41057cfc55b972b7af3ee2803d80b"
+                "sha256:dffb0b45d0f3a49022d3cac1bbec4bf0f7f195d63b4ee8a93a8874ee9cc1f8da",
+                "sha256:eb8ea393b551c5051c6b4717472a95bd2f2c3d5df37934fb178a045f0145da50"
             ],
             "index": "pypi",
-            "version": "==3.2.0"
+            "version": "==3.3.0"
         },
         "apispec": {
             "extras": [
@@ -1962,7 +1962,7 @@
                 "sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7",
                 "sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951"
             ],
-            "markers": "python_version < '4.0' and python_full_version >= '3.6.1'",
+            "markers": "python_version < '4' and python_full_version >= '3.6.1'",
             "version": "==5.10.1"
         },
         "jinja2": {
@@ -2208,7 +2208,7 @@
                 "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc",
                 "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"
             ],
-            "markers": "python_version >= '3.7'",
+            "markers": "python_version < '3.11'",
             "version": "==2.0.1"
         },
         "tomlkit": {

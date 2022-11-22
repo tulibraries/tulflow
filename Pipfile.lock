@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "3a2ca99fcda312becb567517fe1ac4f7a1fdc04aa1b274d1c45758ba9bf49f23"
+            "sha256": "bb27bacfeed2727c59bad5b1a30294ca676a9f93d6f5b2461f64f4919f1d7a83"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -34,11 +34,11 @@
         },
         "apache-airflow": {
             "hashes": [
-                "sha256:62513caaa38ac5c676a2636ca4d37d7bfccec1f7bd3a2605c177246c35a4068d",
-                "sha256:77b0b7e3658be5e658ee47f99c90f6dd020fb1c60c837593a55e052619e53ffd"
+                "sha256:b392736825775eac4742780f38138c47bd9ba907c5cac003ad1ced086e4e3dd6",
+                "sha256:d40d0645d6b89fd3f5458a88cde3599429c4562acb1a51888d6db2267865a316"
             ],
             "index": "pypi",
-            "version": "==2.4.1"
+            "version": "==2.4.3"
         },
         "apache-airflow-providers-amazon": {
             "hashes": [
@@ -491,11 +491,11 @@
         },
         "flask-appbuilder": {
             "hashes": [
-                "sha256:33cf71ebd63a58950fd10e218d5b47e1a127e4b04bf9b6e4ecb4647b52f190b6",
-                "sha256:f0d693af445c9ec56293f001e20f102fe16471196092401215ef1f5c8bc5b7f0"
+                "sha256:601f71348152886ac801835101a6e4427cebf23f82865d9c2d5964ace8a1bfec",
+                "sha256:682e18fab43ccec8f4aac696f090ae45326b0ee1f3ad9608896111ff8405a7a4"
             ],
             "markers": "python_version ~= '3.7'",
-            "version": "==4.1.3"
+            "version": "==4.1.4"
         },
         "flask-babel": {
             "hashes": [
@@ -553,11 +553,11 @@
         },
         "flask-wtf": {
             "hashes": [
-                "sha256:6ff7af73458f182180906a37a783e290bdc8a3817fe4ad17227563137ca285bf",
-                "sha256:ff177185f891302dc253437fe63081e7a46a4e99aca61dfe086fb23e54fff2dc"
+                "sha256:34fe5c6fee0f69b50e30f81a3b7ea16aa1492a771fe9ad0974d164610c09a6c9",
+                "sha256:9d733658c80be551ce7d5bc13c7a7ac0d80df509be1e23827c847d9520f4359a"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==0.15.1"
+            "version": "==1.0.1"
         },
         "graphviz": {
             "hashes": [

@@ -447,7 +447,7 @@
                 "sha256:224e32b03eb46be70e12ef6d64e0be123a64e621ab4c0822ff6d450d52a540b9",
                 "sha256:89141536394f909066cabd112e3e1a37e4e654db00a25308b0f130bc3152eb46"
             ],
-            "markers": "python_version >= '3.7' and python_version < '4.0'",
+            "markers": "python_version >= '3.7' and python_version < '4'",
             "version": "==2.3.0"
         },
         "docutils": {
@@ -510,7 +510,7 @@
                 "sha256:62b521d75494c290a646ae8acc77123721e4364790f1e64af0038d823961fbf0",
                 "sha256:a85eebfa17c339a7260c4643475af444784ba6de5588adda67406f0a75599553"
             ],
-            "markers": "python_version >= '3.7' and python_version < '4.0'",
+            "markers": "python_version >= '3.7' and python_version < '4'",
             "version": "==4.4.4"
         },
         "flask-login": {
@@ -623,7 +623,7 @@
                 "sha256:f6327b6907b4cb72f650a5b7b1be23a2aab395017aa6f1adb13069d66360eb3f",
                 "sha256:fb412b7db83fe56847df9c47b6fe3f13911b06339c2aa02dcc09dce8bbf582cd"
             ],
-            "markers": "python_version >= '3.0' and platform_machine == 'aarch64' or (platform_machine == 'ppc64le' or (platform_machine == 'x86_64' or (platform_machine == 'amd64' or (platform_machine == 'AMD64' or (platform_machine == 'win32' or platform_machine == 'WIN32')))))",
+            "markers": "python_version >= '3' and platform_machine == 'aarch64' or (platform_machine == 'ppc64le' or (platform_machine == 'x86_64' or (platform_machine == 'amd64' or (platform_machine == 'AMD64' or (platform_machine == 'win32' or platform_machine == 'WIN32')))))",
             "version": "==2.0.1"
         },
         "gunicorn": {
@@ -1263,7 +1263,7 @@
                 "sha256:01d26358598f8c3f5fc6de553e2f3080ffc59cf89102d7ee8098f33c72b3c04c",
                 "sha256:3deeb808e72b6b89f98611889e11cc33754f5b2c1517ecfa1aaf25f402051fb5"
             ],
-            "markers": "python_version >= '3.0'",
+            "markers": "python_version >= '3'",
             "version": "==2.3.2"
         },
         "python-dateutil": {
@@ -2126,11 +2126,11 @@
         },
         "moto": {
             "hashes": [
-                "sha256:356bf792b439228891c910e2a0fafd4264334cf9000b508c732ff43d8694fb6a",
-                "sha256:9ba96d04a472d5682493cad7fee33337da34ebef18b397af1ea6dfb41efbe148"
+                "sha256:12f231196ebf22d19774f2a75738fdedae10a8c82abb8fa0877e1819aa799f4f",
+                "sha256:e65a692df57abb631b06c8f3f7827c9deceae3416887527e266c775ad722a2fa"
             ],
             "index": "pypi",
-            "version": "==4.0.10"
+            "version": "==4.1.0"
         },
         "nose": {
             "hashes": [
@@ -2204,13 +2204,6 @@
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
             "version": "==2.8.2"
         },
-        "pytz": {
-            "hashes": [
-                "sha256:01a0681c4b9684a28304615eba55d1ab31ae00bf68ec157ec3708a8182dbbcd0",
-                "sha256:78f4f37d8198e0627c5f1143240bb0206b8691d8d7ac6d78fee88b78733f8c4a"
-            ],
-            "version": "==2022.7.1"
-        },
         "requests": {
             "hashes": [
                 "sha256:7c5599b102feddaa661c826c56ab4fee28bfd17f5abca1ebbe3e7f19d7c97983",
@@ -2264,7 +2257,7 @@
                 "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc",
                 "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"
             ],
-            "markers": "python_version < '3.11'",
+            "markers": "python_version >= '3.7'",
             "version": "==2.0.1"
         },
         "tomlkit": {

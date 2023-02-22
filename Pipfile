@@ -12,7 +12,7 @@ moto = "*"
 requests-mock = "*"
 
 [packages]
-apache-airflow = "==2.4.3"
+apache-airflow = "==2.5.1"
 apache-airflow-providers-amazon = "*"
 apache-airflow-providers-slack = "*"
 apache-airflow-providers-ftp = "*"

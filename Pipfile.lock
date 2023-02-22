@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ece1b63f49d6447568a5fa31521ed314797ffdc21bc0000104906c1284b1e0fb"
+            "sha256": "fc62957e397a0b946161a21a78b6cc1f7b14a758e2e8ddd4f5afa7b0616ce3c1"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -135,11 +135,11 @@
         },
         "apache-airflow": {
             "hashes": [
-                "sha256:b392736825775eac4742780f38138c47bd9ba907c5cac003ad1ced086e4e3dd6",
-                "sha256:d40d0645d6b89fd3f5458a88cde3599429c4562acb1a51888d6db2267865a316"
+                "sha256:ec97fb84b962621431600555ac3a20e1696cf0a4cc84ed27e591438ce92c2ff4",
+                "sha256:ee7ff3e459123bc60b40caba0e32a2fb88d30f3bf5c1780a95bad8ecabd8cc10"
             ],
             "index": "pypi",
-            "version": "==2.4.3"
+            "version": "==2.5.1"
         },
         "apache-airflow-providers-amazon": {
             "hashes": [
@@ -557,8 +557,7 @@
         },
         "connexion": {
             "extras": [
-                "flask",
-                "swagger-ui"
+                "flask"
             ],
             "hashes": [
                 "sha256:a73b96a0e07b16979a42cde7c7e26afe8548099e352cf350f80c57185e0e0b36",
@@ -1986,13 +1985,6 @@
                 "sha256:e7cb0ea774db81bf91844db22de72a40aae8f7b0f9bb9ba0f666d474ef6bf9fc"
             ],
             "version": "==0.4.0"
-        },
-        "swagger-ui-bundle": {
-            "hashes": [
-                "sha256:b462aa1460261796ab78fd4663961a7f6f347ce01760f1303bbbdf630f11f516",
-                "sha256:cea116ed81147c345001027325c1ddc9ca78c1ee7319935c3c75d3669279d575"
-            ],
-            "version": "==0.0.9"
         },
         "tabulate": {
             "hashes": [

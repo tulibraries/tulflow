@@ -2643,11 +2643,11 @@
         },
         "moto": {
             "hashes": [
-                "sha256:304cb19eee0019cd13f7d87ca590a4694677469c383ab8f8439fcb6717c47037",
-                "sha256:f9bf72aec6aea49ebb1a46c8096b2c9629be58ecca3ecd8b51f781fea78148e2"
+                "sha256:cfe398a1f6e317d061c47c3d2dd8c6893f3eb49154984a7cbb8bcd4ba517d67d",
+                "sha256:fdcc2731212ca050a28b2bc83e87628294bcbd55cb4f4c4692f972023fb1e7e6"
             ],
             "index": "pypi",
-            "version": "==4.1.4"
+            "version": "==4.1.6"
         },
         "nose": {
             "hashes": [

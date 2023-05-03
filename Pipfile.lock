@@ -663,11 +663,11 @@
         },
         "flask": {
             "hashes": [
-                "sha256:13f6329ddbfff11340939cd11919daf150a01358ded4b7e81c03c055dfecb559",
-                "sha256:77504c4c097f56ac5f29b00f9009213010cf9d2923a288c0e0564a5db2bb53d6"
+                "sha256:58107ed83443e86067e41eff4631b058178191a355886f8e479e347fa1285fdf",
+                "sha256:edee9b0a7ff26621bd5a8c10ff484ae28737a2410d99b0bb9a6850c7fb977aa0"
             ],
-            "markers": "python_version >= '3.7'",
-            "version": "==2.2.4"
+            "index": "pypi",
+            "version": "==2.2.5"
         },
         "flask-appbuilder": {
             "hashes": [
@@ -1033,11 +1033,11 @@
         },
         "linkify-it-py": {
             "hashes": [
-                "sha256:6cbdbd04c9ce3f3d18cd5fe432a33617dbf6eb4342e3da60ae24e917d37ec837",
-                "sha256:87fca2e28504adc3db7782561158fdb7c4a90570784bb147d79546866c094309"
+                "sha256:19f3060727842c254c808e99d465c80c49d2c7306788140987a1a7a29b0d6ad2",
+                "sha256:a3a24428f6c96f27370d7fe61d2ac0be09017be5190d68d8658233171f1b6541"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==2.0.1"
+            "version": "==2.0.2"
         },
         "lockfile": {
             "hashes": [
@@ -2496,7 +2496,7 @@
                 "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3",
                 "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"
             ],
-            "markers": "python_full_version >= '3.7.0'",
+            "markers": "python_version >= '3.7'",
             "version": "==2.0.0"
         },
         "isort": {
@@ -2659,7 +2659,7 @@
                 "sha256:47692bc24c1958e8b0f13dd727307cff1db103fca36399f457da8e05f222fdc4",
                 "sha256:7954a68d0ba23558d753f73437c55f89027cf8f5108c19844d4b82e5af396335"
             ],
-            "markers": "python_full_version >= '3.7.0'",
+            "markers": "python_version >= '3.7'",
             "version": "==3.5.0"
         },
         "pluggy": {
@@ -2768,7 +2768,7 @@
                 "sha256:8a3a5915713483bf353b6f4079ba8b2a29029d1d1090a503c70b0dc5d9d0c7bd",
                 "sha256:c4d9aa9fc888188f0c673eff79a8dadbe2e75b7fe879dc80a221a06e0a68138f"
             ],
-            "markers": "python_full_version >= '3.7.0'",
+            "markers": "python_version >= '3.7'",
             "version": "==0.23.1"
         },
         "s3transfer": {
@@ -2800,7 +2800,7 @@
                 "sha256:8c726c4c202bdb148667835f68d68780b9a003a9ec34167b6c673b38eff2a171",
                 "sha256:9330fc7faa1db67b541b28e62018c17d20be733177d290a13b24c62d1614e0c3"
             ],
-            "markers": "python_full_version >= '3.7.0'",
+            "markers": "python_version >= '3.7'",
             "version": "==0.11.8"
         },
         "types-pyyaml": {

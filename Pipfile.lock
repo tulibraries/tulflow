@@ -143,11 +143,11 @@
         },
         "apache-airflow-providers-amazon": {
             "hashes": [
-                "sha256:0206eb2f537976eb782841d635abd3be13df89b0a9eb3683de86c994f7dcfdaa",
-                "sha256:16c05f5e8fd006ada54cac309a9b8fb5f0d0ab17ac4d8b8bc7dfa78bf7c9ed1a"
+                "sha256:24214ce0b616c41bfcc78c8df9bb1a32e420cca81bad2783116bf6d3cb7dcc95",
+                "sha256:33c27a3c52f41c0e11195a3e81c0852e158d1e3e5767f58725b03049b77dbed3"
             ],
             "index": "pypi",
-            "version": "==8.1.0"
+            "version": "==8.4.0"
         },
         "apache-airflow-providers-common-sql": {
             "hashes": [
@@ -940,7 +940,7 @@
                 "sha256:f82d4d717d8ef19188687aa32b8363e96062911e63ba22a0cff7802a8e58e5f1",
                 "sha256:fc3a569657468b6f3fb60587e48356fe512c1754ca05a564f11366ac9e306526"
             ],
-            "markers": "python_version >= '3' and platform_machine == 'aarch64' or (platform_machine == 'ppc64le' or (platform_machine == 'x86_64' or (platform_machine == 'amd64' or (platform_machine == 'AMD64' or (platform_machine == 'win32' or platform_machine == 'WIN32')))))",
+            "markers": "python_version >= '3.0' and platform_machine == 'aarch64' or (platform_machine == 'ppc64le' or (platform_machine == 'x86_64' or (platform_machine == 'amd64' or (platform_machine == 'AMD64' or (platform_machine == 'win32' or platform_machine == 'WIN32')))))",
             "version": "==2.0.2"
         },
         "gunicorn": {
@@ -1412,11 +1412,11 @@
         },
         "mypy-boto3-appflow": {
             "hashes": [
-                "sha256:6bb79a6e25bdb8ec16f0ca2da5bcdebf77f3557385679fc8b82aa2816ffb6f28",
-                "sha256:9b5399ed18bcd8ff3cd6d82dac10f87090a1feea3d5ad7f9b6cb94ca21ed45b0"
+                "sha256:75c2398544019f306bf04b33f674308eb6bda4de63f94d6307cf6c231616fcd5",
+                "sha256:ec67c248312ffb5534006be53b9baddb9cbb354a2c4f95349b1c3db2f02da72b"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.28.16"
+            "version": "==1.28.0"
         },
         "mypy-boto3-rds": {
             "hashes": [
@@ -1705,7 +1705,7 @@
                 "sha256:42bb848a3260a027fa71ad47ecd959e471327cb34da5965962edd5926229f341",
                 "sha256:6c57452372f7eaff40934a1c03ad1826bf5e793558e87fef49131e6464b4dae5"
             ],
-            "markers": "python_version >= '3'",
+            "markers": "python_version >= '3.0'",
             "version": "==3.0.1"
         },
         "python-dateutil": {

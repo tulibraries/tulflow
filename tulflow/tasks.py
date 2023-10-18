@@ -44,7 +44,7 @@ def execute_slackpostonsuccess(context, slack_webhook_conn_id="AIRFLOW_CONN_SLAC
     if not message:
        message = "DAG success: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
 
-    slack_post = SlackWebhookOperator(
+    slack_post = SlackWebhookHook(
         task_id="slackpostonsuccess",
         slack_webhook_conn_id=slack_webhook_conn_id,
         password=conn.password,

@@ -2,7 +2,7 @@
 import re
 import pprint
 from airflow.hooks.base import BaseHook
-from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
+from airflow.providers.slack.operators.slack_webhook import SlackWebhookHook
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.operators.python import PythonOperator
 from tulflow.solr_api_utils import SolrApiUtils
@@ -10,9 +10,9 @@ from tulflow.solr_api_utils import SolrApiUtils
 PP = pprint.PrettyPrinter(indent=4)
 
 
-def execute_slackpostonfail(context, conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", message=None):
+def execute_slackpostonfail(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", message=None):
     """Task Method to Post Failed DAG or Task Completion on Slack."""
-    conn = BaseHook.get_connection(conn_id)
+    conn = BaseHook.get_connection(slack_webhook_conn_id)
     task_instance = context.get("task_instance")
     log_url = task_instance.log_url
     task_id = task_instance.task_id
@@ -21,10 +21,10 @@ def execute_slackpostonfail(context, conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", messa
     if not message:
         message = "Task failed: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
 
-    slack_post = SlackWebhookOperator(
+    slack_post = SlackWebhookHook(
         task_id="slackpostonfail",
-        http_conn_id=conn_id,
-        webhook_token=conn.password,
+        http_conn_id=slack_webhook_conn_id,
+        password=conn.password,
         message=":poop: " + message,
         username="airflow",
         dag=context.get("dag")
@@ -33,21 +33,21 @@ def execute_slackpostonfail(context, conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", messa
     return slack_post.execute(context=context)
 
 
-def execute_slackpostonsuccess(context, conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", message=None):
+def execute_slackpostonsuccess(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", message=None):
     """Task Method to Post Successful DAG or Task Completion on Slack."""
-    conn = BaseHook.get_connection(conn_id)
+    conn = BaseHook.get_connection(slack_webhook_conn_id)
     task_instance = context.get("task_instance")
     log_url = task_instance.log_url
     task_id = task_instance.task_id
     dag_id = task_instance.dag_id
     task_date = context.get("execution_date")
     if not message:
-        message = "DAG success: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
+       message = "DAG success: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
 
     slack_post = SlackWebhookOperator(
         task_id="slackpostonsuccess",
-        http_conn_id=conn_id,
-        webhook_token=conn.password,
+        http_conn_id=slack_webhook_conn_id,
+        password=conn.password,
         message=":partygritty: " + message,
         username="airflow",
         trigger_rule="all_success",

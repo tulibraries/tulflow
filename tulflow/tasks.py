@@ -30,7 +30,7 @@ def execute_slackpostonfail(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_W
         dag=context.get("dag")
         )
 
-    return slack_post.execute(context=context)
+    return slack_post.send(context=context)
 
 
 def execute_slackpostonsuccess(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", message=None):
@@ -54,7 +54,7 @@ def execute_slackpostonsuccess(context, slack_webhook_conn_id="AIRFLOW_CONN_SLAC
         dag=context.get("dag")
     )
 
-    return slack_post.execute(context=context)
+    return slack_post.send(context=context)
 
 
 def create_sc_collection(dag, sc_conn_id, sc_coll_name, sc_coll_repl, sc_configset_name):

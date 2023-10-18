@@ -23,7 +23,7 @@ def execute_slackpostonfail(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_W
 
     slack_post = SlackWebhookHook(
         task_id="slackpostonfail",
-        http_conn_id=slack_webhook_conn_id,
+        slack_webhook_conn_id=slack_webhook_conn_id,
         password=conn.password,
         message=":poop: " + message,
         username="airflow",
@@ -46,7 +46,7 @@ def execute_slackpostonsuccess(context, slack_webhook_conn_id="AIRFLOW_CONN_SLAC
 
     slack_post = SlackWebhookOperator(
         task_id="slackpostonsuccess",
-        http_conn_id=slack_webhook_conn_id,
+        slack_webhook_conn_id=slack_webhook_conn_id,
         password=conn.password,
         message=":partygritty: " + message,
         username="airflow",

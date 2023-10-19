@@ -12,19 +12,15 @@ PP = pprint.PrettyPrinter(indent=4)
 
 def execute_slackpostonfail(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", message=None):
     """Task Method to Post Failed DAG or Task Completion on Slack."""
-    conn = BaseHook.get_connection(slack_webhook_conn_id)
     task_instance = context.get("task_instance")
     log_url = task_instance.log_url
-    task_id = task_instance.task_id
     dag_id = task_instance.dag_id
     task_date = context.get("execution_date")
     if not message:
-        message = "Task failed: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
+        message = "Task failed: {} {} {} {}".format(dag_id, task_date, log_url)
 
     slack_post = SlackWebhookHook(
-        task_id="slackpostonfail",
         slack_webhook_conn_id=slack_webhook_conn_id,
-        password=conn.password,
         message=":poop: " + message,
         username="airflow",
         dag=context.get("dag")
@@ -35,19 +31,15 @@ def execute_slackpostonfail(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_W
 
 def execute_slackpostonsuccess(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", message=None):
     """Task Method to Post Successful DAG or Task Completion on Slack."""
-    conn = BaseHook.get_connection(slack_webhook_conn_id)
     task_instance = context.get("task_instance")
     log_url = task_instance.log_url
-    task_id = task_instance.task_id
     dag_id = task_instance.dag_id
     task_date = context.get("execution_date")
     if not message:
-       message = "DAG success: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
+       message = "DAG success: {} {} {} {}".format(dag_id, task_date, log_url)
 
     slack_post = SlackWebhookHook(
-        task_id="slackpostonsuccess",
         slack_webhook_conn_id=slack_webhook_conn_id,
-        password=conn.password,
         message=":partygritty: " + message,
         username="airflow",
         trigger_rule="all_success",

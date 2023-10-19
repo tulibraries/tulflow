@@ -17,7 +17,7 @@ def execute_slackpostonfail(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_W
     dag_id = task_instance.dag_id
     task_date = context.get("execution_date")
     if not message:
-        message = "Task failed: {} {} {} {}".format(dag_id, task_date, log_url)
+        message = "Task failed: {} {} {}".format(dag_id, task_date, log_url)
 
     slack_post = SlackWebhookHook(
         slack_webhook_conn_id=slack_webhook_conn_id,
@@ -36,7 +36,7 @@ def execute_slackpostonsuccess(context, slack_webhook_conn_id="AIRFLOW_CONN_SLAC
     dag_id = task_instance.dag_id
     task_date = context.get("execution_date")
     if not message:
-       message = "DAG success: {} {} {} {}".format(dag_id, task_date, log_url)
+       message = "DAG success: {} {} {}".format(dag_id, task_date, log_url)
 
     slack_post = SlackWebhookHook(
         slack_webhook_conn_id=slack_webhook_conn_id,

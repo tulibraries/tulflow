@@ -10,19 +10,19 @@ from tulflow.solr_api_utils import SolrApiUtils
 PP = pprint.PrettyPrinter(indent=4)
 
 
-def execute_slackpostonfail(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", message=None):
+def execute_slackpostonfail(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", text=None):
     """Task Method to Post Failed DAG or Task Completion on Slack."""
     task_instance = context.get("task_instance")
     task_id = task_instance.task_id
     log_url = task_instance.log_url
     dag_id = task_instance.dag_id
     task_date = context.get("execution_date")
-    if not message:
-        message = "Task failed: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
+    if not text:
+        text = "Task failed: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
 
     slack_post = SlackWebhookHook(
         slack_webhook_conn_id=slack_webhook_conn_id,
-        message=":poop: " + message,
+        text=":poop: " + text,
         username="airflow",
         dag=context.get("dag")
         )
@@ -30,19 +30,19 @@ def execute_slackpostonfail(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_W
     return slack_post.send(context=context)
 
 
-def execute_slackpostonsuccess(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", message=None):
+def execute_slackpostonsuccess(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", text=None):
     """Task Method to Post Successful DAG or Task Completion on Slack."""
     task_instance = context.get("task_instance")
     task_id = task_instance.task_id
     log_url = task_instance.log_url
     dag_id = task_instance.dag_id
     task_date = context.get("execution_date")
-    if not message:
-       message = "DAG success: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
+    if not text:
+       text = "DAG success: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
 
     slack_post = SlackWebhookHook(
         slack_webhook_conn_id=slack_webhook_conn_id,
-        message=":partygritty: " + message,
+        text=":partygritty: " + text,
         username="airflow",
         trigger_rule="all_success",
         dag=context.get("dag")

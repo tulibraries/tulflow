@@ -152,12 +152,12 @@
         },
         "apache-airflow-providers-amazon": {
             "hashes": [
-                "sha256:1af332b22485155bc12e82c9067e9be8462c91640e6fbe0f851309063f5c7bfc",
-                "sha256:d35e3bba2cf902aff36d99891666dfb4699f9de37a6457fafd02ca308df458ff"
+                "sha256:3b45729427e8fa16cc5233dac304b3efb59b70a5c47424446ef075b0500b18d1",
+                "sha256:58809609bd44af69b514232f9fa54d2517ceeaf215bb4ce95c835fbff99f2672"
             ],
             "index": "pypi",
             "markers": "python_version ~= '3.8'",
-            "version": "==8.9.0"
+            "version": "==8.10.0"
         },
         "apache-airflow-providers-common-sql": {
             "hashes": [

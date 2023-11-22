@@ -152,12 +152,12 @@
         },
         "apache-airflow-providers-amazon": {
             "hashes": [
-                "sha256:3b45729427e8fa16cc5233dac304b3efb59b70a5c47424446ef075b0500b18d1",
-                "sha256:58809609bd44af69b514232f9fa54d2517ceeaf215bb4ce95c835fbff99f2672"
+                "sha256:04bd457f27efe26fdbd811486f200fefdf0d14e20a3ae83e39b0df6d9b1c6be2",
+                "sha256:5b09e0b29fcd4e2f28a572da0d180ab63439dddaebb68a446f6d7d30e61a7e3f"
             ],
             "index": "pypi",
             "markers": "python_version ~= '3.8'",
-            "version": "==8.10.0"
+            "version": "==8.11.0"
         },
         "apache-airflow-providers-common-sql": {
             "hashes": [
@@ -338,19 +338,19 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:85e2fa361ad3210d30800bad311688261f2673a9b301e0edab56463d89609761",
-                "sha256:d18688bc5d688decf3cc404430a3ac3ec317be653cdcfbc51104c01f38a66434"
+                "sha256:1fb7e7ba32a6701990168eb7a08e1fb624ae48130784dfab25904ed47deabb31",
+                "sha256:96b4cb2708933cef7dbe1177df37ef0593839942978784147aade0e49511eb2b"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.28.76"
+            "version": "==1.28.85"
         },
         "botocore": {
             "hashes": [
-                "sha256:479abb5a1ee03eb00faa1ea176bc595b2f46f7494777807681a9df45ed99ea18",
-                "sha256:74e0a4515d61b2860b24dc208ca89a68d79dc00147125d531746d3ba808822ad"
+                "sha256:b8f35d65f2b45af50c36fc25cc1844d6bd61d38d2148b2ef133b8f10e198555d",
+                "sha256:ce58e688222df73ec5691f934be1a2122a52c9d11d3037b586b3fff16ed6d25f"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.31.76"
+            "version": "==1.31.85"
         },
         "cachelib": {
             "hashes": [
@@ -2161,10 +2161,10 @@
         },
         "redshift-connector": {
             "hashes": [
-                "sha256:d02e8d6fa01dd46504c879953f6abd7fa72980edd1e6a80202448fe35fb4c9e4"
+                "sha256:13c8209e14fe197057880446932984d9a60cbefcab9d8cb181d640b39febf043"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==2.0.915"
+            "version": "==2.0.916"
         },
         "referencing": {
             "hashes": [

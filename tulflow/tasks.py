@@ -2,54 +2,11 @@
 import re
 import pprint
 from airflow.hooks.base import BaseHook
-from airflow.providers.slack.operators.slack_webhook import SlackWebhookHook
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.operators.python import PythonOperator
 from tulflow.solr_api_utils import SolrApiUtils
 
 PP = pprint.PrettyPrinter(indent=4)
-
-
-def execute_slackpostonfail(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", text=None):
-    """Task Method to Post Failed DAG or Task Completion on Slack."""
-    task_instance = context.get("task_instance")
-    task_id = task_instance.task_id
-    log_url = task_instance.log_url
-    dag_id = task_instance.dag_id
-    task_date = context.get("execution_date")
-    if not text:
-        text = "Task failed: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
-
-    slack_post = SlackWebhookHook(
-        slack_webhook_conn_id=slack_webhook_conn_id,
-        text=":poop: " + text,
-        username="airflow",
-        dag=context.get("dag")
-        )
-
-    return slack_post.send(context=context)
-
-
-def execute_slackpostonsuccess(context, slack_webhook_conn_id="AIRFLOW_CONN_SLACK_WEBHOOK", text=None):
-    """Task Method to Post Successful DAG or Task Completion on Slack."""
-    task_instance = context.get("task_instance")
-    task_id = task_instance.task_id
-    log_url = task_instance.log_url
-    dag_id = task_instance.dag_id
-    task_date = context.get("execution_date")
-    if not text:
-       text = "DAG success: {} {} {} {}".format(dag_id, task_id, task_date, log_url)
-
-    slack_post = SlackWebhookHook(
-        slack_webhook_conn_id=slack_webhook_conn_id,
-        text=":partygritty: " + text,
-        username="airflow",
-        trigger_rule="all_success",
-        dag=context.get("dag")
-    )
-
-    return slack_post.send(context=context)
-
 
 def create_sc_collection(dag, sc_conn_id, sc_coll_name, sc_coll_repl, sc_configset_name):
     """Creates a new SolrCloud Collection."""

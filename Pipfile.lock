@@ -183,12 +183,12 @@
         },
         "apache-airflow-providers-sftp": {
             "hashes": [
-                "sha256:d170a190aaf81d0cc9ccf2ecd6953a319e8b89a9a18411fd4cf163a900b1f2db",
-                "sha256:f1415b210456584122a02921cd93484554f92919cd25889912cdd3cdb4b63f06"
+                "sha256:bbadd915163d47a99db2db51c0b9eec4895b8f363f41ff9de0fdb8653d02063e",
+                "sha256:ed81c2e2a1daf97b51f4f92058d5d2beda5f70f617ad1399b5e57cd06c08e934"
             ],
             "index": "pypi",
             "markers": "python_version ~= '3.8'",
-            "version": "==4.8.0"
+            "version": "==4.8.1"
         },
         "apache-airflow-providers-slack": {
             "hashes": [
@@ -209,12 +209,12 @@
         },
         "apache-airflow-providers-ssh": {
             "hashes": [
-                "sha256:54d45de17cf6978184423c0f48884309137c1e2121b6932a7f0e9b1cc50994aa",
-                "sha256:8ae196f4376150675aec44645c7cb52d0fe0ef7eca025c5c20b9d4feb72fadb0"
+                "sha256:0a768e985326c5f3c6f4426bec4bafeb4a75eac8db95a82ad19288be4e98a6ce",
+                "sha256:802f49669669ed0f582b98608548c4390b7818c7a1496097e76b5a11f304b0c6"
             ],
             "index": "pypi",
             "markers": "python_version ~= '3.8'",
-            "version": "==3.9.0"
+            "version": "==3.10.0"
         },
         "apispec": {
             "extras": [
@@ -1805,7 +1805,6 @@
                 "sha256:43f0b51115a896f9c00f59618023484cb3a14b98bbceab43394a39c6739b7ee7",
                 "sha256:aac08f26a31dc4dffd92821527d1682d99d52f9ef6851968114a8728f3c274d3"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.6'",
             "version": "==3.4.0"
         },

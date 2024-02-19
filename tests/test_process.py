@@ -3,7 +3,7 @@ import unittest
 import boto3
 import httpretty
 from lxml import etree
-from moto import mock_s3
+from moto import mock_aws
 from tulflow import process
 
 class TestDataProcessInteractions(unittest.TestCase):
@@ -140,7 +140,7 @@ class TestDataProcessInteractions(unittest.TestCase):
 class TestS3ProcessInteractions(unittest.TestCase):
     """Test Class for S3 data processing functions."""
 
-    @mock_s3
+    @mock_aws
     def test_remove_s3_object(self):
         bucket = "test_bucket"
         key = "test_key"
@@ -159,7 +159,7 @@ class TestS3ProcessInteractions(unittest.TestCase):
         self.assertEqual(test_object_gone["ResponseMetadata"]["HTTPStatusCode"], 200)
         self.assertEqual(test_object_gone.get("Contents"), None)
 
-    @mock_s3
+    @mock_aws
     def test_get_s3_content(self):
         bucket = "test_bucket"
         key = "test_key_2"
@@ -176,7 +176,7 @@ class TestS3ProcessInteractions(unittest.TestCase):
         test_run = process.get_s3_content(bucket, key, access_id, access_secret)
         self.assertEqual(test_run, b"test more content")
 
-    @mock_s3
+    @mock_aws
     def test_list_s3_content(self):
         bucket = "test_bucket"
         prefix = "test_prefix"
@@ -192,7 +192,7 @@ class TestS3ProcessInteractions(unittest.TestCase):
         test_run_pref = process.list_s3_content(bucket, access_id, access_secret, prefix=prefix)
         self.assertEqual(test_run_pref, ["test_prefix/item1"])
 
-    @mock_s3
+    @mock_aws
     def test_genereate_s3_object(self):
         bucket = "test_bucket"
         key = "test_key_2"

@@ -3,7 +3,7 @@ import unittest
 import boto3
 from lxml import etree
 from unittest import mock
-from moto import mock_s3
+from moto import mock_aws
 from tulflow import process, validate
 from unittest.mock import patch
 from airflow import AirflowException
@@ -21,7 +21,7 @@ class TestSchematronFiltering(unittest.TestCase):
         "access_secret": "puppies"
     }
 
-    @mock_s3
+    @mock_aws
     @patch("tulflow.process.get_github_content")
     def test_filter_s3_schematron_all_valid(self, mocked_get_github_content):
         """Test Filtering S3 XML File with Schematron."""
@@ -62,7 +62,7 @@ class TestSchematronFiltering(unittest.TestCase):
         self.assertEqual(test_invalid_content["Body"].read(), b"""id,report,record,source_file\r\n""")
 
 
-    @mock_s3
+    @mock_aws
     @patch("tulflow.process.get_github_content")
     def test_filter_s3_schematron_all_invalid(self, mocked_get_github_content):
         """Test Filtering S3 XML File with Schematron."""
@@ -117,7 +117,7 @@ class TestSchematronFiltering(unittest.TestCase):
         self.assertIn(b"""id,report,record,source_file\r\n""", test_invalid_content)
 
 
-    @mock_s3
+    @mock_aws
     @patch("tulflow.process.get_github_content")
     def test_filter_s3_schematron_mix(self, mocked_get_github_content):
         """Test Filtering S3 XML File with Schematron."""
@@ -170,7 +170,7 @@ class TestSchematronFiltering(unittest.TestCase):
         self.assertIn(b"here must be a rights statement", test_invalid_content)
 
 
-    @mock_s3
+    @mock_aws
     @patch("tulflow.process.get_github_content")
     def test_filter_s3_schematron_empty(self, mocked_get_github_content):
         """Test Filtering S3 XML File with Schematron."""
@@ -206,7 +206,7 @@ class TestSchematronFiltering(unittest.TestCase):
         self.assertEqual(test_content["Body"].read(), b"""<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dpla="http://dp.la/about/map/" xmlns:schema="http://schema.org" xmlns:oai="http://www.openarchives.org/OAI/2.0/" xmlns:oai_qdc="http://worldcat.org/xmlschemas/qdc-1.0/">\n</metadata>""")
         self.assertEqual(response, { "filtered": 0 })
 
-    @mock_s3
+    @mock_aws
     @patch("tulflow.process.get_github_content")
     def test_filter_s3_schematron_none(self, mocked_get_github_content):
         """Test Filtering S3 XML File with Schematron."""
@@ -242,7 +242,7 @@ class TestSchematronReporting(unittest.TestCase):
         "access_secret": "puppies"
     }
 
-    @mock_s3
+    @mock_aws
     @patch("tulflow.process.get_github_content")
     def test_report_s3_schematron_all_valid(self, mocked_get_github_content):
         """Test Reporting on Valid S3 XML File Validated with Schematron."""
@@ -279,7 +279,7 @@ class TestSchematronReporting(unittest.TestCase):
         self.assertEqual(response, { "transformed": 3 })
 
 
-    @mock_s3
+    @mock_aws
     @patch("tulflow.process.get_github_content")
     def test_report_s3_schematron_all_invalid(self, mocked_get_github_content):
         """Test Reporting on Invalid S3 XML File Validated with Schematron."""
@@ -317,7 +317,7 @@ class TestSchematronReporting(unittest.TestCase):
         self.assertEqual(response, { "transformed": 5 })
 
 
-    @mock_s3
+    @mock_aws
     @patch("tulflow.process.get_github_content")
     def test_report_s3_schematron_mix(self, mocked_get_github_content):
         """Test Reporting on Valid & Invalid S3 XML File Validated with Schematron."""
@@ -355,7 +355,7 @@ class TestSchematronReporting(unittest.TestCase):
         self.assertIn(b'\r\ninvalid-missingitemurl,', test_report_content)
         self.assertEqual(response, { "transformed": 8 })
 
-    @mock_s3
+    @mock_aws
     @patch("tulflow.process.get_github_content")
     def test_report_s3_schematron_empty(self, mocked_get_github_content):
         """Test Reporting on Empty S3 XML File Validated with Schematron."""
@@ -390,7 +390,7 @@ class TestSchematronReporting(unittest.TestCase):
         self.assertIn(b'id,report,record,source_file\r\n', test_report_content)
         self.assertEqual(response, { "transformed": 0 })
 
-    @mock_s3
+    @mock_aws
     @patch("tulflow.process.get_github_content")
     def test_report_s3_schematron_none(self, mocked_get_github_content):
         """Test Reporting on No provided S3 XML File Validated with Schematron."""

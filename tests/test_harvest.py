@@ -4,7 +4,7 @@ import hashlib
 import unittest
 import boto3
 from lxml import etree
-from moto import mock_s3
+from moto import mock_aws
 from unittest import mock
 from unittest.mock import patch
 from airflow.hooks.S3_hook import S3Hook
@@ -14,7 +14,7 @@ from lxml import etree
 import httpretty
 from tulflow import harvest
 from types import SimpleNamespace
-from moto import mock_s3
+from moto import mock_aws
 
 DEFAULT_DATE = timezone.datetime(2019, 8, 16)
 NS = {
@@ -479,7 +479,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         self.assertIn('INFO:root:<oai:collection xmlns:oai="http://www.openarchives.org/OAI/2.0/" dag-id="no-dag-provided" dag-timestamp="no-timestamp-provided"><oai:record airflow-record-id="oai:alma.01TULI_INST:991000000939703811"><oai:header status="deleted"><oai:identifier>oai:alma.01TULI_INST:991000000939703811</oai:identifier><oai:datestamp>2018-04-02T21:02:12Z</oai:datestamp><oai:setSpec>blacklight</oai:setSpec></oai:header></oai:record><oai:record airflow-record-id="oai:alma.01TULI_INST:991000000939703812"><oai:header status="deleted"><oai:identifier>oai:alma.01TULI_INST:991000000939703812</oai:identifier><oai:datestamp>2018-04-02T21:02:12Z</oai:datestamp><oai:setSpec>blacklight</oai:setSpec></oai:header></oai:record></oai:collection>', log.output)
 
 
-    @mock_s3
+    @mock_aws
     def test_perform_xml_lookup_with_cache(self, **kwargs):
         """Test Calling handling XML Element to String with Deletes."""
         kwargs["access_id"] = "cats"

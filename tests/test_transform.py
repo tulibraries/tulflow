@@ -2,7 +2,7 @@
 import unittest
 import boto3
 from lxml import etree
-from moto import mock_s3
+from moto import mock_aws
 from tulflow import transform
 import logging
 from unittest.mock import patch
@@ -22,7 +22,7 @@ class TestXSLTransform(unittest.TestCase):
     def setUp(self):
         transform.prepare_saxon_engine()
 
-    @mock_s3
+    @mock_aws
     @patch('subprocess.check_output')
     def test_transform_s3_xml_simple(self, mocked_subprocess):
         """Test Pulling S3 XML, Transforming with XSLT, & Writing to S3."""
@@ -68,7 +68,7 @@ class TestXSLTransform(unittest.TestCase):
         )
 
 
-    @mock_s3
+    @mock_aws
     @patch('subprocess.check_output')
     def test_transform_s3_xml_complex(self, mocked_subprocess):
         """Test Pulling S3 XML, Transforming with Complex XSLT, & Writing to S3."""

@@ -2,7 +2,7 @@
 import logging
 import csv
 import io
-from airflow import AirflowException
+from airflow.exceptions import AirflowFailException
 from lxml import etree, isoschematron
 from tulflow import process
 
@@ -70,7 +70,7 @@ def filter_s3_schematron(**kwargs):
     logging.info("Invalid Records report: https://%s.s3.amazonaws.com/%s", bucket, invalid_filename)
     process.generate_s3_object(csv_in_mem.getvalue(), bucket, invalid_filename, access_id, access_secret)
     if total_filter_count == total_record_count and total_record_count != 0:
-        raise AirflowException(f"All records were filtered out: {total_record_count}")
+        raise AirflowFailException(f"All records were filtered out: {total_record_count}") # pylint: disable
     return {"filtered": total_filter_count}
 
 def report_s3_schematron(**kwargs):

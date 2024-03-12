@@ -6,7 +6,7 @@ from unittest import mock
 from moto import mock_aws
 from tulflow import process, validate
 from unittest.mock import patch
-from airflow import AirflowException
+from airflow.exceptions import AirflowFailException
 
 class TestSchematronFiltering(unittest.TestCase):
     """Test Class for functions that filtering XML with Schematron."""
@@ -87,11 +87,11 @@ class TestSchematronFiltering(unittest.TestCase):
 
         # run tests
         with self.assertLogs() as log:
-            with self.assertRaises(AirflowException) as context:
+            with self.assertRaises(AirflowFailException) as context:
                 validate.filter_s3_schematron(**self.kwargs)
 
         errors = "All records were filtered out: 5"
-        exception = AirflowException(errors)
+        exception = AirflowFailException(errors)
         self.assertEqual(str(exception), str(context.exception))
 
         self.assertIn("INFO:root:Validating & Filtering File: dpla_test/transformed/sch-oai-invalid.xml", log.output)

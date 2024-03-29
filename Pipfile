@@ -9,7 +9,7 @@ pylint = "*"
 nose = "*"
 httpretty = "*"
 moto = "==5.0.2"
-requests-mock = "==1.11.0"
+requests-mock = "==1.12.1"
 
 [packages]
 apache-airflow = "==2.8.3"

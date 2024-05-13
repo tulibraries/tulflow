@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "96b74820b59b66cc68b0f5653bbedd7cb5055b837dddc681456b2f27180df6d4"
+            "sha256": "c253a26a9562fbb77e28a69fb590421cf292a8d52ccdb869b5da206ab6559252"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -190,12 +190,12 @@
         },
         "apache-airflow-providers-sftp": {
             "hashes": [
-                "sha256:b651b0ced589d0d718d63e566d7760ce7c9289466ffe0934e2edba8b298bb128",
-                "sha256:fe98925ad83bab8228075af4decf16f86d3cfce538b0fc6692225da0663f7b68"
+                "sha256:041a7dcbba5f05d30768b8bb007c508467d2ba3eb4bb46449dcd5cc66ba8c282",
+                "sha256:c314981bfee780cd4274939c52f02e5a1070c778fc8e1a825d6c92743b155aa4"
             ],
             "index": "pypi",
             "markers": "python_version ~= '3.8'",
-            "version": "==4.9.1"
+            "version": "==4.10.0"
         },
         "apache-airflow-providers-slack": {
             "hashes": [

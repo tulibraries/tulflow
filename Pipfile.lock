@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "96b74820b59b66cc68b0f5653bbedd7cb5055b837dddc681456b2f27180df6d4"
+            "sha256": "8382d5db731394465c1eae40817c4ef0d3ec7dc597f4ee8d286135f2c7ec5a0c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -224,12 +224,12 @@
         },
         "apache-airflow-providers-ssh": {
             "hashes": [
-                "sha256:1e0e525dbe6e99c174febdf773367365a27eab1ef50eb96844d008b8ffe43e73",
-                "sha256:f1619fb56fb58dea18b7fb2d7937e7810363f9cd203e7b176177c6f4c9c70b83"
+                "sha256:589e045aa2c2ff2e323f116718e99012a8be234e663d1900e573651f42328456",
+                "sha256:fbc6319c28989852cde53d7a1d98363c651d9de1c6ff2bcf5ddad7fea03866c8"
             ],
             "index": "pypi",
             "markers": "python_version ~= '3.8'",
-            "version": "==3.10.1"
+            "version": "==3.11.0"
         },
         "apispec": {
             "extras": [

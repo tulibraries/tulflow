@@ -2373,12 +2373,12 @@
         },
         "setuptools": {
             "hashes": [
-                "sha256:6c1fccdac05a97e598fb0ae3bbed5904ccb317337a51139dcd51453611bbb987",
-                "sha256:c636ac361bc47580504644275c9ad802c50415c7522212252c033bd15f301f32"
+                "sha256:98da3b8aca443b9848a209ae4165e2edede62633219afa493a58fbba57f72e2e",
+                "sha256:f06fbe978a91819d250a30e0dc4ca79df713d909e24438a42d0ec300fc52247f"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==69.5.1"
+            "version": "==71.0.0"
         },
         "sickle": {
             "hashes": [

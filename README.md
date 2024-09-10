@@ -17,11 +17,10 @@ Within your DAG project, you will need to update the Pipfile to use the latest v
 * run ```pipenv install tulflow```
 * Commit your changes in each repository
 
-Right now we are using Tulflow in 3 different DAG repositories, so you should update the release in each one in order to ensure that the most recent version is actually the one being used.
+Right now we are using Tulflow in 2 different DAG repositories, so you should update the release in each one in order to ensure that the most recent version is actually the one being used.
 
 * [cob_datapipeline](https://github.com/tulibraries/cob_datapipeline)
 * [funcake_dags](https://github.com/tulibraries/funcake_dags)
-* [mainfold_airflow_dags](https://github.com/tulibraries/manifold_airflow_dags)
 
 ## How to Use
 

@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+constraints-*.txt
+pipfile-requirements.txt
+project-dependencies.txt

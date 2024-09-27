@@ -6,28 +6,36 @@ orbs:
 jobs:
   build-and-test:
     docker:
-      - image: cimg/python:3.11.10
+      - image: cimg/python:3.12.3
         environment:
           PIPENV_VENV_IN_PROJECT: true
           SLUGIFY_USES_TEXT_UNIDECODE: yes
     steps:
       - checkout
-      - python/install-packages:
-          args: --dev
-          pkg-manager: pipenv
+      - run: git submodule init; git submodule update
+      - run:
+          name: 'Install Dependencies'
+          command: |
+            SLUGIFY_USES_TEXT_UNIDECODE=yes pipenv install --dev
       - run:
            command: pipenv run airflow db migrate
            name: Migrate Airflow Database
       - run:
-          command: pipenv run pylint tulflow -E
-          name: Lint
+          name: 'Check Airflow Constraints'
+          command: |
+            make compare-dependencies
       - run:
-          command: pipenv run pytest
-          name: Test
+          name: 'Run Pylint'
+          command: |
+            make lint
+      - run:
+          name: 'Run Pytest'
+          command: |
+            make test
 
   build-and-deploy:
     docker:
-      - image: cimg/python:3.11.10
+      - image: cimg/python:3.12.3
         environment:
           PIPENV_VENV_IN_PROJECT: true
           SLUGIFY_USES_TEXT_UNIDECODE: yes

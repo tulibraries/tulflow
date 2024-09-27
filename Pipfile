@@ -4,7 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pytest = "==7.4.4"
+pytest = "==8.3.2"
 pylint = "*"
 nose = "*"
 httpretty = "*"
@@ -27,7 +27,7 @@ numpy = "==1.26.4"
 pandas = "==2.1.4"
 pexpect = "==4.9.0"
 requests = "==2.32.3"
-setuptools = "*"
+setuptools = "74.0.0"
 sickle = ">=0.7.0"
 sqlalchemy = "==1.4.53"
 werkzeug = "==2.2.3"
@@ -35,6 +35,5 @@ wheel = "*"
 wtforms = "==3.1.2"
 xmltodict = "==0.13.0"
 
-
 [requires]
-python_version = "3.11"
+python_version = "3.12"

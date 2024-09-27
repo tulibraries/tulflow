@@ -1,0 +1,3 @@
+[submodule ".circleci/shared-scripts"]
+	path = .circleci/shared-scripts
+	url = git@github.com:tulibraries/shared-scripts.git

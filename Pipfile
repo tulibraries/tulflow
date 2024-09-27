@@ -12,7 +12,7 @@ moto = "==5.0.11"
 requests-mock = "==1.12.1"
 
 [packages]
-apache-airflow = "==2.10.1"
+apache-airflow = "==2.10.2"
 apache-airflow-providers-amazon = "==8.28.0"
 apache-airflow-providers-slack = "==8.9.0"
 apache-airflow-providers-sftp = "==4.11.0"

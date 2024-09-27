@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "388185c8699f19a2155d90ecd61e2e748b1f8fbc8591d2e885fb46eb0951963f"
+            "sha256": "de32e857e9308e9a87856c2a90a5da803dca5054cfb6a55b916ac549211235c4"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -3102,7 +3102,6 @@
                 "sha256:fa76fbb7596cc5839320000cdd5d0955313696d9511debab7ee7278fc8b5c84a",
                 "sha256:fff12c88a672ab9c9c1cf7b0c80e3ad9e2ebd9d828d955c126be4fd3e5578c9e"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.7'",
             "version": "==42.0.8"
         },
@@ -3238,12 +3237,12 @@
         },
         "moto": {
             "hashes": [
-                "sha256:606b641f4c6ef69f28a84147d6d6806d052011e7ae7b0fe46ae8858e7a27a0a3",
-                "sha256:bdba9bec0afcde9f99b58c5271d6458dbfcda0a0a1e9beaecd808d2591db65ea"
+                "sha256:57aa8c2af417cc64a0ddfe63e5bcd1ada90f5079b73cdd1f74c4e9fb30a1a7e6",
+                "sha256:fa1e92ffb55dbfb9fa92a2115a88c32481b75aa3fbd24075d1f29af2f9becffa"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==5.0.11"
+            "version": "==5.0.15"
         },
         "nose": {
             "hashes": [
@@ -3376,7 +3375,6 @@
                 "sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760",
                 "sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.8'",
             "version": "==2.32.3"
         },
@@ -3426,7 +3424,7 @@
                 "sha256:ca899ca043dcb1bafa3e262d73aa25c465bfb49e0bd9dd5d59f1d0acba2f8fac",
                 "sha256:e7d814a81dad81e6caf2ec9fdedb284ecc9c73076b62654547cc64ccdcae26e9"
             ],
-            "markers": "python_version >= '3.8'",
+            "markers": "python_version >= '3.10'",
             "version": "==2.2.3"
         },
         "werkzeug": {
@@ -3434,7 +3432,6 @@
                 "sha256:2e1ccc9417d4da358b9de6f174e3ac094391ea1d4fbef2d667865d819dfd0afe",
                 "sha256:56433961bc1f12533306c624f3be5e744389ac61d722175d543e1751285da612"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.7'",
             "version": "==2.2.3"
         },
@@ -3443,7 +3440,6 @@
                 "sha256:341595a488e3e01a85a9d8911d8912fd922ede5fecc4dce437eb4b6c8d037e56",
                 "sha256:aa89e8fd76320154a40d19a0df04a4695fb9dc5ba977cbb68ab3e4eb225e7852"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.4'",
             "version": "==0.13.0"
         }

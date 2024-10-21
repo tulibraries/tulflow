@@ -32,7 +32,7 @@ sickle = ">=0.7.0"
 sqlalchemy = "==1.4.53"
 werkzeug = "==2.2.3"
 wheel = "*"
-wtforms = "==3.1.2"
+wtforms = "==3.2.1"
 xmltodict = "==0.13.0"
 
 [requires]

@@ -8,7 +8,7 @@ pytest = "==8.3.2"
 pylint = "*"
 nose = "*"
 httpretty = "*"
-moto = "==5.0.11"
+moto = "==5.0.21"
 requests-mock = "==1.12.1"
 
 [packages]

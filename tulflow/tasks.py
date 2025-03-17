@@ -2,7 +2,7 @@
 import re
 import pprint
 from airflow.hooks.base import BaseHook
-from airflow.providers.http.operators.http import SimpleHttpOperator
+from airflow.providers.http.operators.http import HttpOperator
 from airflow.operators.python import PythonOperator
 from tulflow.solr_api_utils import SolrApiUtils
 
@@ -10,7 +10,7 @@ PP = pprint.PrettyPrinter(indent=4)
 
 def create_sc_collection(dag, sc_conn_id, sc_coll_name, sc_coll_repl, sc_configset_name):
     """Creates a new SolrCloud Collection."""
-    task_instance = SimpleHttpOperator(
+    task_instance = HttpOperator(
         task_id="create_collection",
         method="GET",
         http_conn_id=sc_conn_id,
@@ -33,7 +33,7 @@ def create_sc_collection(dag, sc_conn_id, sc_coll_name, sc_coll_repl, sc_configs
 
 def swap_sc_alias(dag, sc_conn_id, sc_coll_name, sc_configset_name):
     """Create or point an existing SolrCloud Alias to an existing SolrCloud Collection."""
-    task_instance = SimpleHttpOperator(
+    task_instance = HttpOperator(
         task_id="solr_alias_swap",
         method="GET",
         http_conn_id=sc_conn_id,

@@ -54,8 +54,8 @@ def transform_s3_xsl(**kwargs):
 
 def prepare_saxon_engine(saxon_jar="saxon.jar", saxon_path="/tmp/saxon/"):
     """Set up Saxon HE 9 Java Engine for XML & XSL tasks."""
-    saxon_version = "9.9.1-5"
-    saxon_download_sha1 = "c1f413a1b810dbf0d673ffd3b27c8829a82ac31c"
+    saxon_version = "12.5"
+    saxon_download_sha1 = "57c007520e2879387b8d13d0a512e9566eeffa73"
 
     if not os.path.exists(saxon_path + saxon_jar):
         Path(saxon_path).mkdir(parents=True, exist_ok=True)

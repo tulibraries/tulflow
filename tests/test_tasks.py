@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch
 import pytest
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
-from airflow.providers.http.operators.http import SimpleHttpOperator
+from airflow.providers.http.operators.http import HttpOperator
 from airflow.hooks.base import BaseHook
 from airflow.models import Connection, DAG, TaskInstance, DagRun
 from airflow.utils import timezone

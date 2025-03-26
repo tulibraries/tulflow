@@ -43,5 +43,6 @@ setuptools.setup(
 	version=VERSION,
 	cmdclass={
         "verify": VerifyVersionCommand,
-    }
+    },
+    license_files=["LICENSE"]
 )

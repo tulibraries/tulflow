@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tulflow"
-version = "v0.12.5"
+version = "v0.12.6"
 description = "Package of Temple University Library Indexing & ETL functions used by Airflow."
 readme = "README.md"
 license-files =["LICENSE"]
@@ -19,3 +19,6 @@ classifiers = [
 dependencies = [
     "nose",
 ]
+
+[project.scripts]
+verify-version = "verify_version:verify_version"

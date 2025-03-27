@@ -4,6 +4,18 @@ orbs:
   python: circleci/python@1.5.0
 
 jobs:
+  verify_version:
+    docker:
+      - image: python:3.12
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: pip install .
+      - run:
+          name: Verify Version
+          command: python -m verify_version
+
   build-and-test:
     docker:
       - image: cimg/python:3.12.3
@@ -42,11 +54,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Verify git tag vs. version.
-          command: |
-            pip install --user twine
-            python3 pyproject.toml verify
-      - run:
           name: Init .pypirc
           command: |
             echo -e "[pypi]" >> ~/.pypirc
@@ -62,12 +69,15 @@ jobs:
             python3 pyproject.toml bdist_wheel
       - run:
           name: Upload to pypi
-          command: python3  -m twine upload dist/*
+          command: |
+            pip install --user twine
+            python3  -m twine upload dist/*
 
 
 workflows:
   main:
     jobs:
+      - verify_version
       - build-and-test
       - build-and-deploy:
           filters:

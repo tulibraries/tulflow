@@ -45,7 +45,7 @@ jobs:
           name: Verify git tag vs. version.
           command: |
             pip install --user twine
-            python3 setup.py verify
+            python3 pyproject.toml verify
       - run:
           name: Init .pypirc
           command: |
@@ -57,9 +57,9 @@ jobs:
           command: |
             # create a source distribution
 
-            python3 setup.py sdist
+            python3 pyproject.toml sdist
             # create a wheel
-            python3 setup.py bdist_wheel
+            python3 pyproject.toml bdist_wheel
       - run:
           name: Upload to pypi
           command: python3  -m twine upload dist/*

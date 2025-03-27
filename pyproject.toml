@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tulflow"
+version = "0.12.3"
+description = "Package of Temple University Library Indexing & ETL functions used by Airflow."
+readme = "README.md"
+license-files =["LICENSE"]
+authors = [
+    {name = "Temple University Libraries", email = "tul08567@temple.edu"}
+]
+urls = {homepage = "https://github.com/tulibraries/tulflow"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "nose",
+]

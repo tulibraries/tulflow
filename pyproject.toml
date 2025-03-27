@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "tulflow"
 description = "Package of Temple University Library Indexing & ETL functions used by Airflow."
 readme = "README.md"
-license-files =["LICENSE"]
+license = {text = "Apache License (2.0)"}
 authors = [
     {name = "Temple University Libraries", email = "tul08567@temple.edu"}
 ]

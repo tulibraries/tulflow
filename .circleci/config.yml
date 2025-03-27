@@ -55,14 +55,13 @@ jobs:
       - run:
           name: Create package
           command: |
-            # create a source distribution
-
-            python3 pyproject.toml sdist
-            # create a wheel
-            python3 pyproject.toml bdist_wheel
+            #install the build tool
+            pip install build
+            # create a source distribution and a wheel
+            python -m build
       - run:
           name: Upload to pypi
-          command: python3  -m twine upload dist/*
+          command: python3 -m twine upload dist/*
 
 
 workflows:

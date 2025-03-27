@@ -1,7 +1,14 @@
 import os
 import sys
 
-VERSION = "v0.12.6"  # Ensure this matches the version in pyproject.toml
+def get_version_from_file():
+    try:
+        with open("VERSION", "r") as version_file:
+            return version_file.read().strip()
+    except FileNotFoundError:
+        sys.exit("VERSION file not found. Please ensure it exists in the project root.")
+
+VERSION = get_version_from_file()  # Dynamically read the version from the VERSION file
 
 def verify_version():
     """Verify that the git tag matches the project version."""

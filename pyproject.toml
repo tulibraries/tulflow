@@ -1,10 +1,9 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=42", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "tulflow"
-version = "v0.12.5"
 description = "Package of Temple University Library Indexing & ETL functions used by Airflow."
 readme = "README.md"
 license-files =["LICENSE"]
@@ -19,3 +18,13 @@ classifiers = [
 dependencies = [
     "nose",
 ]
+dynamic = ["version"] 
+
+[project.scripts]
+verify-version = "verify_version:verify_version"
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
+write_to = "tulflow/_version.py"
+fallback_version = "0.0.0"

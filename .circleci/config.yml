@@ -45,7 +45,7 @@ jobs:
           name: Verify git tag vs. version.
           command: |
             pip install --user twine
-            python3 pyproject.toml verify
+            python3 -m verify_version
       - run:
           name: Init .pypirc
           command: |

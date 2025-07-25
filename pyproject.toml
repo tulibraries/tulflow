@@ -1,16 +1,16 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "setuptools_scm"]
+requires = ["setuptools>=61.0", "wheel", "setuptools_scm[toml]>=6.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "tulflow"
 description = "Package of Temple University Library Indexing & ETL functions used by Airflow."
 readme = "README.md"
-license = {text = "Apache License (2.0)"}
+license = { text = "Apache License (2.0)" }
 authors = [
-    {name = "Temple University Libraries", email = "tul08567@temple.edu"}
+    { name = "Temple University Libraries", email = "tuh42082@temple.edu" }
 ]
-urls = {homepage = "https://github.com/tulibraries/tulflow"}
+urls = { homepage = "https://github.com/tulibraries/tulflow" }
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent"
@@ -18,13 +18,13 @@ classifiers = [
 dependencies = [
     "nose",
 ]
-dynamic = ["version"] 
+dynamic = ["version"]
 
-[project.scripts]
-verify-version = "verify_version:verify_version"
+# (verify-version script removed; version comes from git tags via setuptools_scm)
 
 [tool.setuptools_scm]
-version_scheme = "guess-next-dev"
+version_scheme = "post-release"
 local_scheme = "no-local-version"
+# write version file for runtime access (optional)
 write_to = "tulflow/_version.py"
 fallback_version = "0.0.0"

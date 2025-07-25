@@ -5,7 +5,7 @@ name: Publish Python 🐍 distribution 📦 to PyPI
 on:
   push:
     tags:
-      - "v.*.*.*"
+      - "v*.*.*"
   workflow_dispatch: {}
 
 concurrency:
@@ -62,6 +62,6 @@ jobs:
         with:
           name: python-package-distributions
           path: dist/
-          
+
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

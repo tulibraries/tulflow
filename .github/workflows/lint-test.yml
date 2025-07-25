@@ -19,12 +19,12 @@ jobs:
     strategy:
       matrix:
         python-version: [ 3.12 ]
-        
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodule: recursive
+          submodules: recursive
 
       - name: Setup Python
         uses: actions/setup-python@v5

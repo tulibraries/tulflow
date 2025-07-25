@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "638df28b010759f4150b27d174e176d20a1cb064299d5a8bdefb1f64757dee62"
+            "sha256": "300ed51da06ddd178a4a64488ece14c47db0bb66c8f72560fab7def03b901632"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -142,12 +142,12 @@
         },
         "apache-airflow-providers-amazon": {
             "hashes": [
-                "sha256:69880a782c79e6d91337bd7a74f7ab8e12fee68408c3ec8bd8ccc7def6a14aa7",
-                "sha256:d525e7d703f9fa58dc10f39ca7f7c3e8c7a65759a0a59fe5979998464abf3a9e"
+                "sha256:c489f96522f085aa40f0efb87dc662450734e215ec7def8088b763c5f863fa66",
+                "sha256:d4a097ed98b200357005d0c93b9099c7942d6681126ae59f06dc44c67d1739d2"
             ],
             "index": "pypi",
-            "markers": "python_version ~= '3.9'",
-            "version": "==9.2.0"
+            "markers": "python_version >= '3.10'",
+            "version": "==9.10.0"
         },
         "apache-airflow-providers-common-compat": {
             "hashes": [
@@ -2456,6 +2456,14 @@
             ],
             "markers": "python_version >= '3.9'",
             "version": "==0.13.1"
+        },
+        "sagemaker-studio": {
+            "hashes": [
+                "sha256:5377ec8a71d80fd42c34446d3d6736b6b085127bc58233523e81ad10e74adab7",
+                "sha256:82e91b8dfaedac40ce00e5cb81386ea33d3db06834a81bdcce124086f311c7cd"
+            ],
+            "markers": "python_version >= '3.9'",
+            "version": "==1.0.20"
         },
         "scramp": {
             "hashes": [

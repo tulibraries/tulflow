@@ -8,7 +8,7 @@ pytest = "==8.3.4"
 pylint = "*"
 nose = "*"
 httpretty = "*"
-moto = "==5.0.11"
+moto = "==5.1.9"
 requests-mock = "==1.12.1"
 setuptools-scm = {version="*", extras=["toml"]}
 

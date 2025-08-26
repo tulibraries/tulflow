@@ -2777,12 +2777,12 @@
         },
         "wheel": {
             "hashes": [
-                "sha256:661e1abd9198507b1409a20c02106d9670b2576e916d58f520316666abca6729",
-                "sha256:708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248"
+                "sha256:f796f65d72750ccde090663e466d0ca37cd72b62870f7520b96d34cdc07d86d8",
+                "sha256:fd477efb5da0f7df1d3c76c73c14394002c844451bd63229d8570f376f5e6a38"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.8'",
-            "version": "==0.45.1"
+            "markers": "python_version >= '3.9'",
+            "version": "==0.46.1"
         },
         "wirerope": {
             "hashes": [

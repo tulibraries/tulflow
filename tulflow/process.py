@@ -92,7 +92,7 @@ def generate_bw_parent_field(parent_id):
 
 def get_github_content(repository, filename, branch="main"):
     """Get the contents of GitHub file."""
-    raw_url = "https://raw.github.com/{repo}/{branch}/{filename}".format(
+    raw_url = "https://raw.githubusercontent.com/{repo}/{branch}/{filename}".format(
         repo=repository,
         branch=branch,
         filename=filename

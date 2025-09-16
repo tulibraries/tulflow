@@ -30,7 +30,7 @@ def transform_s3_xsl(**kwargs):
     transformed = etree.Element("collection")
     transformed.attrib["dag-id"] = run_id
     transformed.attrib["dag-timestamp"] = kwargs.get("timestamp", "no-timestamp-provided")
-    xsl = "https://raw.github.com/{repo}/{branch}/{filename}".format(
+    xsl = "https://raw.githubusercontent.com/{repo}/{branch}/{filename}".format(
         repo=kwargs.get("xsl_repository", "tulibraries/aggregator_mdx"),
         branch=kwargs.get("xsl_branch", "main"),
         filename=kwargs.get("xsl_filename")

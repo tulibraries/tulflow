@@ -1,6 +1,6 @@
 # TULFLOW
 
-[![Build Status](https://circleci.com/gh/tulibraries/tulflow.svg?style=svg&circle-token=3f42b93c7525db72aa5411eded38a862296ed707)](https://circleci.com/gh/tulibraries/tulflow)
+[![CI Status](https://github.com/tulibraries/tulflow/actions/workflows/lint-test.yml/badge.svg)](https://github.com/tulibraries/tulflow/actions/workflows/lint-test.yml)
 
 Small Python package / library for common ETL-adjacent functions, primarily used in the TU Libraries Airflow tasks.
 

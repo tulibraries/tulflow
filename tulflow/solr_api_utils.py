@@ -76,7 +76,7 @@ class SolrApiUtils():
         else:
             logging.info("Collection %s did not exist. Continuing without error", collection)
 
-    def create_collection(self, collection, configset="_default", numShards=1, replicationFactor=1, maxShardsPerNode=1):
+    def create_collection(self, collection, configset="_default", numShards=1, replicationFactor=4, maxShardsPerNode=1):
         """Create a SolrCloud collection (not through Airflow Task; that is in tasks.py)"""
         path = f"/solr/admin/collections?action=CREATE&name={collection}&collection.configName={configset}&numShards={numShards}&replicationFactor={replicationFactor}&maxShardsPerNode={maxShardsPerNode}"
         response = self.get_from_solr_api(path)

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8dc66caef27e51a2cd1be6c3ca13f4584f785ab8ce508389b60179edcd45289c"
+            "sha256": "fed82989e2eced2e22c685016b8815c8c4e01428ae1b790eaa539265b48d8ad4"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -202,12 +202,12 @@
         },
         "apache-airflow-providers-amazon": {
             "hashes": [
-                "sha256:27f9bdc5c7cfbfc9d4e3808e61574bb5ee37187422b7e7a066de65688de7823e",
-                "sha256:f2d9fba7cf9f601c7c7518f5bbfe3012677868c6cc83b9977e59f342bf372a34"
+                "sha256:0454f27a333c29135084b84c7a4d0fa9549004296b5d60130b2182023d9851a1",
+                "sha256:21166c9b0160ce21af0ef380443fa10d73893accdb8b8052ded3d9a37fd50881"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==9.22.0"
+            "version": "==9.23.0"
         },
         "apache-airflow-providers-common-compat": {
             "hashes": [
@@ -453,19 +453,19 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:3f349f967ab38c23425626d130962bcb363e75f042734fe856ea8c5a00eef03c",
-                "sha256:dbff353eb7dc93cbddd7926ed24793e0174c04adbe88860dfa639568442e4962"
+                "sha256:6823a4b59aa578c7d98124280a9b6d83cea04bdb02525cbaa79370e5b6f7f631",
+                "sha256:e59846f4ff467b23bae4751948298db554dbdda0d72b09028d2cacbeff27e1ad"
             ],
             "markers": "python_version >= '3.9'",
-            "version": "==1.42.68"
+            "version": "==1.42.69"
         },
         "botocore": {
             "hashes": [
-                "sha256:3951c69e12ac871dda245f48dac5c7dd88ea1bfdd74a8879ec356cf2874b806a",
-                "sha256:9df7da26374601f890e2f115bfa573d65bf15b25fe136bb3aac809f6145f52ab"
+                "sha256:0934f2d90403c5c8c2cba83e754a39d77edcad5885d04a79363edff3e814f55e",
+                "sha256:ef0e3d860a5d7bffc0ccb4911781c4c27d538557ed9a616ba1926c762d72e5f6"
             ],
             "markers": "python_version >= '3.9'",
-            "version": "==1.42.68"
+            "version": "==1.42.69"
         },
         "cachelib": {
             "hashes": [

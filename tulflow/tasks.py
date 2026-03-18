@@ -1,9 +1,8 @@
 """Generic Airflow Tasks Functions, Abstracted for Reuse."""
 import re
 import pprint
-from airflow.hooks.base import BaseHook
 from airflow.providers.http.operators.http import HttpOperator
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from tulflow.solr_api_utils import SolrApiUtils
 
 PP = pprint.PrettyPrinter(indent=4)

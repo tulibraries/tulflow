@@ -5,11 +5,10 @@ import pytest
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.providers.http.operators.http import HttpOperator
 from airflow.hooks.base import BaseHook
-from airflow.models import Connection, DAG, TaskInstance, DagRun
+from airflow.models import Connection, DAG, TaskInstance
 from airflow.utils import timezone
 from tulflow.tasks import create_sc_collection, get_solr_url, refresh_sc_collection_for_alias, swap_sc_alias
 from airflow.utils.state import State
-from airflow import settings
 
 DEFAULT_DATE = timezone.datetime(2019, 8, 16)
 
@@ -27,17 +26,11 @@ class TestSolrCloudTasks(unittest.TestCase):
 
     def test_create_sc_collection(self, mocker):
         """Test create_sc_collection operator instance contains expected config values."""
-        session = settings.Session()
         dag = DAG(dag_id='test_create_sc_collection', start_date=DEFAULT_DATE)
-        with dag:
-            dr = dag.create_dagrun(
-                run_id="test_existing_value_create", state=State.SUCCESS,
-                start_date=DEFAULT_DATE, data_interval=(DEFAULT_DATE, DEFAULT_DATE),
-                session=session,
-                )
+        run_id = "test_existing_value_create"
         operator = create_sc_collection(dag, 'SOLRCLOUD', 'test-collection', '2', 'test-configset')
-        task_instance = TaskInstance(task=operator, run_id=dr.run_id, state=State.SUCCESS)
-
+        task_instance = TaskInstance(task=operator, run_id=run_id, dag_version_id=None, state=State.SUCCESS)
+        
         self.assertEqual("SOLRCLOUD", operator.http_conn_id)
         self.assertEqual("CREATE", operator.data['action'])
         self.assertEqual("test-collection", operator.data['name'])
@@ -55,17 +48,11 @@ class TestSolrCloudTasks(unittest.TestCase):
 
     def test_swap_sc_alias(self, mocker):
         """Test swap_sc_alias operator instance contains expected config values."""
-        session = settings.Session()
-        dag = DAG(dag_id='test_swap_sc_alias', start_date=DEFAULT_DATE)
-        with dag:
-            dr = dag.create_dagrun(
-                run_id="test_existing_value_swap", state=State.SUCCESS,
-                start_date=DEFAULT_DATE, data_interval=(DEFAULT_DATE, DEFAULT_DATE),
-                session=session,
-                )
+        dag = DAG(dag_id='test_create_sc_collection', start_date=DEFAULT_DATE)
+        run_id = "test_existing_value_create"
         operator = swap_sc_alias(dag, 'SOLRCLOUD', 'new-collection', 'my-alias')
-        task_instance = TaskInstance(task=operator, run_id=dr.run_id, state=State.SUCCESS)
-
+        task_instance = TaskInstance(task=operator, run_id=run_id, dag_version_id=None, state=State.SUCCESS)
+        
         self.assertEqual("SOLRCLOUD", operator.http_conn_id)
         self.assertEqual("CREATEALIAS", operator.data['action'])
         self.assertEqual("my-alias", operator.data['name'])
@@ -82,17 +69,11 @@ class TestSolrCloudTasks(unittest.TestCase):
 
     def test_refresh_sc_collection_for_alias(self, mocker):
         """Test refresh_sc_collection_for_alias task instance contains expected config values."""
-        session = settings.Session()
         dag = DAG(dag_id='test_refresh_sc_collection_for_alias', start_date=DEFAULT_DATE)
-        with dag:
-            dr = dag.create_dagrun(
-                run_id="test_existing_value_refresh", state=State.SUCCESS,
-                start_date=DEFAULT_DATE, data_interval=(DEFAULT_DATE, DEFAULT_DATE),
-                session=session,
-                )
+        run_id = "test_existing_value_refresh"
         task = refresh_sc_collection_for_alias(dag=dag, sc_conn=mocker, sc_coll_name='my-collection', sc_alias='my-alias', configset="my-configset")
-        task_instance = TaskInstance(task=task, run_id=dr.run_id, state=State.SUCCESS)
-
+        task_instance = TaskInstance(task=task, run_id=run_id, dag_version_id=None, state=State.SUCCESS)
+        
         self.assertEqual("my-collection", task.op_kwargs['collection'])
         self.assertEqual("my-alias", task.op_kwargs['alias'])
         self.assertEqual("my-configset", task.op_kwargs['configset'])

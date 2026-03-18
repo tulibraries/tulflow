@@ -7,7 +7,7 @@ from lxml import etree
 from moto import mock_aws
 from unittest import mock
 from unittest.mock import patch
-from airflow.hooks.S3_hook import S3Hook
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.models import DAG
 from airflow.utils import timezone
 from lxml import etree

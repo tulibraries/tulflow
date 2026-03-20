@@ -100,7 +100,10 @@ class HarvestIterator(sickle.iterator.OAIItemIterator):
                     continue
                 return mapped
             if self.resumption_token and self.resumption_token.token:
-                self._next_response()
+                try:
+                    self._next_response()
+                except NoRecordsMatch:
+                    raise StopIteration
             else:
                 raise StopIteration
     pass

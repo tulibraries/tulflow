@@ -390,6 +390,21 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         records = harvest.harvest_oai(**kwargs)
         self.assertEqual(records, [])
 
+    def test_harvest_iterator_stops_on_no_records_match_after_resumption_token(self):
+        iterator = harvest.HarvestIterator.__new__(harvest.HarvestIterator)
+        iterator._items = []
+        iterator.mapper = lambda item: item
+        iterator.ignore_deleted = False
+        iterator.resumption_token = SimpleNamespace(token="page-2")
+
+        def raise_no_records_match():
+            raise harvest.NoRecordsMatch("no more records")
+
+        iterator._next_response = raise_no_records_match
+
+        with self.assertRaises(StopIteration):
+            iterator.next()
+
     @httpretty.activate
     def test_harvest_oai_no_metadata(self, **kwargs):
         """Test Calling OAI-PMH HTTP Endpoint & Returning XML String."""
@@ -577,4 +592,3 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         mock_process.return_value = {"updated": 2, "deleted": 0 }
         actual = harvest.oai_to_s3(**kwargs)
         self.assertEqual(actual, {"updated": 2, "deleted": 0, "sets_with_no_records": [] })
-

@@ -93,6 +93,17 @@ def get_solr_url(conn, core):
 
     return solr_url
 
+def get_solr_url_template(conn_id, core):
+    """Generates a templated Solr URL from an Airflow connection id and core."""
+    return (
+        "{% set solr = conn.get('"
+        + conn_id
+        + "') %}"
+        "{{ '' if solr.host.startswith('http') else 'http://' }}{{ solr.host }}"
+        "{% if solr.port %}:{{ solr.port }}{% endif %}/solr/"
+        + core
+    )
+
 def conditionally_trigger(context, dag_run_obj):
     """This function decides whether or not to Trigger the remote DAG"""
     c_p = context['params']['condition_param']

@@ -7,7 +7,13 @@ from airflow.providers.http.operators.http import HttpOperator
 from airflow.hooks.base import BaseHook
 from airflow.models import Connection, DAG, TaskInstance
 from airflow.utils import timezone
-from tulflow.tasks import create_sc_collection, get_solr_url, refresh_sc_collection_for_alias, swap_sc_alias
+from tulflow.tasks import (
+    create_sc_collection,
+    get_solr_url,
+    get_solr_url_template,
+    refresh_sc_collection_for_alias,
+    swap_sc_alias,
+)
 from airflow.utils.state import State
 
 DEFAULT_DATE = timezone.datetime(2019, 8, 16)
@@ -96,3 +102,16 @@ class TestTasksGetSolrUrl(unittest.TestCase):
         conn = Connection(host="https://example.com")
         core = "foo"
         self.assertEqual(get_solr_url(conn, core), "https://example.com/solr/foo")
+
+
+class TestTasksGetSolrUrlTemplate(unittest.TestCase):
+    """Tests for tasks.get_solr_url_template function."""
+
+    def test_get_solr_url_template(self):
+        core = "foo"
+        self.assertEqual(
+            get_solr_url_template("SOLRCLOUD-WRITER", core),
+            "{% set solr = conn.get('SOLRCLOUD-WRITER') %}"
+            "{{ '' if solr.host.startswith('http') else 'http://' }}{{ solr.host }}"
+            "{% if solr.port %}:{{ solr.port }}{% endif %}/solr/foo",
+        )

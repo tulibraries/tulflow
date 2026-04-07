@@ -103,6 +103,11 @@ class TestTasksGetSolrUrl(unittest.TestCase):
         core = "foo"
         self.assertEqual(get_solr_url(conn, core), "https://example.com/solr/foo")
 
+    def test_get_solr_url_uses_schema_when_host_has_no_scheme(self):
+        conn = Connection(host="example.com", port="8983", schema="https")
+        core = "foo"
+        self.assertEqual(get_solr_url(conn, core), "https://example.com:8983/solr/foo")
+
 
 class TestTasksGetSolrUrlTemplate(unittest.TestCase):
     """Tests for tasks.get_solr_url_template function."""
@@ -112,6 +117,6 @@ class TestTasksGetSolrUrlTemplate(unittest.TestCase):
         self.assertEqual(
             get_solr_url_template("SOLRCLOUD-WRITER", core),
             "{% set solr = conn.get('SOLRCLOUD-WRITER') %}"
-            "{{ '' if solr.host.startswith('http') else 'http://' }}{{ solr.host }}"
+            "{{ '' if solr.host.startswith('http') else (solr.schema or 'http') ~ '://' }}{{ solr.host }}"
             "{% if solr.port %}:{{ solr.port }}{% endif %}/solr/foo",
         )

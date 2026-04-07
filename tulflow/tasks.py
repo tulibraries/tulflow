@@ -84,7 +84,8 @@ def get_solr_url(conn, core):
     solr_url = conn.host
 
     if not re.match("^http", solr_url):
-        solr_url = "http://" + solr_url
+        schema = getattr(conn, "schema", None) or "http"
+        solr_url = schema + "://" + solr_url
 
     if conn.port:
         solr_url += ":" + str(conn.port)
@@ -99,7 +100,7 @@ def get_solr_url_template(conn_id, core):
         "{% set solr = conn.get('"
         + conn_id
         + "') %}"
-        "{{ '' if solr.host.startswith('http') else 'http://' }}{{ solr.host }}"
+        "{{ '' if solr.host.startswith('http') else (solr.schema or 'http') ~ '://' }}{{ solr.host }}"
         "{% if solr.port %}:{{ solr.port }}{% endif %}/solr/"
         + core
     )

@@ -2,8 +2,9 @@ import os
 import sys
 
 def get_version_from_file():
+    """Get project version from file."""
     try:
-        with open("VERSION", "r") as version_file:
+        with open("VERSION", "r", encoding="utf-8") as version_file:
             return version_file.read().strip()
     except FileNotFoundError:
         sys.exit("VERSION file not found. Please ensure it exists in the project root.")

@@ -2,9 +2,11 @@
 import unittest
 import boto3
 import httpretty
+
 from lxml import etree
 from moto import mock_aws
 from tulflow import process
+
 
 class TestDataProcessInteractions(unittest.TestCase):
     """Test Class for data processing functions."""
@@ -12,15 +14,19 @@ class TestDataProcessInteractions(unittest.TestCase):
     def test_expand_alma_sftp_tarball_pass(self):
         """Test Untarring AlmaSFTP S3 Tarball bytestream to XML."""
         test_key = "almasftp/alma_bibs__new_1.xml.tar.gz"
-        test_object = open("tests/fixtures/alma_bibs__new_1.xml.tar.gz", "rb").read()
+        with open("tests/fixtures/alma_bibs__new_1.xml.tar.gz", "rb") as fixture_file:
+            test_object = fixture_file.read()
         test_run = process.expand_alma_sftp_tarball(test_key, test_object)
         self.assertEqual(type(test_run).__name__, "bytes")
-        self.assertEqual(test_run, open("tests/fixtures/alma_bibs__new_1.xml", "rb").read())
+        with open("tests/fixtures/alma_bibs__new_1.xml", "rb") as fixture_file:
+            expected = fixture_file.read()
+        self.assertEqual(test_run, expected)
 
     def test_expand_alma_sftp_tarball_empty(self):
         """Test Untarring AlmaSFTP S3 Tarball bytestream to XML."""
-        test_key = "almasftp/alma_bibs__new_1.xml.tar.gz"
-        test_object = open("tests/fixtures/alma_bibs__empty.xml.tar.gz", "rb").read()
+        test_key = "almasftp/alma_bibs__empty.xml.tar.gz"
+        with open("tests/fixtures/alma_bibs__empty.xml.tar.gz", "rb") as fixture_file:
+            test_object = fixture_file.read()
         with self.assertLogs("tulflow_process") as log:
             test_run = process.expand_alma_sftp_tarball(test_key, test_object)
         self.assertEqual(test_run, None)
@@ -30,7 +36,8 @@ class TestDataProcessInteractions(unittest.TestCase):
     def test_expand_alma_sftp_tarball_multi(self):
         """Test Untarring AlmaSFTP S3 Tarball bytestream to XML."""
         test_key = "almasftp/alma_bibs__new_1.xml.tar.gz"
-        test_object = open("tests/fixtures/alma_bibs__multi.xml.tar.gz", "rb").read()
+        with open("tests/fixtures/alma_bibs__multi.xml.tar.gz", "rb") as fixture_file:
+            test_object = fixture_file.read()
         with self.assertLogs("tulflow_process") as log:
             test_run = process.expand_alma_sftp_tarball(test_key, test_object)
         self.assertEqual(test_run, None)
@@ -43,8 +50,10 @@ class TestDataProcessInteractions(unittest.TestCase):
     def test_add_marc21xml_root_namespace(self):
         """Test converting ALMASFTP XML Collection document as bytes
         to lxml.etree.Element with MARC21 as default namespace."""
-        test_bytes = open("tests/fixtures/alma_bibs__new_1.xml", "rb").read()
-        test_out = etree.fromstring(open("tests/fixtures/alma_bibs__new_1_ns.xml", "rb").read())
+        with open("tests/fixtures/alma_bibs__new_1.xml", "rb") as fixture_file:
+            test_bytes = fixture_file.read()
+        with open("tests/fixtures/alma_bibs__new_1_ns.xml", "rb") as fixture_file:
+            test_out = etree.fromstring(fixture_file.read())
         test_run = process.add_marc21xml_root_ns(test_bytes)
         self.assertEqual(etree.tostring(test_run), etree.tostring(test_out))
         self.assertIn("{http://www.loc.gov/MARC21/slim}", test_run.tag)
@@ -52,21 +61,25 @@ class TestDataProcessInteractions(unittest.TestCase):
     def test_add_marc21xml_root_namespace_dup(self):
         """Test converting ALMASFTP XML Collection document as bytes
         to lxml.etree.Element with MARC21 as default namespace."""
-        test_bytes = open("tests/fixtures/alma_bibs__new_1_ns.xml", "rb").read()
-        test_out = etree.fromstring(open("tests/fixtures/alma_bibs__new_1_ns.xml", "rb").read())
+        with open("tests/fixtures/alma_bibs__new_1_ns.xml", "rb") as fixture_file:
+            test_bytes = fixture_file.read()
+        with open("tests/fixtures/alma_bibs__new_1_ns.xml", "rb") as fixture_file:
+            test_out = etree.fromstring(fixture_file.read())
         test_run = process.add_marc21xml_root_ns(test_bytes)
         self.assertEqual(etree.tostring(test_run), etree.tostring(test_out))
         self.assertIn("{http://www.loc.gov/MARC21/slim}", test_run.tag)
 
     def test_get_record_001(self):
         """Test validating & returning a MARC/XML OO1 field."""
-        test_xml = etree.fromstring(open("tests/fixtures/record_001.xml", "rb").read())
+        with open("tests/fixtures/record_001.xml", "rb") as fixture_file:
+            test_xml = etree.fromstring(fixture_file.read())
         test_run = process.get_record_001(test_xml)
         self.assertEqual(test_run, "991022063789703811")
 
     def test_get_record_001_empty(self):
         """Test validating & returning a MARC/XML OO1 field."""
-        test_xml = etree.fromstring(open("tests/fixtures/record_001_empty.xml", "rb").read())
+        with open("tests/fixtures/record_001_empty.xml", "rb") as fixture_file:
+            test_xml = etree.fromstring(fixture_file.read())
         with self.assertLogs("tulflow_process") as log:
             test_run = process.get_record_001(test_xml)
         self.assertEqual(test_run, None)
@@ -78,7 +91,8 @@ class TestDataProcessInteractions(unittest.TestCase):
 
     def test_get_record_001_missing(self):
         """Test validating & returning a MARC/XML OO1 field."""
-        test_xml = etree.fromstring(open("tests/fixtures/record_001_missing.xml", "rb").read())
+        with open("tests/fixtures/record_001_missing.xml", "rb") as fixture_file:
+            test_xml = etree.fromstring(fixture_file.read())
         with self.assertLogs("tulflow_process") as log:
             test_run = process.get_record_001(test_xml)
         self.assertEqual(test_run, None)
@@ -90,7 +104,8 @@ class TestDataProcessInteractions(unittest.TestCase):
 
     def test_get_record_001_dup(self):
         """Test validating & returning a MARC/XML OO1 field."""
-        test_xml = etree.fromstring(open("tests/fixtures/record_001_dup.xml", "rb").read())
+        with open("tests/fixtures/record_001_dup.xml", "rb") as fixture_file:
+            test_xml = etree.fromstring(fixture_file.read())
         test_run = process.get_record_001(test_xml)
         with self.assertLogs("tulflow_process") as log:
             test_run = process.get_record_001(test_xml)
@@ -109,16 +124,20 @@ class TestDataProcessInteractions(unittest.TestCase):
     @httpretty.activate
     def test_get_github_content_exists(self):
         """Test getting existing file from GitHub."""
+        with open("tests/fixtures/temple.xsl", encoding="utf-8") as fixture_file:
+            temple_xsl = fixture_file.read()
         httpretty.register_uri(
             httpretty.GET,
             "https://raw.githubusercontent.com/tulibraries/aggregator_mdx/main/transforms/temple.xsl",
-            body=open("tests/fixtures/temple.xsl").read()
+            body=temple_xsl
         )
         repository = "tulibraries/aggregator_mdx"
         filename = "transforms/temple.xsl"
 
         test_run = process.get_github_content(repository, filename)
-        self.assertEqual(test_run, open("tests/fixtures/temple.xsl", "rb").read())
+        with open("tests/fixtures/temple.xsl", "rb") as fixture_file:
+            expected = fixture_file.read()
+        self.assertEqual(test_run, expected)
 
     @httpretty.activate
     def test_get_github_content_missing(self):
@@ -136,6 +155,7 @@ class TestDataProcessInteractions(unittest.TestCase):
                 process.get_github_content(repository, filename)
         self.assertEqual(pytest_wrapped_e.exception.code, 1)
         self.assertIn("ERROR:root:404 Client Error: Not Found for url: https://raw.githubusercontent.com/tulibraries/aggregator_mdx/main/transforms/temple-fake.xsl", log.output)
+
 
 class TestS3ProcessInteractions(unittest.TestCase):
     """Test Class for S3 data processing functions."""

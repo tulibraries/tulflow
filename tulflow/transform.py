@@ -8,10 +8,13 @@ import logging
 import os
 import subprocess
 import sys
+from pathlib import Path
+
 import requests
 from lxml import etree
+
 from tulflow import process
-from pathlib import Path
+
 
 # pylint: disable=unexpected-keyword-arg
 def transform_s3_xsl(**kwargs):
@@ -29,27 +32,50 @@ def transform_s3_xsl(**kwargs):
     saxon = prepare_saxon_engine()
     transformed = etree.Element("collection")
     transformed.attrib["dag-id"] = run_id
-    transformed.attrib["dag-timestamp"] = kwargs.get("timestamp", "no-timestamp-provided")
-    xsl = "https://raw.githubusercontent.com/{repo}/{branch}/{filename}".format(
-        repo=kwargs.get("xsl_repository", "tulibraries/aggregator_mdx"),
-        branch=kwargs.get("xsl_branch", "main"),
-        filename=kwargs.get("xsl_filename")
+    transformed.attrib["dag-timestamp"] = kwargs.get(
+        "timestamp",
+        "no-timestamp-provided",
+    )
+    xsl = (
+        f"https://raw.githubusercontent.com/"
+        f"{kwargs.get('xsl_repository', 'tulibraries/aggregator_mdx')}/"
+        f"{kwargs.get('xsl_branch', 'main')}/"
+        f"{kwargs.get('xsl_filename')}"
     )
 
-    for s3_key in process.list_s3_content(bucket, access_id, access_secret, source_prefix):
+    for s3_key in process.list_s3_content(
+        bucket,
+        access_id,
+        access_secret,
+        source_prefix,
+    ):
         logging.info("Transforming File %s", s3_key)
-        s3_content = process.get_s3_content(bucket, s3_key, access_id, access_secret)
+        s3_content = process.get_s3_content(
+            bucket,
+            s3_key,
+            access_id,
+            access_secret,
+        )
         s3_xml = etree.fromstring(s3_content)
         for record in s3_xml.iterchildren():
             record_id = record.get("airflow-record-id")
             logging.info("Transforming Record %s", record_id)
-            result_str = subprocess.check_output(["java", "-jar", saxon, "-xsl:" + xsl, "-s:-"], input=etree.tostring(record, encoding="utf-8"))
+            result_str = subprocess.check_output(
+                ["java", "-jar", saxon, "-xsl:" + xsl, "-s:-"],
+                input=etree.tostring(record, encoding="utf-8"),
+            )
             result = etree.fromstring(result_str)
             result.attrib["airflow-record-id"] = record_id
             transformed.append(result)
         filename = s3_key.replace(source_prefix, dest_prefix)
         transformed_xml = etree.tostring(transformed, encoding="utf-8")
-        process.generate_s3_object(transformed_xml, bucket, filename, access_id, access_secret)
+        process.generate_s3_object(
+            transformed_xml,
+            bucket,
+            filename,
+            access_id,
+            access_secret,
+        )
 
 
 def prepare_saxon_engine(saxon_jar="saxon.jar", saxon_path="/tmp/saxon/"):
@@ -61,9 +87,15 @@ def prepare_saxon_engine(saxon_jar="saxon.jar", saxon_path="/tmp/saxon/"):
         Path(saxon_path).mkdir(parents=True, exist_ok=True)
         request_url = "https://repo1.maven.org/maven2/net/sf/saxon/Saxon-HE/"
         request_url += saxon_version + "/Saxon-HE-" + saxon_version + ".jar"
-        resp = requests.get(request_url, allow_redirects=True, verify=False)
+        resp = requests.get(
+            request_url,
+            allow_redirects=True,
+            verify=False,
+            timeout=30,
+        )
         if hashlib.sha1(resp.content).hexdigest() == saxon_download_sha1:
-            open(saxon_path + saxon_jar, "wb").write(resp.content)
+            with open(saxon_path + saxon_jar, "wb") as saxon_file:
+                saxon_file.write(resp.content)
             os.chmod(saxon_path + saxon_jar, 0o744)
             return saxon_path + saxon_jar
         logging.fatal("SHA1 Digests do not match.")

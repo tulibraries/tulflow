@@ -1,0 +1,16 @@
+[MESSAGES CONTROL]
+disable =
+    line-too-long,
+    invalid-name,
+    missing-function-docstring,
+    missing-module-docstring,
+    too-many-arguments,
+    too-many-positional-arguments,
+    too-many-locals,
+    c-extension-no-member,
+    too-many-statements,
+    too-few-public-methods,
+    fixme,
+    wrong-import-order,
+    missing-final-newline,
+    duplicate-code

@@ -1,22 +1,17 @@
 """Tests suite for tulflow harvest (Functions for harvesting OAI in Airflow Tasks)."""
-from datetime import datetime
 import hashlib
 import unittest
 import boto3
-from lxml import etree
-from moto import mock_aws
-from unittest import mock
-from unittest.mock import patch
-from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-from airflow.models import DAG
-from airflow.utils import timezone
-from lxml import etree
 import httpretty
-from tulflow import harvest
-from types import SimpleNamespace
-from moto import mock_aws
 
-DEFAULT_DATE = timezone.datetime(2019, 8, 16)
+from datetime import datetime
+from unittest import mock
+from airflow.models import DAG
+from lxml import etree
+from moto import mock_aws
+from tulflow import harvest
+
+DEFAULT_DATE = datetime(2019, 8, 16)
 NS = {
     "marc21": "http://www.loc.gov/MARC21/slim",
     "oai": "http://www.openarchives.org/OAI/2.0/"
@@ -269,21 +264,20 @@ listSets = """
 
 class TestDagS3Interaction(unittest.TestCase):
     """Test Class for S3 Post Wrapper."""
-    @classmethod
-    def setUpClass(self):
-        self.dag_id = "s3_stuff"
-        self.maxDiff = None
 
+    @classmethod
+    def setUpClass(cls):
+        cls.dag_id = "s3_stuff"
+        cls.maxDiff = None
 
     def test_dag_s3_prefix(self):
         """Test Creating S3 Bucket ("prefix")."""
         timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         prefix = harvest.dag_s3_prefix(self.dag_id, timestamp)
-        self.assertEqual(prefix, "{}/{}".format(self.dag_id, timestamp))
-
+        self.assertEqual(prefix, f"{self.dag_id}/{timestamp}")
 
     @mock.patch("tulflow.process.generate_s3_object")
-    def test_write_push_string_to_s3(self, mock):
+    def test_write_push_string_to_s3(self, mock_generate_s3_object):
         """Test Writing String to S3 using our Function."""
         string = "<fooooooooo>"
         prefix = "this/thing/here"
@@ -292,19 +286,24 @@ class TestDagS3Interaction(unittest.TestCase):
         kwargs["access_secret"] = "kittens"
         kwargs["bucket_name"] = "my-bucket"
         our_hash = hashlib.md5(string.encode("utf-8")).hexdigest()
-        key = "{}/{}".format(prefix, our_hash)
-
+        key = f"{prefix}/{our_hash}"
 
         harvest.dag_write_string_to_s3(string=string, prefix=prefix, **kwargs)
-        mock.assert_called_once_with(string, "my-bucket", key, "puppies", "kittens")
+        mock_generate_s3_object.assert_called_once_with(
+            string,
+            "my-bucket",
+            key,
+            "puppies",
+            "kittens",
+        )
 
 
 class TestOAIHarvestInteraction(unittest.TestCase):
     """Test Class for OAI Harvest Wrapper."""
-    @classmethod
-    def setUpClass(self):
-        self.maxDiff = None
 
+    @classmethod
+    def setUpClass(cls):
+        cls.maxDiff = None
 
     def test_oai_sets_all(self, **kwargs):
         """Test that all sets are lined up for harvest."""
@@ -315,7 +314,6 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         returned_sets = harvest.generate_oai_sets(**kwargs)
         self.assertEqual(returned_sets, [])
 
-
     def test_oai_sets_incl(self, **kwargs):
         """Test that all sets are lined up for harvest."""
         kwargs["all_sets"] = False
@@ -324,7 +322,6 @@ class TestOAIHarvestInteraction(unittest.TestCase):
 
         returned_sets = harvest.generate_oai_sets(**kwargs)
         self.assertEqual(returned_sets, ["a", "b", "c"])
-
 
     @httpretty.activate
     def test_oai_sets_excl(self, **kwargs):
@@ -342,7 +339,6 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         returned_sets = harvest.generate_oai_sets(**kwargs)
         returned_sets.sort()
         self.assertListEqual(returned_sets, ["a", "b"])
-
 
     @httpretty.activate
     def test_harvest_oai(self, **kwargs):
@@ -396,7 +392,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         httpretty.register_uri(
             httpretty.GET,
             "http://127.0.0.1/combine/oai",
-            body = """
+            body="""
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
@@ -449,8 +445,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             processed = harvest.process_xml(response, harvest.write_log, "test-dir", **kwargs)
             self.assertIn("INFO:root:OAI Records Harvested & Processed: 2", log.output)
             self.assertIn("INFO:root:OAI Records Harvest & Marked for Deletion: 0", log.output)
-            self.assertEqual(processed, {"updated": 2, "deleted": 0 })
-
+            self.assertEqual(processed, {"updated": 2, "deleted": 0})
 
     @httpretty.activate
     def test_process_xml_alma(self, **kwargs):
@@ -478,7 +473,6 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         # assert multiple deletions get added as expected
         self.assertIn('INFO:root:<oai:collection xmlns:oai="http://www.openarchives.org/OAI/2.0/" dag-id="no-dag-provided" dag-timestamp="no-timestamp-provided"><oai:record airflow-record-id="oai:alma.01TULI_INST:991000000939703811"><oai:header status="deleted"><oai:identifier>oai:alma.01TULI_INST:991000000939703811</oai:identifier><oai:datestamp>2018-04-02T21:02:12Z</oai:datestamp><oai:setSpec>blacklight</oai:setSpec></oai:header></oai:record><oai:record airflow-record-id="oai:alma.01TULI_INST:991000000939703812"><oai:header status="deleted"><oai:identifier>oai:alma.01TULI_INST:991000000939703812</oai:identifier><oai:datestamp>2018-04-02T21:02:12Z</oai:datestamp><oai:setSpec>blacklight</oai:setSpec></oai:header></oai:record></oai:collection>', log.output)
 
-
     @mock_aws
     def test_perform_xml_lookup_with_cache(self, **kwargs):
         """Test Calling handling XML Element to String with Deletes."""
@@ -503,7 +497,6 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         self.assertIn(b"<datafield>test</datafield>", etree.tostring(resp_xml))
         self.assertIn(b"<datafield>9910367273103811</datafield>", etree.tostring(resp_xml))
 
-
     @mock.patch("tulflow.harvest.harvest_oai")
     @mock.patch("tulflow.harvest.dag_s3_prefix")
     @mock.patch("tulflow.harvest.process_xml")
@@ -523,11 +516,10 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         self.assertTrue(mock_prefix.called)
         self.assertTrue(mock_process.called)
 
-
     @mock.patch("tulflow.harvest.harvest_oai")
     @mock.patch("tulflow.harvest.dag_s3_prefix")
     @mock.patch("tulflow.harvest.process_xml")
-    def test_oai_to_s3_harvest_return_value_mult_set(self, mock_process, mock_prefix, mock_harvest, **kwargs):
+    def test_oai_to_s3_harvest_return_value_mult_set(self, mock_process, _mock_prefix, _mock_harvest, **kwargs):
         """Test oai_to_s3 wraps harvest_oai function."""
         dag = DAG(dag_id="test_slacksuccess", start_date=DEFAULT_DATE)
         kwargs["oai_endpoint"] = "http://test/combine/oai"
@@ -537,14 +529,14 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         kwargs["until"] = "until"
         kwargs["dag"] = dag
         kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        mock_process.return_value = {"updated": 2, "deleted": 0 }
+        mock_process.return_value = {"updated": 2, "deleted": 0}
         actual = harvest.oai_to_s3(**kwargs)
         self.assertEqual(actual, {"updated": 4, "deleted": 0, "sets_with_no_records": []})
 
     @mock.patch("tulflow.harvest.harvest_oai")
     @mock.patch("tulflow.harvest.dag_s3_prefix")
     @mock.patch("tulflow.harvest.process_xml")
-    def test_oai_to_s3_harvest_not_process_empty_data(self, mock_process, mock_prefix, mock_harvest, **kwargs):
+    def test_oai_to_s3_harvest_not_process_empty_data(self, mock_process, _mock_prefix, mock_harvest, **kwargs):
         """Test oai_to_s3 does not process empty data"""
         dag = DAG(dag_id="test_slacksuccess", start_date=DEFAULT_DATE)
         kwargs["oai_endpoint"] = "http://test/combine/oai"
@@ -556,7 +548,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         mock_harvest.return_value = []
-        mock_process.return_value = {"updated": 0, "deleted": 0 }
+        mock_process.return_value = {"updated": 0, "deleted": 0}
         actual = harvest.oai_to_s3(**kwargs)
         self.assertFalse(mock_process.called)
         self.assertEqual(actual, {"updated": 0, "deleted": 0, "sets_with_no_records": ["set1", "set2"]})
@@ -564,7 +556,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
     @mock.patch("tulflow.harvest.harvest_oai")
     @mock.patch("tulflow.harvest.dag_s3_prefix")
     @mock.patch("tulflow.harvest.process_xml")
-    def test_oai_to_s3_harvest_return_value_no_set(self, mock_process, mock_prefix, mock_harvest, **kwargs):
+    def test_oai_to_s3_harvest_return_value_no_set(self, mock_process, _mock_prefix, _mock_harvest, **kwargs):
         """Test oai_to_s3 wraps harvest_oai function."""
         dag = DAG(dag_id="test_slacksuccess", start_date=DEFAULT_DATE)
         kwargs["oai_endpoint"] = "http://test/combine/oai"
@@ -574,7 +566,6 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         kwargs["all_sets"] = True
         kwargs["dag"] = dag
         kwargs["timestamp"] = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        mock_process.return_value = {"updated": 2, "deleted": 0 }
+        mock_process.return_value = {"updated": 2, "deleted": 0}
         actual = harvest.oai_to_s3(**kwargs)
-        self.assertEqual(actual, {"updated": 2, "deleted": 0, "sets_with_no_records": [] })
-
+        self.assertEqual(actual, {"updated": 2, "deleted": 0, "sets_with_no_records": []})

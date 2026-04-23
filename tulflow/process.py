@@ -3,10 +3,11 @@ import io
 import logging
 import sys
 import tarfile
-from lxml import etree
-from botocore.exceptions import ClientError
 import boto3
 import requests
+
+from lxml import etree
+from botocore.exceptions import ClientError
 
 NS = {
     "marc21": "http://www.loc.gov/MARC21/slim",
@@ -16,16 +17,16 @@ NS = {
 etree.register_namespace("marc21", "http://www.loc.gov/MARC21/slim")
 etree.register_namespace("oai", "http://www.openarchives.org/OAI/2.0")
 
-LOGGER = logging.getLogger('tulflow_process')
+LOGGER = logging.getLogger("tulflow_process")
 PARSER = etree.XMLParser(remove_blank_text=True)
 
 def s3_client(access_id, access_secret):
     kwargs = {}
     if access_id:
-        kwargs['aws_access_key_id'] = access_id
+        kwargs["aws_access_key_id"] = access_id
 
     if access_secret:
-        kwargs['aws_secret_access_key'] = access_secret
+        kwargs["aws_secret_access_key"] = access_secret
 
     return boto3.client(
         "s3",
@@ -47,19 +48,19 @@ def add_marc21xml_root_ns(data_in):
 
 def expand_alma_sftp_tarball(key, source_obj):
     """Given an AlmaSFTP S3 bytestream, expand and return XML file."""
-    source_tar = tarfile.open(fileobj=io.BytesIO(source_obj), mode="r:gz")
-    if len(source_tar.getmembers()) == 0:
-        LOGGER.error("S3 Object is empty.")
-        LOGGER.error(key)
-        return None
+    with tarfile.open(fileobj=io.BytesIO(source_obj), mode="r:gz") as source_tar:
+        if len(source_tar.getmembers()) == 0:
+            LOGGER.error("S3 Object is empty.")
+            LOGGER.error(key)
+            return None
 
-    if len(source_tar.getmembers()) > 1:
-        LOGGER.error("S3 Object has more than 1 member, which is unexpected.")
-        LOGGER.error(key)
-        return None
+        if len(source_tar.getmembers()) > 1:
+            LOGGER.error("S3 Object has more than 1 member, which is unexpected.")
+            LOGGER.error(key)
+            return None
 
-    for item in source_tar:
-        return source_tar.extractfile(item).read()
+        for item in source_tar:
+            return source_tar.extractfile(item).read()
 
 
 def get_record_001(record):
@@ -92,13 +93,9 @@ def generate_bw_parent_field(parent_id):
 
 def get_github_content(repository, filename, branch="main"):
     """Get the contents of GitHub file."""
-    raw_url = "https://raw.githubusercontent.com/{repo}/{branch}/{filename}".format(
-        repo=repository,
-        branch=branch,
-        filename=filename
-    )
+    raw_url = f"https://raw.githubusercontent.com/{repository}/{branch}/{filename}"
     try:
-        resp = requests.get(raw_url)
+        resp = requests.get(raw_url, timeout=30)
         resp.raise_for_status()
         return resp.content
     except requests.exceptions.RequestException as error:
@@ -117,7 +114,7 @@ def get_s3_content(bucket, key, access_id, access_secret):
     """Get the contents of S3 object located at given S3 Key."""
     try:
         response = s3_client(access_id, access_secret).get_object(Bucket=bucket, Key=key)
-        body = response['Body'].read()
+        body = response["Body"].read()
         return body
     except ClientError as error:
         LOGGER.error(error)
@@ -130,8 +127,8 @@ def list_s3_content(bucket, access_id, access_secret, prefix=""):
         response = s3_client(access_id, access_secret).list_objects(Bucket=bucket, Prefix=prefix)
         objects = []
         if response.get("Contents"):
-            for key in response['Contents']:
-                objects.append(key['Key'])
+            for key in response["Contents"]:
+                objects.append(key["Key"])
         return objects
     except ClientError as error:
         LOGGER.error(error)

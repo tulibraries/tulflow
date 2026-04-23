@@ -8,6 +8,7 @@ import io
 import logging
 import pandas
 import sickle
+
 from lxml import etree
 from sickle import Sickle
 from sickle.models import xml_to_dict
@@ -17,7 +18,7 @@ from tulflow import process
 NS = {
     "marc21": "http://www.loc.gov/MARC21/slim",
     "oai": "http://www.openarchives.org/OAI/2.0/"
-    }
+}
 
 
 def oai_to_s3(**kwargs):
@@ -51,13 +52,17 @@ def oai_to_s3(**kwargs):
         outdir = dag_s3_prefix(dag_id, dag_start_date)
         processed = process_xml(data, dag_write_string_to_s3, outdir, **kwargs)
         all_processed.append(processed)
-    all_updated = sum([set['updated'] for set in all_processed])
-    all_deleted = sum([set['deleted'] for set in all_processed])
+    all_updated = sum(item["updated"] for item in all_processed)
+    all_deleted = sum(item["deleted"] for item in all_processed)
     logging.info("Total OAI Records Harvested & Processed: %s", all_updated)
     logging.info("Total OAI Records Harvest & Marked for Deletion: %s", all_deleted)
     logging.info("Total sets with no records: %s", len(sets_with_no_records))
     logging.info("Sets with no records %s", sets_with_no_records)
-    return {"updated": all_updated, "deleted": all_deleted, "sets_with_no_records": sets_with_no_records}
+    return {
+        "updated": all_updated,
+        "deleted": all_deleted,
+        "sets_with_no_records": sets_with_no_records,
+    }
 
 
 def generate_oai_sets(**kwargs):
@@ -70,12 +75,12 @@ def generate_oai_sets(**kwargs):
     if all_sets:
         logging.info("Seeing All Sets Needed.")
         return []
-    elif included_sets:
+    if included_sets:
         logging.info("Seeing SetSpec List.")
         if not isinstance(included_sets, list):
             return [included_sets]
         return included_sets
-    elif excluded_sets:
+    if excluded_sets:
         logging.info("Seeing Excluded SetSpec List.")
         if not isinstance(excluded_sets, list):
             excluded_sets = [excluded_sets]
@@ -88,6 +93,8 @@ def generate_oai_sets(**kwargs):
 
 
 class HarvestIterator(sickle.iterator.OAIItemIterator):
+    """Custom iterator that skips deleted records and records without metadata."""
+
     def next(self):
         """Return the next record/header/set."""
         while True:
@@ -95,7 +102,7 @@ class HarvestIterator(sickle.iterator.OAIItemIterator):
                 mapped = self.mapper(item)
                 if self.ignore_deleted and mapped.deleted:
                     continue
-                if hasattr(mapped, 'metadata') and mapped.metadata == None:
+                if hasattr(mapped, "metadata") and mapped.metadata is None:
                     logging.info("Skipping record with no metadata: %s", mapped.header.identifier)
                     continue
                 return mapped
@@ -103,18 +110,18 @@ class HarvestIterator(sickle.iterator.OAIItemIterator):
                 self._next_response()
             else:
                 raise StopIteration
-    pass
+
 
 # TODO: Remove if https://github.com/mloesch/sickle/pull/47 gets merged.
 class HarvestRecord(sickle.models.Record):
+    """Custom Sickle record that unwraps metadata children."""
+
     def get_metadata(self):
-        # We want to get record/metadata/<container>/*
-        # <container> would be the element ``dc``
-        # in the ``oai_dc`` case.
-        meta_data = self.xml.find('.//' + self._oai_namespace + 'metadata')
-        if meta_data != None:
+        meta_data = self.xml.find(".//" + self._oai_namespace + "metadata")
+        if meta_data is not None:
             return xml_to_dict(meta_data.getchildren()[0], strip_ns=self._strip_ns)
-    pass
+        return None
+
 
 def harvest_oai(**kwargs):
     """Create OAI ListRecords Iterator for Harvesting Data."""
@@ -122,19 +129,22 @@ def harvest_oai(**kwargs):
     harvest_params = kwargs.get("harvest_params")
     logging.info("Harvesting from %s", oai_endpoint)
     logging.info("Harvesting %s", harvest_params)
-    sickle = Sickle(oai_endpoint, retry_status_codes=[500,503,504], max_retries=3)
+    sickle_client = Sickle(oai_endpoint, retry_status_codes=[500, 503, 504], max_retries=3)
 
-    class_mapping = harvest_params.get("class_mapping", {
-        "ListRecords": HarvestRecord,
-        })
+    class_mapping = harvest_params.get(
+        "class_mapping",
+        {
+            "ListRecords": HarvestRecord,
+        },
+    )
     iterator = harvest_params.get("iterator", HarvestIterator)
     for key in class_mapping:
-        sickle.class_mapping[key] = class_mapping[key]
+        sickle_client.class_mapping[key] = class_mapping[key]
 
-    sickle.iterator = iterator
+    sickle_client.iterator = iterator
 
     try:
-        return sickle.ListRecords(**harvest_params)
+        return sickle_client.ListRecords(**harvest_params)
     except NoRecordsMatch:
         logging.info("No records found.")
         return []
@@ -142,6 +152,7 @@ def harvest_oai(**kwargs):
 
 class OaiXml:
     """oai-pmh xml etree wrapper"""
+
     def __init__(self, dag_id, timestamp):
         etree.register_namespace("oai", "http://www.openarchives.org/OAI/2.0/")
         etree.register_namespace("marc21", "http://www.loc.gov/MARC21/slim")
@@ -236,7 +247,6 @@ def perform_xml_lookup_with_cache():
                         logging.error(parent_node)
         return oai_record
 
-
     return perform_xml_lookup
 
 
@@ -248,18 +258,16 @@ def dag_write_string_to_s3(string, prefix, **kwargs):
     logging.info("Writing to S3 Bucket %s", bucket_name)
 
     our_hash = hashlib.md5(string.encode("utf-8")).hexdigest()
-    filename = "{}/{}".format(prefix, our_hash)
+    filename = f"{prefix}/{our_hash}"
     process.generate_s3_object(string, bucket_name, filename, access_id, access_secret)
 
 
-def write_log(string, prefix, **kwargs):
+def write_log(string, prefix, **_kwargs):
     """Write the data to logging info."""
-    prefix = prefix
     logging.info(prefix)
-    string = string
     logging.info(string)
 
 
 def dag_s3_prefix(dag_id, timestamp):
     """Define the prefix that will be prepended to all files created by this dag run"""
-    return "{}/{}".format(dag_id, timestamp)
+    return f"{dag_id}/{timestamp}"

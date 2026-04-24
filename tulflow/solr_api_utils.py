@@ -50,7 +50,7 @@ class SolrApiUtils():
         self.collections = None
         self.aliases = None
 
-    def get_from_solr_api(self, path):
+    def get_from_solr_api(self, path, timeout=30):
         """Issue HTTP Get Request to SolrCloud API."""
         url = self.solr_url + path
         logging.info("Requesting %s", url)
@@ -58,9 +58,9 @@ class SolrApiUtils():
             return requests.get(
                 url,
                 auth=(self.auth_user, self.auth_pass),
-                timeout=30,
+                timeout=timeout,
             )
-        return requests.get(url, timeout=30)
+        return requests.get(url, timeout=timeout)
 
     def get_configsets(self):
         """Issue HTTP Get Request to SolrCloud API to retrieve ConfigSets List."""

@@ -4150,19 +4150,19 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:56d53bce75629cc7c78a32da8b62de74cee3e2a3d54a2b60ba1a65f9f1b129da",
-                "sha256:5b6056a661c19e974aaea3cb97690ddbe30d10c31e4f887df3bff06574f34510"
+                "sha256:7c7777862ffc898f05efa566032bbabfe226dbb810e35ec11125817f128bc5c5",
+                "sha256:fb9fe51849ef2a78198d582756fc06f14f7de27f73e0fa90275d6aa4171eb4d0"
             ],
-            "markers": "python_version >= '3.9'",
-            "version": "==1.42.94"
+            "markers": "python_version >= '3.10'",
+            "version": "==1.43.3"
         },
         "botocore": {
             "hashes": [
-                "sha256:41c6b3b11b073221a41f52b222ba387be34459fb77cdc506e8b74cdaf24bdcce",
-                "sha256:a2143742132ed0f6cdb90204d667b89d0301068b1045e8bc099efa267bf1b348"
+                "sha256:eac6da0fffccf87888ebf4d89f0b2378218a707efa748cd955b838995e944695",
+                "sha256:ec0769eb0f7c5034856bb406a92698dbc02a3d4be0f78a384747106b161d8ea3"
             ],
-            "markers": "python_version >= '3.9'",
-            "version": "==1.42.94"
+            "markers": "python_version >= '3.10'",
+            "version": "==1.43.3"
         },
         "certifi": {
             "hashes": [
@@ -4449,7 +4449,6 @@
                 "sha256:fdd1736fed309b4300346f88f74cd120c27c56852c3838cab416e7a166f67298",
                 "sha256:ffca7aa1d00cf7d6469b988c581598f2259e46215e0140af408966a24cf086ce"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.8' and python_full_version not in '3.9.0, 3.9.1'",
             "version": "==46.0.7"
         },
@@ -4614,12 +4613,12 @@
         },
         "moto": {
             "hashes": [
-                "sha256:d9f20ae3cf29c44f93c1f8f06c8f48d5560e5dc027816ef1d0d2059741ffcfbe",
-                "sha256:e5b2c378296e4da50ce5a3c355a1743c8d6d396ea41122f5bb2a40f9b9a8cc0e"
+                "sha256:be592dd93cc016a94afe2e2cae5de59c2df1cdd9d017c497d9a81e507ebe7fc8",
+                "sha256:d728d5c9c431e0f1043d907bebd663b09a9105c62380991068598a3799373a85"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.9'",
-            "version": "==5.1.22"
+            "markers": "python_version >= '3.10'",
+            "version": "==5.2.0"
         },
         "nose": {
             "hashes": [
@@ -4780,7 +4779,6 @@
                 "sha256:18817f8c57c6263968bc123d237e3b8b08ac046f5456bd1e307ee8f4250d3517",
                 "sha256:4e6d1ef462f3626a1f0a0a9c42dd93c63bad33f9f1c1937509b8c5c8718ab56a"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.10'",
             "version": "==2.33.1"
         },
@@ -4803,11 +4801,11 @@
         },
         "s3transfer": {
             "hashes": [
-                "sha256:61bcd00ccb83b21a0fe7e91a553fff9729d46c83b4e0106e7c314a733891f7c2",
-                "sha256:8e424355754b9ccb32467bdc568edf55be82692ef2002d934b1311dbb3b9e524"
+                "sha256:9edeb6d1c3c2f89d6050348548834ad8289610d886e5bf7b7207728bd43ce33a",
+                "sha256:ce3801712acf4ad3e89fb9990df97b4972e93f4b3b0004d214be5bce12814c20"
             ],
-            "markers": "python_version >= '3.9'",
-            "version": "==0.16.1"
+            "markers": "python_version >= '3.10'",
+            "version": "==0.17.0"
         },
         "setuptools": {
             "hashes": [
@@ -4866,7 +4864,6 @@
                 "sha256:63a77fb8892bf28ebc3178683445222aa500e48ebad5ec77b0ad80f8726b1f50",
                 "sha256:9bad61a4268dac112f1c5cd4630a56ede601b6ed420300677a869083d70a4c44"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.9'",
             "version": "==3.1.8"
         },
@@ -4875,7 +4872,6 @@
                 "sha256:6d94c9f834dd9e44514162799d344d815a3a4faec913717a9ecbfa5be1bb8e61",
                 "sha256:a4a00d300b0e1c59fc2bfccb53d7b2e88c32f200df138a0dd2229f842497026a"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.9'",
             "version": "==1.0.4"
         }

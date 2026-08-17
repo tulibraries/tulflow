@@ -6,12 +6,15 @@ This module contains objects to harvest data from one given location to another.
 import hashlib
 import io
 import logging
+import re
 import pandas
+import requests
 import sickle
 
 from lxml import etree
 from sickle import Sickle
 from sickle.models import xml_to_dict
+from sickle.response import OAIResponse
 from sickle.oaiexceptions import NoRecordsMatch
 from tulflow import process
 
@@ -92,6 +95,66 @@ def generate_oai_sets(**kwargs):
     return []
 
 
+def validate_oai_response(response):
+    status_code = response.http_response.status_code
+
+    try:
+        root_element = etree.QName(response.xml).localname
+    except (etree.XMLSyntaxError, TypeError, ValueError):
+        root_element = None
+
+    if status_code < 400 and root_element == "OAI-PMH":
+        return
+
+    support_id_match = re.search(
+        r"support\s+id\s+is:\s*<?\s*([0-9]+)",
+        response.raw,
+        re.IGNORECASE,
+    )
+
+    support_id = (
+        support_id_match.group(1)
+        if support_id_match
+        else None
+    )
+
+    logging.error(
+        "Invalid response received from OAI endpoint. HTTP status: %s\n%s",
+        status_code,
+        response.raw,
+    )
+
+    message = "OAI endpoint returned an invalid response"
+
+    if support_id:
+        logging.error(
+            "OAI request rejection support ID: %s",
+            support_id,
+        )
+        message += f". Support ID: {support_id}"
+
+    raise RuntimeError(message)
+
+
+class ValidatingSickle(Sickle):
+    def harvest(self, **kwargs):
+        try:
+            response = super().harvest(**kwargs)
+        except requests.HTTPError as error:
+            if error.response is not None:
+                response = OAIResponse(
+                    error.response,
+                    params=kwargs,
+                )
+                validate_oai_response(response)
+
+            raise
+
+        validate_oai_response(response)
+
+        return response
+
+
 class HarvestIterator(sickle.iterator.OAIItemIterator):
     """Custom iterator that skips deleted records and records without metadata."""
 
@@ -112,7 +175,8 @@ class HarvestIterator(sickle.iterator.OAIItemIterator):
                 raise StopIteration
 
 
-# TODO: Remove if https://github.com/mloesch/sickle/pull/47 gets merged.
+# TODO: Remove when Sickle handles records with missing metadata upstream.
+# See https://github.com/mloesch/sickle/pull/47.
 class HarvestRecord(sickle.models.Record):
     """Custom Sickle record that unwraps metadata children."""
 
@@ -129,8 +193,7 @@ def harvest_oai(**kwargs):
     harvest_params = kwargs.get("harvest_params")
     logging.info("Harvesting from %s", oai_endpoint)
     logging.info("Harvesting %s", harvest_params)
-    sickle_client = Sickle(oai_endpoint, retry_status_codes=[500, 503, 504], max_retries=3)
-
+    sickle_client = ValidatingSickle(oai_endpoint, retry_status_codes=[500, 503, 504], max_retries=3)
     class_mapping = harvest_params.get(
         "class_mapping",
         {

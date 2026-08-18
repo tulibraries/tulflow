@@ -158,6 +158,29 @@ class ValidatingSickle(Sickle):
 class HarvestIterator(sickle.iterator.OAIItemIterator):
     """Custom iterator that skips deleted records and records without metadata."""
 
+    def _next_response(self):
+        """Handle noRecordsMatch responses after following a resumption token."""
+        resumption_token = getattr(self, "resumption_token", None)
+        following_resumption_token = bool(
+            resumption_token and resumption_token.token
+        )
+
+        try:
+            super()._next_response()
+        except NoRecordsMatch:
+            if not following_resumption_token:
+                raise
+
+            logging.warning(
+                "Received noRecordsMatch while following a resumption token. "
+                "Treating this as the end of the harvest. "
+                "Resumption token: %s",
+                resumption_token.token,
+            )
+
+            self.resumption_token = None
+            self._items = iter(())
+
     def next(self):
         """Return the next record/header/set."""
         while True:

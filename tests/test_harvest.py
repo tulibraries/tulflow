@@ -408,22 +408,22 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             httpretty.GET,
             "http://127.0.0.1/combine/oai",
             body="""
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-    <responseDate>2019-08-30T13:46:14Z</responseDate>
-    <request verb="ListRecords" set="dpla_test">http://10.5.0.10/combine/oai</request>
-    <ListRecords>
-        <record>
-            <header>
-                <identifier>oai:lizards</identifier>
-                <datestamp>2019-08-30T13:45:28Z</datestamp>
-                <setSpec>dpla_test</setSpec>
-            </header>
-        </record>
-    </ListRecords>
-</OAI-PMH>
-"""
+            <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+                <responseDate>2019-08-30T13:46:14Z</responseDate>
+                <request verb="ListRecords" set="dpla_test">http://10.5.0.10/combine/oai</request>
+                <ListRecords>
+                    <record>
+                        <header>
+                            <identifier>oai:lizards</identifier>
+                            <datestamp>2019-08-30T13:45:28Z</datestamp>
+                            <setSpec>dpla_test</setSpec>
+                        </header>
+                    </record>
+                </ListRecords>
+            </OAI-PMH>
+            """
         )
 
         kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
@@ -560,6 +560,102 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         self.assertTrue(
             any(
                 "HTTP status: 403" in message
+                for message in log.output
+            )
+        )
+
+    @httpretty.activate
+    def test_harvest_oai_http_error_with_support_id(self, **kwargs):
+        request_rejected = """
+        <html>
+            <head><title>Request Rejected</title></head>
+            <body>
+                The requested URL was rejected.
+                Your support ID is: < 2177197108427845598>
+            </body>
+        </html>
+        """
+
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body=request_rejected,
+            status=403,
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "oai_dc",
+            "set": "pitt_collection.1",
+            "from": None,
+            "until": None,
+        }
+
+        with self.assertLogs(level="ERROR") as log:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "Support ID: 2177197108427845598",
+            ):
+                harvest.harvest_oai(**kwargs)
+
+        self.assertTrue(
+            any(
+                "The requested URL was rejected" in message
+                for message in log.output
+            )
+        )
+
+        self.assertTrue(
+            any(
+                "OAI request rejection support ID: 2177197108427845598"
+                in message
+                for message in log.output
+            )
+        )
+
+    @httpretty.activate
+    def test_harvest_oai_http_error_without_support_id(self, **kwargs):
+        forbidden = """
+        <html>
+            <head><title>403 Forbidden</title></head>
+            <body>
+                <center><h1>403 Forbidden</h1></center>
+            </body>
+        </html>
+        """
+
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body=forbidden,
+            status=403,
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "oai_dc",
+            "set": "collection:AYA",
+            "from": None,
+            "until": None,
+        }
+
+        with self.assertLogs(level="ERROR") as log:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "No support ID was provided by the remote server",
+            ):
+                harvest.harvest_oai(**kwargs)
+
+        self.assertTrue(
+            any(
+                "403 Forbidden" in message
+                for message in log.output
+            )
+        )
+
+        self.assertTrue(
+            any(
+                "did not provide a support ID" in message
                 for message in log.output
             )
         )

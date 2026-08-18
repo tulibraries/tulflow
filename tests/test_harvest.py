@@ -564,6 +564,86 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             )
         )
 
+    @httpretty.activate
+    def test_harvest_oai_no_records_after_resumption_token(self, **kwargs):
+        """Treat noRecordsMatch after a resumption token as end of harvest."""
+        first_page = """
+        <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <responseDate>2026-03-20T21:01:00Z</responseDate>
+            <request verb="ListRecords">http://127.0.0.1/combine/oai</request>
+            <ListRecords>
+                <record>
+                    <header>
+                        <identifier>oai:lafayette:test</identifier>
+                        <datestamp>2026-03-18T19:34:11Z</datestamp>
+                        <setSpec>collection:Dīvān-i Jāmī</setSpec>
+                    </header>
+                    <metadata>
+                        <oai_dc:dc
+                            xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                            xmlns:dc="http://purl.org/dc/elements/1.1/">
+                            <dc:title>Test record</dc:title>
+                        </oai_dc:dc>
+                    </metadata>
+                </record>
+                <resumptionToken>next-page</resumptionToken>
+            </ListRecords>
+        </OAI-PMH>
+        """
+
+        final_page = """
+        <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <responseDate>2026-03-20T21:01:20Z</responseDate>
+            <request>http://127.0.0.1/combine/oai</request>
+            <error code="noRecordsMatch">
+                The combination of the values of the from, until, set and
+                metadataPrefix arguments results in an empty list.
+            </error>
+        </OAI-PMH>
+        """
+
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            responses=[
+                httpretty.Response(
+                    body=first_page,
+                    status=200,
+                ),
+                httpretty.Response(
+                    body=final_page,
+                    status=200,
+                ),
+            ],
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "oai_dc",
+            "set": "collection:Dīvān-i Jāmī",
+            "from": None,
+            "until": None,
+        }
+
+        with self.assertLogs(level="WARNING") as log:
+            records = list(harvest.harvest_oai(**kwargs))
+
+        self.assertEqual(len(records), 1)
+        self.assertEqual(
+            records[0].header.identifier,
+            "oai:lafayette:test",
+        )
+
+        self.assertTrue(
+            any(
+                "Received noRecordsMatch while following a resumption token"
+                in message
+                for message in log.output
+            )
+        )
+
     @mock_aws
     def test_perform_xml_lookup_with_cache(self, **kwargs):
         """Test Calling handling XML Element to String with Deletes."""

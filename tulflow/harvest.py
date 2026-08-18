@@ -94,21 +94,13 @@ def generate_oai_sets(**kwargs):
         return remaining_sets
     return []
 
-
-def validate_oai_response(response):
-    status_code = response.http_response.status_code
-
-    try:
-        root_element = etree.QName(response.xml).localname
-    except (etree.XMLSyntaxError, TypeError, ValueError):
-        root_element = None
-
-    if status_code < 400 and root_element == "OAI-PMH":
-        return
+def raise_oai_response_error(response):
+    """Log an invalid OAI response and raise an error."""
+    body = response.text
 
     support_id_match = re.search(
-        r"support\s+id\s+is:\s*<?\s*([0-9]+)",
-        response.raw,
+        r"support\s+id\s+(?:is|:)\s*:?\s*<?\s*([0-9]+)",
+        body,
         re.IGNORECASE,
     )
 
@@ -118,35 +110,65 @@ def validate_oai_response(response):
         else None
     )
 
-    logging.error(
-        "Invalid response received from OAI endpoint. HTTP status: %s\n%s",
-        status_code,
-        response.raw,
-    )
+    if not support_id:
+        for name, value in response.headers.items():
+            if "support" in name.lower() or "support" in value.lower():
+                header_match = re.search(r"([0-9]{6,})", value)
+                if header_match:
+                    support_id = header_match.group(1)
+                    break
 
-    message = "OAI endpoint returned an invalid response"
+    logging.error(
+        "Invalid response received from OAI endpoint. "
+        "URL: %s HTTP status: %s\n%s",
+        response.url,
+        response.status_code,
+        body,
+    )
 
     if support_id:
         logging.error(
             "OAI request rejection support ID: %s",
             support_id,
         )
-        message += f". Support ID: {support_id}"
 
-    raise RuntimeError(message)
+        raise RuntimeError(
+            "OAI endpoint returned an invalid response. "
+            f"Support ID: {support_id}"
+        )
+
+    logging.error(
+        "The OAI endpoint did not provide a support ID in the response."
+    )
+
+    raise RuntimeError(
+        "OAI endpoint returned an invalid response. "
+        "No support ID was provided by the remote server."
+    )
+
+
+def validate_oai_response(response):
+    """Validate that an OAI endpoint returned an OAI-PMH response."""
+    try:
+        root_element = etree.QName(response.xml).localname
+    except (etree.XMLSyntaxError, TypeError, ValueError):
+        root_element = None
+
+    if root_element == "OAI-PMH":
+        return
+
+    raise_oai_response_error(response.http_response)
 
 
 class ValidatingSickle(Sickle):
+    """Sickle client that validates responses from OAI endpoints."""
+
     def harvest(self, **kwargs):
         try:
             response = super().harvest(**kwargs)
         except requests.HTTPError as error:
             if error.response is not None:
-                response = OAIResponse(
-                    error.response,
-                    params=kwargs,
-                )
-                validate_oai_response(response)
+                raise_oai_response_error(error.response)
 
             raise
 

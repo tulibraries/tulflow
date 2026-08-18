@@ -614,6 +614,54 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         )
 
     @httpretty.activate
+    def test_harvest_oai_http_error_with_cloudfront_request_id(self, **kwargs):
+        forbidden = """
+        <html>
+            <head><title>403 Forbidden</title></head>
+            <body>
+                <center><h1>403 Forbidden</h1></center>
+            </body>
+        </html>
+        """
+
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body=forbidden,
+            status=403,
+            adding_headers={
+                "X-Amz-Cf-Id": (
+                    "aIAEm5tFORZydAjeqJ9D2lRelymcNdaI_cZDLOd5fsbApS7WYFgYgw=="
+                ),
+            },
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "oai_dc",
+            "set": "collection:AYA",
+            "from": None,
+            "until": None,
+        }
+
+        with self.assertLogs(level="ERROR") as log:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "Request ID: "
+                "aIAEm5tFORZydAjeqJ9D2lRelymcNdaI_cZDLOd5fsbApS7WYFgYgw==",
+            ):
+                harvest.harvest_oai(**kwargs)
+
+        self.assertTrue(
+            any(
+                "OAI request rejection request ID: "
+                "aIAEm5tFORZydAjeqJ9D2lRelymcNdaI_cZDLOd5fsbApS7WYFgYgw=="
+                in message
+                for message in log.output
+            )
+        )
+
+    @httpretty.activate
     def test_harvest_oai_http_error_without_support_id(self, **kwargs):
         forbidden = """
         <html>
@@ -642,7 +690,7 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         with self.assertLogs(level="ERROR") as log:
             with self.assertRaisesRegex(
                 RuntimeError,
-                "No support ID was provided by the remote server",
+                "OAI endpoint returned an invalid response",
             ):
                 harvest.harvest_oai(**kwargs)
 
@@ -655,11 +703,11 @@ class TestOAIHarvestInteraction(unittest.TestCase):
 
         self.assertTrue(
             any(
-                "did not provide a support ID" in message
+                "did not provide a support or request ID" in message
                 for message in log.output
             )
         )
-
+        
     @httpretty.activate
     def test_harvest_oai_no_records_after_resumption_token(self, **kwargs):
         """Treat noRecordsMatch after a resumption token as end of harvest."""

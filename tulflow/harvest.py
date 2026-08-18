@@ -97,9 +97,16 @@ def generate_oai_sets(**kwargs):
 def raise_oai_response_error(response):
     """Log an invalid OAI response and raise an error."""
     body = response.text
+    request_id = response.headers.get("X-Amz-Cf-Id")
 
     support_id_match = re.search(
         r"support\s+id\s+(?:is|:)\s*:?\s*<?\s*([0-9]+)",
+        body,
+        re.IGNORECASE,
+    )
+
+    request_id_match = re.search(
+        r"request\s+id\s*:\s*([A-Za-z0-9_+=/-]+)",
         body,
         re.IGNORECASE,
     )
@@ -110,13 +117,8 @@ def raise_oai_response_error(response):
         else None
     )
 
-    if not support_id:
-        for name, value in response.headers.items():
-            if "support" in name.lower() or "support" in value.lower():
-                header_match = re.search(r"([0-9]{6,})", value)
-                if header_match:
-                    support_id = header_match.group(1)
-                    break
+    if not request_id and request_id_match:
+        request_id = request_id_match.group(1)
 
     logging.error(
         "Invalid response received from OAI endpoint. "
@@ -126,26 +128,28 @@ def raise_oai_response_error(response):
         body,
     )
 
+    message = "OAI endpoint returned an invalid response"
+
     if support_id:
         logging.error(
             "OAI request rejection support ID: %s",
             support_id,
         )
+        message += f". Support ID: {support_id}"
 
-        raise RuntimeError(
-            "OAI endpoint returned an invalid response. "
-            f"Support ID: {support_id}"
+    if request_id:
+        logging.error(
+            "OAI request rejection request ID: %s",
+            request_id,
+        )
+        message += f". Request ID: {request_id}"
+
+    if not support_id and not request_id:
+        logging.error(
+            "The OAI endpoint did not provide a support or request ID."
         )
 
-    logging.error(
-        "The OAI endpoint did not provide a support ID in the response."
-    )
-
-    raise RuntimeError(
-        "OAI endpoint returned an invalid response. "
-        "No support ID was provided by the remote server."
-    )
-
+    raise RuntimeError(message)
 
 def validate_oai_response(response):
     """Validate that an OAI endpoint returned an OAI-PMH response."""

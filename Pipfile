@@ -13,7 +13,7 @@ requests-mock = "*"
 setuptools-scm = {version="*", extras=["toml"]}
 
 [packages]
-aiohttp = "==3.14.1"
+aiohttp = "==3.14.3"
 apache-airflow = "==3.3.0"
 apache-airflow-providers-amazon = "==9.31.0"
 apache-airflow-providers-fab = "==3.7.1"

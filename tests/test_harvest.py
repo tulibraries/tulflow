@@ -3,6 +3,7 @@ import hashlib
 import unittest
 import boto3
 import httpretty
+import requests
 
 from datetime import datetime
 from unittest import mock
@@ -884,3 +885,51 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         mock_process.return_value = {"updated": 2, "deleted": 0}
         actual = harvest.oai_to_s3(**kwargs)
         self.assertEqual(actual, {"updated": 2, "deleted": 0, "sets_with_no_records": []})
+
+    @mock.patch("tulflow.harvest.time.sleep")
+    @mock.patch("sickle.iterator.OAIItemIterator._next_response")
+    def test_harvest_iterator_retries_connection_error(
+        self,
+        mock_next_response,
+        mock_sleep,
+    ):
+        """Retry a transient connection error while fetching the next OAI page."""
+        iterator = object.__new__(harvest.HarvestIterator)
+        iterator.resumption_token = mock.Mock(token="next-page")
+        iterator._items = iter(())
+
+        mock_next_response.side_effect = [
+            requests.ConnectionError("connection reset"),
+            None,
+        ]
+
+        iterator._next_response()
+
+        self.assertEqual(mock_next_response.call_count, 2)
+        mock_sleep.assert_called_once_with(1)
+        self.assertEqual(iterator.resumption_token.token, "next-page")
+
+    @mock.patch("tulflow.harvest.time.sleep")
+    @mock.patch("sickle.iterator.OAIItemIterator._next_response")
+    def test_harvest_iterator_raises_after_connection_retries(
+        self,
+        mock_next_response,
+        mock_sleep,
+    ):
+        """Raise after exhausting connection-error retries."""
+        iterator = object.__new__(harvest.HarvestIterator)
+        iterator.resumption_token = mock.Mock(token="next-page")
+        iterator._items = iter(())
+        error = requests.ConnectionError("connection reset")
+
+        mock_next_response.side_effect = [error, error, error]
+
+        with self.assertRaises(requests.ConnectionError):
+            iterator._next_response()
+
+        self.assertEqual(mock_next_response.call_count, 3)
+        self.assertEqual(
+            [call.args[0] for call in mock_sleep.call_args_list],
+            [1, 2],
+        )
+        self.assertEqual(iterator.resumption_token.token, "next-page")

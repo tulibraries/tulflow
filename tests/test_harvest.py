@@ -3,6 +3,7 @@ import hashlib
 import unittest
 import boto3
 import httpretty
+import requests
 
 from datetime import datetime
 from unittest import mock
@@ -408,22 +409,22 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             httpretty.GET,
             "http://127.0.0.1/combine/oai",
             body="""
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-    <responseDate>2019-08-30T13:46:14Z</responseDate>
-    <request verb="ListRecords" set="dpla_test">http://10.5.0.10/combine/oai</request>
-    <ListRecords>
-        <record>
-            <header>
-                <identifier>oai:lizards</identifier>
-                <datestamp>2019-08-30T13:45:28Z</datestamp>
-                <setSpec>dpla_test</setSpec>
-            </header>
-        </record>
-    </ListRecords>
-</OAI-PMH>
-"""
+            <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+                <responseDate>2019-08-30T13:46:14Z</responseDate>
+                <request verb="ListRecords" set="dpla_test">http://10.5.0.10/combine/oai</request>
+                <ListRecords>
+                    <record>
+                        <header>
+                            <identifier>oai:lizards</identifier>
+                            <datestamp>2019-08-30T13:45:28Z</datestamp>
+                            <setSpec>dpla_test</setSpec>
+                        </header>
+                    </record>
+                </ListRecords>
+            </OAI-PMH>
+            """
         )
 
         kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
@@ -564,6 +565,230 @@ class TestOAIHarvestInteraction(unittest.TestCase):
             )
         )
 
+    @httpretty.activate
+    def test_harvest_oai_http_error_with_support_id(self, **kwargs):
+        request_rejected = """
+        <html>
+            <head><title>Request Rejected</title></head>
+            <body>
+                The requested URL was rejected.
+                Your support ID is: < 2177197108427845598>
+            </body>
+        </html>
+        """
+
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body=request_rejected,
+            status=403,
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "oai_dc",
+            "set": "pitt_collection.1",
+            "from": None,
+            "until": None,
+        }
+
+        with self.assertLogs(level="ERROR") as log:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "Support ID: 2177197108427845598",
+            ):
+                harvest.harvest_oai(**kwargs)
+
+        self.assertTrue(
+            any(
+                "The requested URL was rejected" in message
+                for message in log.output
+            )
+        )
+
+        self.assertTrue(
+            any(
+                "OAI request rejection support ID: 2177197108427845598"
+                in message
+                for message in log.output
+            )
+        )
+
+    @httpretty.activate
+    def test_harvest_oai_http_error_with_cloudfront_request_id(self, **kwargs):
+        forbidden = """
+        <html>
+            <head><title>403 Forbidden</title></head>
+            <body>
+                <center><h1>403 Forbidden</h1></center>
+            </body>
+        </html>
+        """
+
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body=forbidden,
+            status=403,
+            adding_headers={
+                "X-Amz-Cf-Id": (
+                    "aIAEm5tFORZydAjeqJ9D2lRelymcNdaI_cZDLOd5fsbApS7WYFgYgw=="
+                ),
+            },
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "oai_dc",
+            "set": "collection:AYA",
+            "from": None,
+            "until": None,
+        }
+
+        with self.assertLogs(level="ERROR") as log:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "Request ID: "
+                "aIAEm5tFORZydAjeqJ9D2lRelymcNdaI_cZDLOd5fsbApS7WYFgYgw==",
+            ):
+                harvest.harvest_oai(**kwargs)
+
+        self.assertTrue(
+            any(
+                "OAI request rejection request ID: "
+                "aIAEm5tFORZydAjeqJ9D2lRelymcNdaI_cZDLOd5fsbApS7WYFgYgw=="
+                in message
+                for message in log.output
+            )
+        )
+
+    @httpretty.activate
+    def test_harvest_oai_http_error_without_support_id(self, **kwargs):
+        forbidden = """
+        <html>
+            <head><title>403 Forbidden</title></head>
+            <body>
+                <center><h1>403 Forbidden</h1></center>
+            </body>
+        </html>
+        """
+
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body=forbidden,
+            status=403,
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "oai_dc",
+            "set": "collection:AYA",
+            "from": None,
+            "until": None,
+        }
+
+        with self.assertLogs(level="ERROR") as log:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "OAI endpoint returned an invalid response",
+            ):
+                harvest.harvest_oai(**kwargs)
+
+        self.assertTrue(
+            any(
+                "403 Forbidden" in message
+                for message in log.output
+            )
+        )
+
+        self.assertTrue(
+            any(
+                "did not provide a support or request ID" in message
+                for message in log.output
+            )
+        )
+        
+    @httpretty.activate
+    def test_harvest_oai_no_records_after_resumption_token(self, **kwargs):
+        """Treat noRecordsMatch after a resumption token as end of harvest."""
+        first_page = """
+        <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <responseDate>2026-03-20T21:01:00Z</responseDate>
+            <request verb="ListRecords">http://127.0.0.1/combine/oai</request>
+            <ListRecords>
+                <record>
+                    <header>
+                        <identifier>oai:lafayette:test</identifier>
+                        <datestamp>2026-03-18T19:34:11Z</datestamp>
+                        <setSpec>collection:Dīvān-i Jāmī</setSpec>
+                    </header>
+                    <metadata>
+                        <oai_dc:dc
+                            xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+                            xmlns:dc="http://purl.org/dc/elements/1.1/">
+                            <dc:title>Test record</dc:title>
+                        </oai_dc:dc>
+                    </metadata>
+                </record>
+                <resumptionToken>next-page</resumptionToken>
+            </ListRecords>
+        </OAI-PMH>
+        """
+
+        final_page = """
+        <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <responseDate>2026-03-20T21:01:20Z</responseDate>
+            <request>http://127.0.0.1/combine/oai</request>
+            <error code="noRecordsMatch">
+                The combination of the values of the from, until, set and
+                metadataPrefix arguments results in an empty list.
+            </error>
+        </OAI-PMH>
+        """
+
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            responses=[
+                httpretty.Response(
+                    body=first_page,
+                    status=200,
+                ),
+                httpretty.Response(
+                    body=final_page,
+                    status=200,
+                ),
+            ],
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "oai_dc",
+            "set": "collection:Dīvān-i Jāmī",
+            "from": None,
+            "until": None,
+        }
+
+        with self.assertLogs(level="WARNING") as log:
+            records = list(harvest.harvest_oai(**kwargs))
+
+        self.assertEqual(len(records), 1)
+        self.assertEqual(
+            records[0].header.identifier,
+            "oai:lafayette:test",
+        )
+
+        self.assertTrue(
+            any(
+                "Received noRecordsMatch while following a resumption token"
+                in message
+                for message in log.output
+            )
+        )
+
     @mock_aws
     def test_perform_xml_lookup_with_cache(self, **kwargs):
         """Test Calling handling XML Element to String with Deletes."""
@@ -660,3 +885,51 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         mock_process.return_value = {"updated": 2, "deleted": 0}
         actual = harvest.oai_to_s3(**kwargs)
         self.assertEqual(actual, {"updated": 2, "deleted": 0, "sets_with_no_records": []})
+
+    @mock.patch("tulflow.harvest.time.sleep")
+    @mock.patch("sickle.iterator.OAIItemIterator._next_response")
+    def test_harvest_iterator_retries_connection_error(
+        self,
+        mock_next_response,
+        mock_sleep,
+    ):
+        """Retry a transient connection error while fetching the next OAI page."""
+        iterator = object.__new__(harvest.HarvestIterator)
+        iterator.resumption_token = mock.Mock(token="next-page")
+        iterator._items = iter(())
+
+        mock_next_response.side_effect = [
+            requests.ConnectionError("connection reset"),
+            None,
+        ]
+
+        iterator._next_response()
+
+        self.assertEqual(mock_next_response.call_count, 2)
+        mock_sleep.assert_called_once_with(1)
+        self.assertEqual(iterator.resumption_token.token, "next-page")
+
+    @mock.patch("tulflow.harvest.time.sleep")
+    @mock.patch("sickle.iterator.OAIItemIterator._next_response")
+    def test_harvest_iterator_raises_after_connection_retries(
+        self,
+        mock_next_response,
+        mock_sleep,
+    ):
+        """Raise after exhausting connection-error retries."""
+        iterator = object.__new__(harvest.HarvestIterator)
+        iterator.resumption_token = mock.Mock(token="next-page")
+        iterator._items = iter(())
+        error = requests.ConnectionError("connection reset")
+
+        mock_next_response.side_effect = [error, error, error]
+
+        with self.assertRaises(requests.ConnectionError):
+            iterator._next_response()
+
+        self.assertEqual(mock_next_response.call_count, 3)
+        self.assertEqual(
+            [call.args[0] for call in mock_sleep.call_args_list],
+            [1, 2],
+        )
+        self.assertEqual(iterator.resumption_token.token, "next-page")

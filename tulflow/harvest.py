@@ -10,6 +10,7 @@ import re
 import pandas
 import requests
 import sickle
+import time
 
 from lxml import etree
 from sickle import Sickle
@@ -94,21 +95,20 @@ def generate_oai_sets(**kwargs):
         return remaining_sets
     return []
 
-
-def validate_oai_response(response):
-    status_code = response.http_response.status_code
-
-    try:
-        root_element = etree.QName(response.xml).localname
-    except (etree.XMLSyntaxError, TypeError, ValueError):
-        root_element = None
-
-    if status_code < 400 and root_element == "OAI-PMH":
-        return
+def raise_oai_response_error(response):
+    """Log an invalid OAI response and raise an error."""
+    body = response.text
+    request_id = response.headers.get("X-Amz-Cf-Id")
 
     support_id_match = re.search(
-        r"support\s+id\s+is:\s*<?\s*([0-9]+)",
-        response.raw,
+        r"support\s+id\s+(?:is|:)\s*:?\s*<?\s*([0-9]+)",
+        body,
+        re.IGNORECASE,
+    )
+
+    request_id_match = re.search(
+        r"request\s+id\s*:\s*([A-Za-z0-9_+=/-]+)",
+        body,
         re.IGNORECASE,
     )
 
@@ -118,10 +118,15 @@ def validate_oai_response(response):
         else None
     )
 
+    if not request_id and request_id_match:
+        request_id = request_id_match.group(1)
+
     logging.error(
-        "Invalid response received from OAI endpoint. HTTP status: %s\n%s",
-        status_code,
-        response.raw,
+        "Invalid response received from OAI endpoint. "
+        "URL: %s HTTP status: %s\n%s",
+        response.url,
+        response.status_code,
+        body,
     )
 
     message = "OAI endpoint returned an invalid response"
@@ -133,20 +138,42 @@ def validate_oai_response(response):
         )
         message += f". Support ID: {support_id}"
 
+    if request_id:
+        logging.error(
+            "OAI request rejection request ID: %s",
+            request_id,
+        )
+        message += f". Request ID: {request_id}"
+
+    if not support_id and not request_id:
+        logging.error(
+            "The OAI endpoint did not provide a support or request ID."
+        )
+
     raise RuntimeError(message)
+
+def validate_oai_response(response):
+    """Validate that an OAI endpoint returned an OAI-PMH response."""
+    try:
+        root_element = etree.QName(response.xml).localname
+    except (etree.XMLSyntaxError, TypeError, ValueError):
+        root_element = None
+
+    if root_element == "OAI-PMH":
+        return
+
+    raise_oai_response_error(response.http_response)
 
 
 class ValidatingSickle(Sickle):
+    """Sickle client that validates responses from OAI endpoints."""
+
     def harvest(self, **kwargs):
         try:
             response = super().harvest(**kwargs)
         except requests.HTTPError as error:
             if error.response is not None:
-                response = OAIResponse(
-                    error.response,
-                    params=kwargs,
-                )
-                validate_oai_response(response)
+                raise_oai_response_error(error.response)
 
             raise
 
@@ -157,6 +184,49 @@ class ValidatingSickle(Sickle):
 
 class HarvestIterator(sickle.iterator.OAIItemIterator):
     """Custom iterator that skips deleted records and records without metadata."""
+
+    def _next_response(self):
+        """Handle transient connection failures and noRecordsMatch responses."""
+        resumption_token = getattr(self, "resumption_token", None)
+        following_resumption_token = bool(
+            resumption_token and resumption_token.token
+        )
+
+        for attempt in range(3):
+            try:
+                super()._next_response()
+                return
+            except requests.ConnectionError as error:
+                if attempt == 2:
+                    raise
+
+                delay = 2 ** attempt
+
+                logging.warning(
+                    "Connection error retrieving next OAI response. "
+                    "Retrying in %s seconds. "
+                    "Resumption token: %s. Error: %s",
+                    delay,
+                    resumption_token.token if resumption_token else None,
+                    error,
+                )
+
+                time.sleep(delay)
+
+            except NoRecordsMatch:
+                if not following_resumption_token:
+                    raise
+
+                logging.warning(
+                    "Received noRecordsMatch while following a resumption token. "
+                    "Treating this as the end of the harvest. "
+                    "Resumption token: %s",
+                    resumption_token.token,
+                )
+
+                self.resumption_token = None
+                self._items = iter(())
+                return
 
     def next(self):
         """Return the next record/header/set."""

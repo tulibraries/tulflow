@@ -355,6 +355,33 @@ class TestOAIHarvestInteraction(unittest.TestCase):
         returned_sets = harvest.generate_oai_sets(**kwargs)
         returned_sets.sort()
         self.assertListEqual(returned_sets, ["a", "b"])
+        self.assertEqual(
+            httpretty.last_request().headers["User-Agent"],
+            harvest.OAI_HEADERS["User-Agent"]
+        )
+
+    @httpretty.activate
+    def test_harvest_oai_sends_user_agent(self, **kwargs):
+        """Test harvest_oai sends the configured User-Agent header."""
+        httpretty.register_uri(
+            httpretty.GET,
+            "http://127.0.0.1/combine/oai",
+            body=lizards
+        )
+
+        kwargs["oai_endpoint"] = "http://127.0.0.1/combine/oai"
+        kwargs["harvest_params"] = {
+            "metadataPrefix": "generic",
+            "from": None,
+            "until": None
+        }
+
+        harvest.harvest_oai(**kwargs)
+
+        self.assertEqual(
+            httpretty.last_request().headers["User-Agent"],
+            harvest.OAI_HEADERS["User-Agent"]
+        )
 
     @httpretty.activate
     def test_harvest_oai(self, **kwargs):

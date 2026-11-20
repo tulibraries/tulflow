@@ -24,6 +24,8 @@ NS = {
     "oai": "http://www.openarchives.org/OAI/2.0/"
 }
 
+OAI_HEADERS = {"User-Agent": "Mozilla/5.0"}
+
 
 def oai_to_s3(**kwargs):
     """Wrapper function for using OAI Harvest, Default Processor, and S3 Writer."""
@@ -88,7 +90,7 @@ def generate_oai_sets(**kwargs):
         logging.info("Seeing Excluded SetSpec List.")
         if not isinstance(excluded_sets, list):
             excluded_sets = [excluded_sets]
-        list_sets = Sickle(oai_endpoint).ListSets()
+        list_sets = Sickle(oai_endpoint, headers=OAI_HEADERS).ListSets()
         all_sets = [oai_set.xml.find("oai:setSpec", namespaces=NS).text for oai_set in list_sets]
         remaining_sets = list(set(all_sets) - set(excluded_sets))
         logging.info(remaining_sets)
@@ -263,7 +265,12 @@ def harvest_oai(**kwargs):
     harvest_params = kwargs.get("harvest_params")
     logging.info("Harvesting from %s", oai_endpoint)
     logging.info("Harvesting %s", harvest_params)
-    sickle_client = ValidatingSickle(oai_endpoint, retry_status_codes=[500, 503, 504], max_retries=3)
+    sickle_client = ValidatingSickle(
+        oai_endpoint,
+        retry_status_codes=[500, 503, 504],
+        max_retries=3,
+        headers=OAI_HEADERS,
+    )
     class_mapping = harvest_params.get(
         "class_mapping",
         {

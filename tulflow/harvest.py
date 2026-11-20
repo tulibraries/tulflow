@@ -24,8 +24,7 @@ NS = {
     "oai": "http://www.openarchives.org/OAI/2.0/"
 }
 
-OAI_HEADERS = {"User-Agent": "Mozilla/5.0"}
-
+OAI_HEADERS = {"User-Agent": "TempleUniversityLibraries/tulflow"}
 
 def oai_to_s3(**kwargs):
     """Wrapper function for using OAI Harvest, Default Processor, and S3 Writer."""
